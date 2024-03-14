@@ -1,0 +1,17 @@
+[
+    {
+        "pokemon": "caterpie",
+        "level": 100,
+        "status": "NONE"
+    },
+{
+    "pokemon": "snorlax",
+    "level": 100,
+    "status": "NONE"
+},
+{
+    "pokemon": "jolteon",
+    "level": 100,
+    "status": "NONE"
+}
+]
