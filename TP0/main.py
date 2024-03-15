@@ -2,7 +2,6 @@ from src.catching import attempt_catch
 from src.pokemon import PokemonFactory, StatusEffect
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import make_interp_spline
 from src.catching import attempt_catch
 
 def ejercicio2a():
@@ -79,5 +78,4 @@ def ejercicio2b():
 
 
 if __name__ == "__main__":
-    ejercicio2a()
     ejercicio2b()

@@ -4,9 +4,9 @@
         "level": 100,
         "status": "NONE"
     },
-{
-    "pokemon": "snorlax",
-    "level": 100,
-    "status": "NONE"
-}
+    {
+        "pokemon": "snorlax",
+        "level": 100,
+        "status": "NONE"
+    }
 ]

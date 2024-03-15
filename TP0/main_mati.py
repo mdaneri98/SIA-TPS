@@ -33,7 +33,7 @@ def initialize(filePath):
 
     return (pokemons, pokeballs, status_effects)
 
-def ejercicio1a():
+def ejercicio1a_con_barras_sin_desvio():
     pokemons, pokeballs, _ = initialize("config/ejercicio1a-config.json")
 
     # Creamos y llenamos el DataFrame
@@ -45,21 +45,20 @@ def ejercicio1a():
                 new_row = {'pokemon': pokemon.name, 'pokeball': pokeball, 'success': success}
                 df.loc[len(df)] = new_row
 
-    # Calcular la media de atrapadas para cada Pokémon y pokebola.
-    media_por_pokemon_pokeball = df.groupby(['pokemon', 'pokeball'])['success'].mean().reset_index()
+    # Calcular la media y desvío estándar de atrapadas para cada Pokémon y pokebola.
+    media_std_por_pokeball_pokemon = df.groupby(['pokeball', 'pokemon'])['success'].agg(['mean', 'std']).reset_index()
     
-    # Media para cada pokemon.
-    media_por_pokemon = df.groupby(['pokemon'])['success'].mean().reset_index() 
-
-    # Crear un gráfico de barras con Plotly Express
-    fig = px.bar(media_por_pokemon_pokeball, x='pokemon', y='success', color='pokeball', barmode='group', title='Promedio de Atrapadas por Pokémon y Tipo de Pokeball')
-    fig.add_trace(go.Scatter(x=media_por_pokemon['pokemon'], y=media_por_pokemon['success']))
+    # Crear un gráfico de puntos con barras de error para representar la media y desvío estándar
+    fig = px.scatter(media_std_por_pokeball_pokemon, x='pokeball', y='mean', color='pokemon', error_y='std',
+                     title='Promedio de Atrapadas por Pokémon y Tipo de Pokeball',
+                     labels={'mean': 'Promedio de Atrapadas', 'pokeball': 'Tipo de Pokeball'},
+                     hover_data={'mean': True, 'std': True})
 
     # Mostrar el gráfico
     fig.show()
 
 
-def ejercicio1a_corregido():
+def ejercicio1a_puntos_con_desvio():
     pokemons, pokeballs, _ = initialize("config/ejercicio1a-config.json")
 
     # Creamos y llenamos el DataFrame
@@ -71,15 +70,14 @@ def ejercicio1a_corregido():
                 new_row = {'pokemon': pokemon.name, 'pokeball': pokeball, 'success': success}
                 df.loc[len(df)] = new_row
 
-    # Calcular la media de atrapadas para cada Pokémon y pokebola.
-    media_por_pokeball_pokemon = df.groupby(['pokeball', 'pokemon'])['success'].mean().reset_index()
+    # Calcular la media y desvío estándar de atrapadas para cada Pokémon y pokebola.
+    media_std_por_pokeball_pokemon = df.groupby('pokeball')['success'].agg(['mean', 'std']).reset_index()
     
-    # Media para cada pokemon.
-    media_por_pokeball = df.groupby(['pokeball'])['success'].mean().reset_index() 
-
-    # Crear un gráfico de barras con Plotly Express
-    fig = px.bar(media_por_pokeball_pokemon, x='pokeball', y='success', color='pokemon', barmode='group', title='Promedio de Atrapadas por Pokémon y Tipo de Pokeball')
-    fig.add_trace(go.Scatter(x=media_por_pokeball['pokeball'], y=media_por_pokeball['success']))
+    # Crear un gráfico de puntos con barras de error para representar la media y desvío estándar
+    fig = px.scatter(media_std_por_pokeball_pokemon, x='pokeball', y='mean', error_y='std',
+                     title='Promedio de Atrapadas por Pokémon y Tipo de Pokeball',
+                     labels={'mean': 'Promedio de Atrapadas', 'pokeball': 'Tipo de Pokeball'},
+                     hover_data={'mean': True, 'std': True})
 
     # Mostrar el gráfico
     fig.show()
@@ -143,22 +141,14 @@ def ejercicio2a():
                     new_row = {'pokemon': pokemon.name, 'pokeball': pokeball, 'status': current_status.name, 'success': success}
                     df.loc[len(df)] = new_row
 
-#    df = df.groupby(['pokemon', 'status'])['success'].sum()
-
     # Agrupar los datos por Pokémon y estado, y calcular la tasa de éxito promedio
     grouped_df = df.groupby(['pokemon', 'status'])['success'].mean().reset_index()
     
-
     # Crear el gráfico de barras agrupadas
     fig = px.bar(grouped_df, x='status', y='success', color='pokemon',
                 title='Efectividad de Captura por Pokémon y Estado',
                 barmode='group',
                 labels={'success': 'Media de Atrapadas', 'status': 'Estado'})
-
-    # Agregar trazos de líneas para cada Pokémon
-    for pokemon in grouped_df['pokemon'].unique():
-        pokemon_data = grouped_df[grouped_df['pokemon'] == pokemon]
-        fig.add_trace(go.Scatter(x=pokemon_data['status'], y=pokemon_data['success'], mode='lines', name=pokemon))
 
     # Mostrar el gráfico
     fig.show()
@@ -209,4 +199,4 @@ def ejercicio2b():
 
 
 if __name__ == "__main__":
-    ejercicio2b()
+    ejercicio1a_puntos_con_desvio()
