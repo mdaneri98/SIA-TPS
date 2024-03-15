@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from src.pokemon import PokemonFactory, StatusEffect
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pandas as pd
 
 
@@ -193,10 +194,86 @@ def ejercicio2b():
 
 
 
+def ejercicio2c():
+    factory = PokemonFactory("pokemon.json")
+    pokemon_names = ['snorlax', 'caterpie', 'mewtwo']
+    pokeballs = ["pokeball", "ultraball", "fastball", "heavyball"]
+    status_effects = [StatusEffect.NONE, StatusEffect.POISON, StatusEffect.BURN, StatusEffect.PARALYSIS, StatusEffect.SLEEP, StatusEffect.FREEZE]
 
+    levels = [x for x in range(0, 101)]
+    hp_steps = [x * 0.1 for x in range(0, 11)]
 
+    rows = []
+    for level in levels:    
+        for pokemon_name in pokemon_names:
+            for pokeball in pokeballs:
+                for status in status_effects:
+                    for hp in hp_steps:
+                        pokemon = factory.create(pokemon_name, level, status, hp)
+                        for _ in range(N):
+                            success, _ = attempt_catch(pokemon, pokeball)
+                            rows.append({'pokemon': pokemon.name, 'pokeball': pokeball, 'level': level, 'status': status.name, 'hp': hp, 'success': success})
+    
+    df = pd.DataFrame(rows)
+
+    # Calcular el promedio de atrapadas por nivel
+    avg_catch_by_level = df.groupby('level')['success'].mean().reset_index()
+
+    # Calcular el promedio de atrapadas por hp
+    avg_catch_by_hp = df.groupby('hp')['success'].mean().reset_index()
+
+    # Calcular el promedio de atrapadas por pokeball
+    avg_catch_by_pokeball = df.groupby('pokeball')['success'].mean().reset_index()
+
+    # Calcular el promedio de atrapadas por status
+    avg_catch_by_status = df.groupby('status')['success'].mean().reset_index()
+
+    # Crear un solo gráfico de subtramas con los cuatro gráficos de líneas
+    fig = make_subplots(rows=2, cols=2,
+                        subplot_titles=["Nivel", "HP", "Pokeball", "Status"])
+
+    fig.add_trace(go.Scatter(x=avg_catch_by_level['level'], y=avg_catch_by_level['success'],
+                             mode='lines', name='Promedio de Atrapadas por Nivel'), row=1, col=1)
+
+    fig.add_trace(go.Scatter(x=avg_catch_by_hp['hp'], y=avg_catch_by_hp['success'],
+                             mode='lines', name='Promedio de Atrapadas por HP'), row=1, col=2)
+
+    fig.add_trace(go.Scatter(x=avg_catch_by_pokeball['pokeball'], y=avg_catch_by_pokeball['success'],
+                             mode='lines', name='Promedio de Atrapadas por Pokeball'), row=2, col=1)
+
+    fig.add_trace(go.Scatter(x=avg_catch_by_status['status'], y=avg_catch_by_status['success'],
+                             mode='lines', name='Promedio de Atrapadas por Status'), row=2, col=2)
+
+    fig.update_layout(title='Promedio de Atrapadas por Variable')
+    fig.update_xaxes(title_text='Nivel', row=1, col=1)
+    fig.update_xaxes(title_text='HP', row=1, col=2)
+    fig.update_xaxes(title_text='Pokeball', row=2, col=1)
+    fig.update_xaxes(title_text='Status', row=2, col=2)
+    fig.update_yaxes(title_text='Promedio de Atrapadas', row=1, col=1)
+    fig.update_yaxes(title_text='Promedio de Atrapadas', row=2, col=1)
+
+    fig.show()
+
+    # Calcular las diferencias entre la máxima y mínima de los promedios para nivel, hp, pokeball y status
+    diff_level = avg_catch_by_level['success'].max() - avg_catch_by_level['success'].min()
+    diff_hp = avg_catch_by_hp['success'].max() - avg_catch_by_hp['success'].min()
+    diff_pokeball = avg_catch_by_pokeball['success'].max() - avg_catch_by_pokeball['success'].min()
+    diff_status = avg_catch_by_status['success'].max() - avg_catch_by_status['success'].min()
+
+    # Graficar el histograma con Plotly
+    variables = ['Nivel', 'HP', 'Pokeball', 'Estado']
+    diffs = [diff_level, diff_hp, diff_pokeball, diff_status]
+
+    fig = go.Figure(data=[go.Bar(x=variables, y=diffs, marker_color='skyblue')])
+    fig.update_layout(title='Diferencia entre Máxima y Mínima de Promedios por Variable',
+                      xaxis_title='Variables',
+                      yaxis_title='Diferencia entre Máxima y Mínima de Promedios')
+
+    fig.show()
+
+    
 
 
 
 if __name__ == "__main__":
-    ejercicio1a_puntos_con_desvio()
+    ejercicio2c()
