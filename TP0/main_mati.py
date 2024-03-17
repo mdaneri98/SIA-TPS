@@ -271,9 +271,49 @@ def ejercicio2c():
 
     fig.show()
 
+def ejercicio2e(): 
     
 
+    factory = PokemonFactory("pokemon.json")
 
+    with open("config/ejercicio2d-config.json", "r") as file_2d:
+        config = json.load(file_2d)
+    
+    pokemon_name = "onix"
+    pokeballs = config["pokeballs"]
+    status = config["status"]
+    levels = [x for x in range(1, 101, 10)]  # Niveaux de 1 à 100 avec un pas de 10
+    hp = config["hp_percentages"]
+    
+    for level in levels:
+        df = pd.DataFrame(columns=['pokemon', 'pokeball', 'hp', 'status', 'success'])
+        for pokeball in pokeballs:
+            for hp_percentage in hp:
+                for status_type in status:
+                    pokemon = factory.create(pokemon_name, level, StatusEffect[status_type], hp_percentage)
+                    
+                    for _ in range(N):
+                        success, _ = attempt_catch(pokemon, pokeball)
+                        new_row = {'pokemon': pokemon_name, 'pokeball': pokeball, 'hp': hp_percentage, 'status': status_type, 'success': success}
+                        df.loc[len(df)] = new_row
+    
+        mean_success = df.groupby(['pokeball', 'hp', 'status'])['success'].mean().reset_index()
+        # Sort by mean success and select top 3 combinations
+        top_3_combinations = mean_success.nlargest(3, 'success')
+        
+        # Create the bar plot
+        fig = go.Figure()
+        for idx, row in top_3_combinations.iterrows():
+            label = f"{row['status']} | HP: {row['hp']} | Ball: {row['pokeball']}"
+            fig.add_trace(go.Bar(x=[label], y=[row['success']], name=label))
+
+        # Customize layout
+        fig.update_layout(title=f'Top 3 Pokemon Capture Success by Status, HP Percentage, and Pokeball - {level}',
+                          xaxis=dict(title='Combination'),
+                          yaxis=dict(title='Mean Success'))
+
+        # Show the plot
+        fig.show()
 
 if __name__ == "__main__":
-    ejercicio2c()
+    ejercicio2e()
