@@ -1,5 +1,3 @@
-from pila import Pila
-from cola import Cola
 import soko
 import sys
 
@@ -58,8 +56,6 @@ def read_input():
 
 def main():
     # Inicializar el estado del juego
-    pila_aux = Pila()
-    cola_aux = Cola()
     nivel_actual = 0
 
     niveles = cargar_niveles ("niveles.txt")
