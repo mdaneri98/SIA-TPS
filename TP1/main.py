@@ -1,5 +1,8 @@
 import soko
 import sys
+import State
+from tree import Tree, Node
+import algorithms
 
 # Definir el tamaño de la ventana y el tamaño de la celda
 ANCHO = 550
@@ -56,26 +59,36 @@ def read_input():
 
 def main():
     # Inicializar el estado del juego
-    nivel_actual = 0
+    nivel_actual = 1
 
     niveles = cargar_niveles ("niveles.txt")
     nivel = soko.crear_grilla(niveles[nivel_actual])
     
-    while True:
-        direccion = read_input()
-        nivel = soko.mover (nivel, direccion)
+    playerPos
+    goalsPos = []
+    boxesPos = []
+    for i, _ in nivel:
+        for j in len(nivel):
+            if (nivel[i][j] == '$'):
+                boxesPos.append((i,j))
+            elif nivel[i][j] == '@':
+                playerPos = (i,j)
+            elif nivel[i][j] == '.':
+                goalsPos.append((i,j))
 
-        #Chequea el fin del nivel y pasa al siguiente
-        if soko.juego_ganado (nivel):
-            nivel_actual += 1
-                
-            if nivel_actual == len(niveles):
-                return
-                
-            nivel = soko.crear_grilla(niveles[nivel_actual])
-                
+ 
+    state = State(playerPos, boxesPos, goalsPos)
+    tree = Tree(state)
+ 
+    algorithms.bfs(tree)
 
-       
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     main()
