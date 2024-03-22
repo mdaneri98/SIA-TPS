@@ -77,7 +77,7 @@ def main():
                 goalsPos.append((i,j))
 
  
-    state = State(playerPos, boxesPos, goalsPos)
+    state = State(nivel, playerPos, boxesPos, goalsPos)
     tree = Tree(state)
  
     algorithms.bfs(tree)

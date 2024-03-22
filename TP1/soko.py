@@ -97,8 +97,21 @@ def juego_ganado (grilla):
         if CAJA in filas:
             return False
     return True
-    
-      
+
+def puede_moverse(grilla, posicion, direccion):
+    filas = len(grilla)
+    columnas = len(grilla[0])
+
+    movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]  # Izquierda, Arriba, Abajo, Derecha
+
+    for mov in movimientos:
+        nueva_fila = posicion[0] + mov[0]
+        nueva_columna = posicion[1] + mov[1]
+        if 0 <= nueva_fila < filas and 0 <= nueva_columna < columnas and grilla[nueva_fila][nueva_columna] != '#':
+            if mov == direccion:
+                return True
+    return False
+
 def mover(grilla, direccion):
     '''
     Mueve el jugador en la dirección indicada.
