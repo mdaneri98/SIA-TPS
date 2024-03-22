@@ -1,10 +1,10 @@
 class Node(object):
     """Represents a node in a tree"""
-    def __init__(self, gameState, children = None, parent = None, depth = 0):
+    def __init__(self, state, children = None, parent = None, depth = 0):
         self.parent = parent
         self.children = []
         self.depth = depth
-        self.gameState = gameState
+        self.state = state
         if children is not None:
             for child in children:
                 self.add_child(child)
@@ -21,11 +21,11 @@ class Node(object):
     def get_depth(self):
         return self.depth
     
-    def game_state(self):
-        return self.gameState
+    def state(self):
+        return self.state
     
-    def add_child(self, gameState):
-        newNode = Node(gameState, parent = self, depth = self.depth + 1)
+    def add_child(self, state):
+        newNode = Node(state, parent = self, depth = self.depth + 1)
         self.children.append(newNode)
         return newNode
     
@@ -44,12 +44,12 @@ class Node(object):
         return path
     
     def print_game_state(self, boardMatrix, goals):
-       return self.gameState.printGameState(boardMatrix, goals)
+       return self.state.printstate(boardMatrix, goals)
 
 class Tree(object):
     """Represents a tree"""
-    def __init__(self, initialGameState):
-        self.root = Node(initialGameState)
+    def __init__(self, initialstate):
+        self.root = Node(initialstate)
     
     def get_root(self):
         return self.root
