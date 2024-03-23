@@ -1,12 +1,10 @@
 import copy
-import soko
+
 
 PARED = "#"
 CAJA = "$"
 JUGADOR = "@"
 OBJETIVO = "."
-OBJETIVO_CAJA = "*"
-OBJETIVO_JUGADOR = "+"
 ESPACIO_VACIO = " "
 
 OESTE = (-1, 0)
@@ -28,15 +26,6 @@ def crear_grilla(desc):
            .  Objetivo
            *  Objetivo + Caja
            +  Objetivo + Jugador
-
-    Ejemplo:
-
-    >>> crear_grilla([
-        '#####',
-        '#.$ #',
-        '#@  #',
-        '#####',
-    ])
     '''
     
     grilla = []
@@ -50,183 +39,59 @@ def crear_grilla(desc):
     
     return grilla
 
-def dimensiones (grilla):
-    '''
-    Devuelve una tupla con la cantidad de columnas y filas de la grilla.
-    '''
-    cantidad_filas = len(grilla)
-    cantidad_columnas = len(grilla[0])
+
+def moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
+    aux_grilla = regenerate(grilla, playerPos, goalsPos, boxesPos)
+    if puede_moverse(aux_grilla, playerPos, goalsPos, boxesPos, direccion):
+        dx, dy = direccion
+        playerPos = (playerPos[0] + dx, playerPos[1] + dy)
+            
+        # Mover bloque si el jugador empuja uno
+        boxesPos = [(bx + dx, by + dy) if (bx, by) == playerPos else (bx, by) for bx, by in boxesPos]
+        
+    return playerPos, boxesPos  # Devolver posiciones sin cambios si el movimiento no es posible
     
-    return (cantidad_columnas, cantidad_filas)
-
-def hay_pared (grilla, c, f):
-    '''
-    Devuelve True si hay una pared en la columna y fila (c, f).
-    '''
-    return grilla [f][c] == PARED
-
-def hay_objetivo (grilla, c, f):
-    '''
-    Devuelve True si hay un objetivo en la columna y fila (c, f).
-    '''
-    return grilla [f][c] == OBJETIVO or grilla [f][c] == OBJETIVO_JUGADOR or grilla [f][c] == OBJETIVO_CAJA
-
-def hay_caja (grilla, c, f):
-    '''
-    Devuelve True si hay una caja en la columna y fila (c, f).
-    '''
-    return grilla [f][c] == CAJA or grilla [f][c] == OBJETIVO_CAJA
-
-def hay_jugador (grilla, c, f):
-    '''
-    Devuelve True si el jugador está en la columna y fila (c, f).
-    '''
-    return grilla [f][c] == JUGADOR or grilla[f][c] == OBJETIVO_JUGADOR
-
-def hay_espacio (grilla, c, f):
-    '''
-    Devuelve True si hay un espacio vacio en la columna y fila (c, f)
-    '''
-    return grilla [f][c] == ESPACIO_VACIO
-    
-def juego_ganado (grilla):
-    '''
-    Devuelve True si el juego esta ganado
-    '''
-    for filas in grilla:
-        if CAJA in filas:
+def puede_moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
+    aux_grilla = regenerate(grilla, playerPos, goalsPos, boxesPos)
+    dx, dy = direccion
+    nueva_pos = (playerPos[0] + dx, playerPos[1] + dy)
+        
+    # No puede moverse si la nueva posición es una pared
+    if aux_grilla[nueva_pos[1]][nueva_pos[0]] == PARED:
+        return False
+        
+    # Si la nueva posición es un bloque, verificar si el bloque puede moverse
+    if nueva_pos in boxesPos:
+        nueva_pos_bloque = (nueva_pos[0] + dx, nueva_pos[1] + dy)
+            
+        # Verificar si el bloque se movería a una pared o a otro bloque
+        if aux_grilla[nueva_pos_bloque[1]][nueva_pos_bloque[0]] in PARED or nueva_pos_bloque in boxesPos:
             return False
+        
     return True
 
-def puede_moverse(grilla, posicion, direccion):
-    filas = len(grilla)
-    columnas = len(grilla[0])
 
-    movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]  # Izquierda, Arriba, Abajo, Derecha
+def regenerate(board, playerPos, goalsPos, boxesPos):
+    # Crear una copia del tablero original
+    print("Intentando generar mapa: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
 
-    for mov in movimientos:
-        nueva_fila = posicion[0] + mov[0]
-        nueva_columna = posicion[1] + mov[1]
-        if 0 <= nueva_fila < filas and 0 <= nueva_columna < columnas and grilla[nueva_fila][nueva_columna] != '#':
-            if mov == direccion:
-                return True
-    return False
 
-def mover(grilla, direccion):
-    '''
-    Mueve el jugador en la dirección indicada.
+    board_copy = [row[:] for row in board]
+    board_copy[playerPos[1]][playerPos[0]] = JUGADOR
 
-    La dirección es una tupla con el movimiento horizontal y vertical. Dado que
-    no se permite el movimiento diagonal, la dirección puede ser una de cuatro
-    posibilidades:
+    num_filas = len(board_copy)
+    num_columnas = max(len(fila) for fila in board_copy) if board_copy else 0 
 
-    direccion  significado
-    ---------  -----------
-    (-1, 0)    Oeste
-    (1, 0)     Este
-    (0, -1)    Norte
-    (0, 1)     Sur
+    print(num_filas, num_columnas)
+    #for i in goalsPos:
+    #    board_copy[i[1]][i[0]] = OBJETIVO
+    #board_copy[goalsPos[0][1]][goalsPos[0][0]] = OBJETIVO
 
-    La función debe devolver una grilla representando el estado siguiente al
-    movimiento efectuado. La grilla recibida NO se modifica; es decir, en caso
-    de que el movimiento sea válido, la función devuelve una nueva grilla.
-    ''' 
-    for f in range (len(grilla)):
-        for c in range(len(grilla[f])):
-            if grilla[f][c] == JUGADOR or grilla [f][c] == OBJETIVO_JUGADOR:
-                fila = f
-                col = c
-                break
-    
-    # Realizo la copia de la grilla original
-    nueva_grilla = copy.deepcopy (grilla)
-    
-    # Guardo la posicion que esta un casillero mas adelante 
-    pos_sig = grilla [fila + (direccion[1])] [col + (direccion [0])]
-            
-    if pos_sig == PARED:
-        return grilla
-    
-    # Guardo la posicion que está dos casilleros mas adelante
-    pos_sig_sig = grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])]
-   
-    if (pos_sig == CAJA or pos_sig == OBJETIVO_CAJA) and (pos_sig_sig == CAJA or pos_sig_sig == PARED or pos_sig_sig == OBJETIVO_CAJA):
-        return grilla
-    
-    mover_caja (grilla, direccion, pos_sig, fila, col, nueva_grilla, pos_sig_sig)
-    mover_jugador (grilla, direccion, pos_sig, fila, col, nueva_grilla, pos_sig_sig)
-    return nueva_grilla
-    
-def mover_jugador (grilla, direccion, pos_sig, fila, col, nueva_grilla, pos_sig_sig):
-    """
-    En caso de que este permitido mueve al jugador a la posicion deseada
-    """
-    if pos_sig == ESPACIO_VACIO and grilla[fila][col] == JUGADOR:
-        nueva_grilla [fila][col] = ESPACIO_VACIO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = JUGADOR
-        
-    elif pos_sig == ESPACIO_VACIO and grilla[fila][col] == OBJETIVO_JUGADOR:
-        nueva_grilla [fila][col] = OBJETIVO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = JUGADOR
-    
-    elif pos_sig == CAJA and grilla[fila][col] == OBJETIVO_JUGADOR and pos_sig_sig == ESPACIO_VACIO:
-        nueva_grilla [fila][col] = OBJETIVO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = JUGADOR
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = CAJA
-        
-    elif pos_sig == OBJETIVO and grilla[fila][col] == JUGADOR:
-        nueva_grilla [fila][col] = ESPACIO_VACIO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO_JUGADOR
-    
-    elif pos_sig == OBJETIVO_CAJA and grilla[fila][col] == OBJETIVO_JUGADOR:
-        nueva_grilla [fila][col] = OBJETIVO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO_JUGADOR
-    
-    elif pos_sig == OBJETIVO and grilla[fila][col] == OBJETIVO_JUGADOR:
-        nueva_grilla [fila][col] = OBJETIVO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO_JUGADOR
-    
-    elif pos_sig == OBJETIVO_CAJA and grilla[fila][col] == JUGADOR:
-        nueva_grilla [fila][col] = ESPACIO_VACIO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO_JUGADOR
-    
-    elif pos_sig == CAJA and grilla[fila][col] == JUGADOR:
-        nueva_grilla [fila][col] = ESPACIO_VACIO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = JUGADOR
-    
-    elif pos_sig == CAJA and grilla[fila][col] == OBJETIVO_JUGADOR:
-        nueva_grilla [fila][col] = OBJETIVO
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = JUGADOR
+    for i in boxesPos:
+        print(i)
+        board_copy[i[1]][i[0]] = CAJA
+    #board_copy[boxesPos[0][1]][boxesPos[0][0]] = CAJA
 
-def mover_caja (grilla, direccion, pos_sig, fila, col, nueva_grilla, pos_sig_sig):
-    """
-    En caso de que este permitido mueve a la caja a la posicion deseada
-    """
-    if pos_sig == CAJA and pos_sig_sig == ESPACIO_VACIO:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = ESPACIO_VACIO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = CAJA
-        
-    elif pos_sig == CAJA and pos_sig_sig == OBJETIVO:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = ESPACIO_VACIO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = OBJETIVO_CAJA
-        
-    elif pos_sig == OBJETIVO_CAJA and pos_sig_sig == ESPACIO_VACIO:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = CAJA
-    
-    elif pos_sig_sig == ESPACIO_VACIO and pos_sig == OBJETIVO_CAJA:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = CAJA
-    
-    elif pos_sig_sig == OBJETIVO and pos_sig == OBJETIVO_CAJA:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = OBJETIVO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = OBJETIVO_CAJA
-    
-    elif pos_sig_sig == OBJETIVO and pos_sig == CAJA:
-        nueva_grilla [fila + direccion[1]] [col + direccion[0]] = ESPACIO_VACIO
-        nueva_grilla [fila + 2 * (direccion[1])] [col + 2 * (direccion[0])] = OBJETIVO_CAJA
-    
-        
+    print(board_copy)
 
-    
-      
+    return board_copy

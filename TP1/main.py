@@ -1,8 +1,10 @@
 import soko
 import sys
-import State
+from State import State
 from tree import Tree, Node
 import algorithms
+import utils
+import time
 
 # Definir el tamaño de la ventana y el tamaño de la celda
 ANCHO = 550
@@ -43,48 +45,38 @@ def cargar_niveles (ruta_archivo):
         
         return niveles
 
-def read_input():
-    move = input("Enter your move (wasd): ").lower()
-
-    if move == 'w':
-        return (0, -1)
-    elif move == 's':
-        return (0, 1)
-    elif move == 'a':
-        return (-1, 0)
-    elif move == 'd':
-        return (1, 0)
-    else:
-        return (0,0)
 
 def main():
     # Inicializar el estado del juego
-    nivel_actual = 1
+    actual_level = 1
 
-    niveles = cargar_niveles ("niveles.txt")
-    nivel = soko.crear_grilla(niveles[nivel_actual])
+    levels = cargar_niveles("niveles.txt")
+    level = soko.crear_grilla(levels[actual_level])
+    print(level)
     
-    playerPos
-    goalsPos = []
-    boxesPos = []
-    for i, _ in nivel:
-        for j in len(nivel):
-            if (nivel[i][j] == '$'):
-                boxesPos.append((i,j))
-            elif nivel[i][j] == '@':
-                playerPos = (i,j)
-            elif nivel[i][j] == '.':
-                goalsPos.append((i,j))
+    (level, playerPos, goalsPos, boxesPos) = utils.sanitize_level(level)
 
- 
-    state = State(nivel, playerPos, boxesPos, goalsPos)
-    tree = Tree(state)
- 
-    algorithms.bfs(tree)
+    print("mapa sanitizado: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
+    print(level)
+    print()
 
+    state = State(playerPos, boxesPos, goalsPos)
+    
+    # Registrar el tiempo de inicio
+    start = time.time()
 
+    print("mapa regenarizado: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
+    print(state.print_board(soko.regenerate(level, state.playerPos, state.goalsPos, state.boxesPos)))
+    print()
 
+    #(success, cost, nodes_count, frontier_nodes) = algorithms.bfs(state, level)
+    #print((success, cost, nodes_count, frontier_nodes))
 
+    # Registrar el tiempo de finalización
+    end = time.time()
+    delta = end - start
+
+   
 
 
 

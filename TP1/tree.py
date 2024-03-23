@@ -43,8 +43,6 @@ class Node(object):
         path.reverse()
         return path
     
-    def print_game_state(self, boardMatrix, goals):
-       return self.state.printstate(boardMatrix, goals)
 
 class Tree(object):
     """Represents a tree"""

@@ -1,33 +1,45 @@
-import State
+from State import State
 from tree import Node, Tree
 from collections import deque
 import soko
 
 
-#Breadth First Search using node tree to record path
-def bfs(tree, visited, node):
-    visited = [] # List to keep track of visited nodes.
-    fr = deque()
-    fr.append(tree.get_root())
+def bfs(state, board):
+    visited_states = set()
+    frontier_nodes = deque() 
+    
+    tree = Tree(state)
+    root = tree.get_root()
+    visited_states.add(state)
+    frontier_nodes.append(root)
     
     # Vemos los, hasta cuatro, movimientos posibles
     movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]
 
-    while (fr.count > 0):
-        cur_node = fr.pop()
-        state = cur_node.state()
-        if state.is_finished():
-            return state
-        else:
-            for mov in movimientos:
-                soko.puede_moverse(state., mov)
+    while len(frontier_nodes) > 0:
+        current_node = frontier_nodes.popleft()
+        current_state = current_node.state
 
-    visited.append(node)
+        if current_state.is_finished():
+            return current_node.get_root_path(current_node), current_node.get_depth(), len(visited_states), len(frontier_nodes)
+        
+        for mov in movimientos: 
+            if soko.puede_moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov):
+                new_playerPos, new_boxesPos = soko.moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov)
 
+                new_state = State(new_playerPos, new_boxesPos, state.goalsPos)
 
+                if new_state not in visited_states:
+                    visited_states.add(new_state)
+                    next_node = current_node.add_child(new_state)
+                    frontier_nodes.append(next_node)    
+        
+        
+        #for node in current_node.get_root_path(current_node):
+            #print(node.state.playerPos)
+        #new_state.print_board(soko.regenerate(board, new_state.playerPos, new_state.goalsPos, new_state.boxesPos))
 
-def dfs():
-    pass
+    return 1, 0, len(visited_states), len(frontier_nodes)
 
 
 def manhattan_heuristic(board):
