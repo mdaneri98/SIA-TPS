@@ -74,15 +74,16 @@ def main():
     elif method == 'dfs':
         path, cost, exploredNodes, frontierNodes = algorithms.dfs(initialState, boardMatrix)
     elif method == 'greedy':
-        path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, goalsPos, heuristicFunction)
+        path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, heuristicFunction)
     elif method == 'astar':
-        path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, goalsPos, heuristicFunction)
+        pass
+    #    path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
 
     # Registrar el tiempo de finalización
     end = time.time()
 
     for node in path:
-        node.state.print_board(soko.regenerate(level, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
+        node.state.print_board(soko.regenerate(board, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
         print()
 
     delta = end - start
