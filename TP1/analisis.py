@@ -1,4 +1,4 @@
-from main import main
+from main import main, start
 import subprocess
 import pandas as pd
 
@@ -13,6 +13,8 @@ for level in levels:
     for method in methods:
         for heuristic in heuristics:
             for _ in range(10):
+                result = start(level, method, heuristic)
+                '''
                 result = subprocess.run(['python', 'main.py', '--level', str(level), '--method', method], capture_output=True, text=True)
                 output = result.stdout
                 output_lines = output.split('\n')
@@ -25,6 +27,17 @@ for level in levels:
                     'ExploredNodes': output_lines[3].split(': ')[1],
                     'FrontierNodes': output_lines[4].split(': ')[1],
                     'Time': output_lines[5].split(': ')[1],
+                }
+                '''
+                result_dict = {
+                    'Level': level,
+                    'Method': method,
+                    'Heuristic': heuristic,
+                    'Result': result['path'],
+                    'Cost': result['cost'],
+                    'ExploredNodes': result['exploredNodes'],
+                    'FrontierNodes': result['frontierNodes'],
+                    'Time': result['delta'],
                 }
                 results.append(result_dict)
 

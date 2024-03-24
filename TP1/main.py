@@ -46,14 +46,19 @@ def cargar_niveles (ruta_archivo):
         return niveles
 
 
-def main():
-    level, method, heuristic = utils.readCommand(sys.argv).values()
+def start(*args):
+    if args:
+        level, method, heuristic = args
+    else:
+        # Si no se pasan argumentos directamente, lee los argumentos de la línea de comandos
+        parsed_args = utils.readCommand(sys.argv)
+        level, method, heuristic = parsed_args.values()
+
+    print(level, method, heuristic)
 
     heuristicFunction = algorithms.manhattan_heuristic
     if heuristic == "combined":
         heuristicFunction = algorithms.combined_heuristic
-
-    time_start = time.time()
 
     levels = cargar_niveles("niveles.txt")
     board = soko.crear_grilla(levels[level])
@@ -75,8 +80,8 @@ def main():
         path, cost, exploredNodes, frontierNodes = algorithms.dfs(initialState, boardMatrix)
     elif method == 'greedy':
         path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, heuristicFunction)
-    elif method == 'astar':
-        path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
+    #elif method == 'astar':
+    #    path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
 
     # Registrar el tiempo de finalización
     end = time.time()
@@ -94,16 +99,22 @@ def main():
 
     delta = end - start
 
-    print('\nResultados' if path != 1 else '\nResult: Couldn\'t find solution\n')
-    print('Se recorrio el nivel: ' + str(level))
-    print('Se utilizo el metodo: ' + method)
-    if method == 'greedy' or method == 'astar':
-        print('Con la heuristica: ' + heuristic)
-    print('El costo de la solución fue: ' + str(cost))
-    print('Los nodos explorados fueron: ' + str(exploredNodes))
-    print('La cantidad de nodos fueron: ' + str(frontierNodes))
-    print('El tiempo fue: %.3f' % delta + ' seg')
+    return {'path': path, 'level': level, 'method': method, 'heuristic': heuristic, 'cost': cost, 'exploredNodes': exploredNodes, 'frontierNodes': frontierNodes, 'delta': delta}
 
-   
+
+
+
+
+
 if __name__ == "__main__":
-    main()
+    results = start()
+
+    print('\nResultados' if results['path'] != 1 else '\nResult: Couldn\'t find solution\n')
+    print('Se recorrio el nivel: ' + str(results['level']))
+    print('Se utilizo el metodo: ' + results['method'])
+    if results['method'] == 'greedy' or results['method'] == 'astar':
+        print('Con la heuristica: ' + results['heuristic'])
+    print('El costo de la solución fue: ' + str(results['cost']))
+    print('Los nodos explorados fueron: ' + str(results['exploredNodes']))
+    print('La cantidad de nodos fueron: ' + str(results['frontierNodes']))
+    print('El tiempo fue: %.3f' % results['delta'] + ' seg')
