@@ -103,7 +103,7 @@ def main():
     print('El costo de la solución fue: ' + str(cost))
     print('Los nodos explorados fueron: ' + str(exploredNodes))
     print('La cantidad de nodos fueron: ' + str(frontierNodes))
-    print('El tiempo fue %s: %.3f .' %(method, delta))
+    print('El tiempo fue: %.3f' % delta + ' seg')
 
    
 if __name__ == "__main__":

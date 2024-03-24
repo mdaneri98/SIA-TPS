@@ -1,24 +1,19 @@
-
-
-
 class State(object):
-    
-    def __init__(self, playerPos:tuple, boxesPos:list[tuple], goalsPos: list[tuple]):
+
+    def __init__(self, playerPos: tuple, boxesPos: list[tuple], goalsPos: list[tuple]):
         self.playerPos = playerPos
         self.boxesPos = boxesPos
         self.goalsPos = goalsPos
 
     def __eq__(self, other):
-        result =  self.__class__ == other.__class__ and self.playerPos == other.playerPos and self.boxesPos == other.boxesPos
+        result = self.__class__ == other.__class__ and self.playerPos == other.playerPos and self.boxesPos == other.boxesPos
         return result
-    
+
     def __hash__(self):
         return hash((self.playerPos, tuple(self.boxesPos)))
 
     def is_finished(self) -> bool:
         return self.boxesPos == self.goalsPos
-    
-
 
     def print_board(self, board):
         if board is None:

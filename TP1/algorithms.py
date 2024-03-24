@@ -80,7 +80,7 @@ def dfs(state, board):
     return [], 0, len(visited_states), len(frontier_nodes)
 
 
-def greedy(state, board, heuristic):
+def greedy(state: State, board: list[list[str]], heuristic):
     visited_states = set()
     frontier_nodes = []
 
@@ -100,10 +100,11 @@ def greedy(state, board, heuristic):
                 frontier_nodes)
 
         for mov in movimientos:
-            if soko.puede_moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov):
-                new_playerPos, new_boxesPos = soko.moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov)
+            if soko.puede_moverse(board, current_state.playerPos, current_state.goalsPos, current_state.boxesPos, mov):
+                new_playerPos, new_boxesPos = soko.moverse(board, current_state.playerPos, current_state.goalsPos,
+                                                           current_state.boxesPos, mov)
 
-                new_state = State(new_playerPos, new_boxesPos, state.goalsPos)
+                new_state = State(new_playerPos, new_boxesPos, current_state.goalsPos)
 
                 if new_state not in visited_states:
                     visited_states.add(new_state)
@@ -113,6 +114,9 @@ def greedy(state, board, heuristic):
         frontier_nodes.sort(key=lambda x: x[1])
     return [], 0, len(visited_states), len(frontier_nodes)
 
+
+def astar(state: State, board: list[list[str]], heuristic):
+    pass
 
 def manhattan_heuristic(state, board):
     #    distance = 0
