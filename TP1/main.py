@@ -52,31 +52,21 @@ def main():
 
     levels = cargar_niveles("niveles.txt")
     level = soko.crear_grilla(levels[actual_level])
-    print(level)
     
     (level, playerPos, goalsPos, boxesPos) = utils.sanitize_level(level)
-
-    print("mapa sanitizado: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
-    print(level)
-    print()
 
     state = State(playerPos, boxesPos, goalsPos)
     
     # Registrar el tiempo de inicio
     start = time.time()
 
-    print("mapa regenarizado: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
-    print(state.print_board(soko.regenerate(level, state.playerPos, state.goalsPos, state.boxesPos)))
-    print()
-
-    #(success, cost, nodes_count, frontier_nodes) = algorithms.bfs(state, level)
-    #print((success, cost, nodes_count, frontier_nodes))
+    (success, cost, nodes_count, frontier_nodes) = algorithms.bfs(state, level)
+    print((success, cost, nodes_count, frontier_nodes))
 
     # Registrar el tiempo de finalización
     end = time.time()
     delta = end - start
 
    
-
 if __name__ == "__main__":
     main()

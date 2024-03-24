@@ -72,26 +72,13 @@ def puede_moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
 
 
 def regenerate(board, playerPos, goalsPos, boxesPos):
-    # Crear una copia del tablero original
-    print("Intentando generar mapa: \nplayerPos: {}\ngoalsPos:{}\nboxesPos:{}\n".format(playerPos, goalsPos, boxesPos))
-
-
     board_copy = [row[:] for row in board]
     board_copy[playerPos[1]][playerPos[0]] = JUGADOR
 
-    num_filas = len(board_copy)
-    num_columnas = max(len(fila) for fila in board_copy) if board_copy else 0 
-
-    print(num_filas, num_columnas)
-    #for i in goalsPos:
-    #    board_copy[i[1]][i[0]] = OBJETIVO
-    #board_copy[goalsPos[0][1]][goalsPos[0][0]] = OBJETIVO
+    for i in goalsPos:
+        board_copy[i[0]][i[1]] = OBJETIVO
 
     for i in boxesPos:
-        print(i)
-        board_copy[i[1]][i[0]] = CAJA
-    #board_copy[boxesPos[0][1]][boxesPos[0][0]] = CAJA
-
-    print(board_copy)
+        board_copy[i[0]][i[1]] = CAJA
 
     return board_copy

@@ -35,9 +35,8 @@ def bfs(state, board):
                     frontier_nodes.append(next_node)    
         
         
-        #for node in current_node.get_root_path(current_node):
-            #print(node.state.playerPos)
-        #new_state.print_board(soko.regenerate(board, new_state.playerPos, new_state.goalsPos, new_state.boxesPos))
+        for node in current_node.get_root_path(current_node):
+            print(node.state.print_board(soko.regenerate(board, node.state.playerPos, node.state.goalsPos, node.state.boxesPos)))
 
     return 1, 0, len(visited_states), len(frontier_nodes)
 
