@@ -116,7 +116,6 @@ def manhattan_heuristic(board, state):
 #            if cell == '*':
 #                distance += closest_target_distance(board, i, j)
 #    return distance
-
     for box_pos in state.boxesPos:
         min_distance = float('inf')  # Inicializar con infinito para encontrar el mínimo
         for goal_pos in state.goalsPos:
@@ -137,16 +136,16 @@ def closest_target_distance(board, x, y):
     return min_distance
 
     
-def combined_heuristic(board):
-    goals = [(i, j) for i, row in enumerate(board.board) for j, cell in enumerate(row) if cell == '.']
-    return combined(board, goals)
+#def combined_heuristic(board):
+#    goals = [(i, j) for i, row in enumerate(board.board) for j, cell in enumerate(row) if cell == '.']
+#    return combined(board, goals)
 
 
-def combined(board, goals):
+def combined_heuristic(board, state):
     distance = 0
     for box in board.get_boxes_positions():
         min_distance_with_turns = float('inf')
-        for goal in goals:
+        for goal in state.goalsPos:
             manhattan_distance = abs(box[0] - goal[0]) + abs(box[1] - goal[1])
             turns_needed = 0 if (box[0] - goal[0]) * (box[1] - goal[1]) == 0 else 1
             distance_with_turns = manhattan_distance + turns_needed * 2
