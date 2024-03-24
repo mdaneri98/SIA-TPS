@@ -19,7 +19,7 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 
 Para ejecutar el mismo se deberá posicionar en la carpeta raíz del proyecto: 
 ```
-python main.py --level 2 -emethod bfs 
+python main.py --level 2 --method bfs 
 ```
 
 Significado de cada uno de los parámetros: 

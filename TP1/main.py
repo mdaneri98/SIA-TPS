@@ -95,6 +95,15 @@ def main():
 
     delta = end - start
 
+    print('\nResultados' if path != 1 else '\nResult: Couldn\'t find solution\n')
+    print('Se utilizo el metodo: ' + method)
+    if method == 'greedy' or method == 'astar':
+        print('Con la heuristica: ' + heuristic)
+    print('El costo de la solución fue: ' + str(cost))
+    print('Los nodos explorados fueron: ' + str(exploredNodes))
+    print('La cantidad de nodos fueron: ' + str(frontierNodes))
+    print('El tiempo fue %s: %.3f .' %(method, delta))
+
    
 if __name__ == "__main__":
     main()
