@@ -40,14 +40,90 @@ def bfs(state, board):
 
     # Cambio para cuando no se encuentra una solución
     return None, 0, len(visited_states), len(frontier_nodes)
+def dfs(state, board):
+    visited_states = set()
+    frontier_nodes = deque() 
+    
+    tree = Tree(state)
+    root = tree.get_root()
+    visited_states.add(state)
+    frontier_nodes.append(root)
+    
+    # Vemos los, hasta cuatro, movimientos posibles
+    movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]
+
+    while len(frontier_nodes) > 0:
+        current_node = frontier_nodes.pop()
+        current_state = current_node.state
+
+        if current_state.is_finished():
+            return current_node.get_root_path(current_node), current_node.get_depth(), len(visited_states), len(frontier_nodes)
+        
+        for mov in movimientos: 
+            if soko.puede_moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov):
+                new_playerPos, new_boxesPos = soko.moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov)
+
+                new_state = State(new_playerPos, new_boxesPos, state.goalsPos)
+
+                if new_state not in visited_states:
+                    visited_states.add(new_state)
+                    next_node = current_node.add_child(new_state)
+                    frontier_nodes.append(next_node)    
+        
+
+    return 1, 0, len(visited_states), len(frontier_nodes)
+
+def greedy(state, board, heuristic):
+    visited_states = set()
+    frontier_nodes = []
+    
+    tree = Tree(state)
+    root = tree.get_root()
+    visited_states.add(state)
+    frontier_nodes.append((root, heuristic(state)))
+
+    movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]
+
+    while len(frontier_nodes) > 0:
+        current_node = frontier_nodes.pop(0)
+        current_state = current_node.state
 
 
-def manhattan_heuristic(board):
-    distance = 0
-    for i, row in enumerate(board.board):  # Acceder a board.board en lugar de board
-        for j, cell in enumerate(row):
-            if cell == '*':
-                distance += closest_target_distance(board, i, j)
+        if current_state.is_finished():
+            return current_node.get_root_path(current_node), current_node.get_depth(), len(visited_states), len(frontier_nodes)
+        
+
+        for mov in movimientos: 
+            if soko.puede_moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov):
+                new_playerPos, new_boxesPos = soko.moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov)
+
+                new_state = State(new_playerPos, new_boxesPos, state.goalsPos)
+
+                if new_state not in visited_states:
+                    visited_states.add(new_state)
+                    next_node = current_node.add_child(new_state)
+                    frontier_nodes.append(next_node, heuristic(new_state, board))
+        
+        frontier_nodes.sort(key=lambda x: x[1])
+    return 1, 0, len(visited_states), len(frontier_nodes)
+    
+
+
+def manhattan_heuristic(board, state):
+#    distance = 0
+#    for i, row in enumerate(board.board):  # Acceder a board.board en lugar de board
+#        for j, cell in enumerate(row):
+#            if cell == '*':
+#                distance += closest_target_distance(board, i, j)
+#    return distance
+
+    for box_pos in state.boxesPos:
+        min_distance = float('inf')  # Inicializar con infinito para encontrar el mínimo
+        for goal_pos in state.goalsPos:
+            distance = abs(box_pos[0] - goal_pos[0]) + abs(box_pos[1] - goal_pos[1])
+            min_distance = min(min_distance, distance)
+        distance += min_distance
+
     return distance
 
 
