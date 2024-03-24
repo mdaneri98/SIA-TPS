@@ -146,9 +146,9 @@ def closest_target_distance(board, x, y):
 #    return combined(board, goals)
 
 
-def combined_heuristic(board, state):
+def combined_heuristic(state, board):
     distance = 0
-    for box in board.get_boxes_positions():
+    for box in state.boxesPos:
         min_distance_with_turns = float('inf')
         for goal in state.goalsPos:
             manhattan_distance = abs(box[0] - goal[0]) + abs(box[1] - goal[1])

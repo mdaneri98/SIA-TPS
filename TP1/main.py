@@ -51,7 +51,7 @@ def main():
 
     heuristicFunction = algorithms.manhattan_heuristic
     if heuristic == "combined":
-        heuristicFunction = algorithms.combined
+        heuristicFunction = algorithms.combined_heuristic
 
     time_start = time.time()
 
@@ -76,8 +76,7 @@ def main():
     elif method == 'greedy':
         path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, heuristicFunction)
     elif method == 'astar':
-        pass
-    #    path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
+        path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
 
     # Registrar el tiempo de finalización
     end = time.time()
