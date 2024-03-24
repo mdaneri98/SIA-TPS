@@ -115,16 +115,43 @@ def greedy(state: State, board: list[list[str]], heuristic):
     return [], 0, len(visited_states), len(frontier_nodes)
 
 
-def astar(state: State, board: list[list[str]], heuristic):
-    pass
+def astar(initialState, boardMatrix, heuristic):
+    exploredStates = set()
+    frontierNodes = []
+
+    tree = Tree(initialState)
+    root = tree.get_root()
+    exploredStates.add(initialState)
+    frontierNodes.append((root, 0, heuristic(initialState, boardMatrix)))
+
+    while len(frontierNodes) > 0:
+        currentNode, _, _ = frontierNodes.pop(0)
+        currentState = currentNode.state
+
+        if currentState.is_finished():
+            return currentNode.get_root_path(currentNode), currentNode.get_depth(), len(exploredStates), len(
+                frontierNodes)
+
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Lista de direcciones posibles
+        for direction in directions:
+            if soko.puede_moverse(boardMatrix, currentState.playerPos, currentState.goalsPos, currentState.boxesPos, direction):
+                new_playerPos, new_boxesPos = soko.moverse(boardMatrix, currentState.playerPos, currentState.goalsPos,
+                                                           currentState.boxesPos, direction)
+                new_state = State(new_playerPos, new_boxesPos, currentState.goalsPos)
+
+                if new_state not in exploredStates:
+                    exploredStates.add(new_state)
+                    next_node = currentNode.add_child(new_state)
+                    h = heuristic(new_state, boardMatrix)
+                    f = next_node.depth + h
+                    frontierNodes.append((next_node, f, h))
+
+        frontierNodes.sort(key=lambda x: x[1])
+
+    return [], 0, len(exploredStates), len(frontierNodes)
+
 
 def manhattan_heuristic(state, board):
-    #    distance = 0
-    #    for i, row in enumerate(board.board):  # Acceder a board.board en lugar de board
-    #        for j, cell in enumerate(row):
-    #            if cell == '*':
-    #                distance += closest_target_distance(board, i, j)
-    #    return distance
     for box_pos in state.boxesPos:
         min_distance = float('inf')  # Inicializar con infinito para encontrar el mínimo
         for goal_pos in state.goalsPos:
@@ -145,12 +172,7 @@ def closest_target_distance(board, x, y):
     return min_distance
 
 
-# def combined_heuristic(board):
-#    goals = [(i, j) for i, row in enumerate(board.board) for j, cell in enumerate(row) if cell == '.']
-#    return combined(board, goals)
-
-
-def combined_heuristic(state, board):
+def combined_heuristic(board, state):
     distance = 0
     for box in state.boxesPos:
         min_distance_with_turns = float('inf')

@@ -18,7 +18,7 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 
 Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto: 
 ```
-python main.py --level 2 --method bfs 
+python main.py --level 2 --method bfs --heuristic manhattan
 ```
 
 Significado de cada uno de los parámetros: 
@@ -27,4 +27,6 @@ Significado de cada uno de los parámetros:
 | --level             | Indica el nivel a resolver. | [1-5]|
 | --method            | Indica el método de búsqueda que utilizará para resolver el tablero.  | bfs, dfs, astar, greedy|
 | --heuristic         | Indica la heurística que se utilizará.  | manhattan, combined|
+
+En caso de no especificar la herurística, se utilizará la heurística de Manhattan por defecto.
 
