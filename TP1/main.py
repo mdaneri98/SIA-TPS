@@ -47,29 +47,44 @@ def cargar_niveles (ruta_archivo):
 
 
 def main():
-    # Inicializar el estado del juego
-    actual_level = 1
+    level, method, heuristic = utils.readCommand(sys.argv).values()
+
+    heuristicFunction = algorithms.manhattan_heuristic
+    if heuristic == "combined":
+        heuristicFunction = algorithms.combined
+
+    time_start = time.time()
 
     levels = cargar_niveles("niveles.txt")
-    level = soko.crear_grilla(levels[actual_level])
-    
-    (level, playerPos, goalsPos, boxesPos) = utils.sanitize_level(level)
+    board = soko.crear_grilla(levels[level])
 
-    state = State(playerPos, boxesPos, goalsPos)
-    
+    (boardMatrix, playerPos, goalsPos, boxesPos) = utils.sanitize_level(board)
+
+    initialState = State(playerPos, boxesPos, goalsPos)
+
     # Registrar el tiempo de inicio
     start = time.time()
 
-    (success, cost, nodes_count, frontier_nodes) = algorithms.bfs(state, level)
-
-    for node in success:
-        node.state.print_board(soko.regenerate(level, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
-        print()
-
-  #  print((success, cost, nodes_count, frontier_nodes))
+    path = []
+    cost = 0
+    exploredNodes = []
+    frontierNodes = []
+    if method == 'bfs':
+        path, cost, exploredNodes, frontierNodes = algorithms.bfs(initialState, boardMatrix)
+    elif method == 'dfs':
+        path, cost, exploredNodes, frontierNodes = algorithms.dfs(initialState, boardMatrix)
+    elif method == 'greedy':
+        path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, goalsPos, heuristicFunction)
+    elif method == 'astar':
+        path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, goalsPos, heuristicFunction)
 
     # Registrar el tiempo de finalización
     end = time.time()
+
+    for node in path:
+        node.state.print_board(soko.regenerate(level, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
+        print()
+
     delta = end - start
 
    
