@@ -57,7 +57,7 @@ def puede_moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
     nueva_pos = (playerPos[0] + dx, playerPos[1] + dy)
         
     # No puede moverse si la nueva posición es una pared
-    if aux_grilla[nueva_pos[1]][nueva_pos[0]] == PARED:
+    if aux_grilla[nueva_pos[0]][nueva_pos[1]] == PARED:
         return False
         
     # Si la nueva posición es un bloque, verificar si el bloque puede moverse
@@ -65,7 +65,7 @@ def puede_moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
         nueva_pos_bloque = (nueva_pos[0] + dx, nueva_pos[1] + dy)
             
         # Verificar si el bloque se movería a una pared o a otro bloque
-        if aux_grilla[nueva_pos_bloque[1]][nueva_pos_bloque[0]] in PARED or nueva_pos_bloque in boxesPos:
+        if aux_grilla[nueva_pos_bloque[0]][nueva_pos_bloque[1]] in PARED or nueva_pos_bloque in boxesPos:
             return False
         
     return True
@@ -73,7 +73,7 @@ def puede_moverse(grilla, playerPos, goalsPos, boxesPos, direccion):
 
 def regenerate(board, playerPos, goalsPos, boxesPos):
     board_copy = [row[:] for row in board]
-    board_copy[playerPos[1]][playerPos[0]] = JUGADOR
+    board_copy[playerPos[0]][playerPos[1]] = JUGADOR
 
     for i in goalsPos:
         board_copy[i[0]][i[1]] = OBJETIVO

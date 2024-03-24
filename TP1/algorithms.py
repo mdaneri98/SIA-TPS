@@ -14,9 +14,9 @@ def bfs(state, board):
     frontier_nodes.append(root)
     
     # Vemos los, hasta cuatro, movimientos posibles
-    movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]
+    movimientos = [(0, 1), (1, 0), (-1, 0), (0, -1)]
 
-    while len(frontier_nodes) > 0:
+    while frontier_nodes:
         current_node = frontier_nodes.popleft()
         current_state = current_node.state
 
@@ -24,21 +24,22 @@ def bfs(state, board):
             return current_node.get_root_path(current_node), current_node.get_depth(), len(visited_states), len(frontier_nodes)
         
         for mov in movimientos: 
-            if soko.puede_moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov):
-                new_playerPos, new_boxesPos = soko.moverse(board, state.playerPos, state.goalsPos, state.boxesPos, mov)
+            if soko.puede_moverse(board, current_state.playerPos, current_state.goalsPos, current_state.boxesPos, mov):
+                new_playerPos, new_boxesPos = soko.moverse(board, current_state.playerPos, current_state.goalsPos, current_state.boxesPos, mov)
 
-                new_state = State(new_playerPos, new_boxesPos, state.goalsPos)
+                new_state = State(new_playerPos, new_boxesPos, current_state.goalsPos)
 
                 if new_state not in visited_states:
                     visited_states.add(new_state)
                     next_node = current_node.add_child(new_state)
-                    frontier_nodes.append(next_node)    
-        
-        
-        for node in current_node.get_root_path(current_node):
-            print(node.state.print_board(soko.regenerate(board, node.state.playerPos, node.state.goalsPos, node.state.boxesPos)))
+                    frontier_nodes.append(next_node)
 
-    return 1, 0, len(visited_states), len(frontier_nodes)
+        # Suponiendo que tienes una función print_board en State que acepta el tablero regenerado
+        #print_board = soko.regenerate(board, current_state.playerPos, current_state.goalsPos, current_state.boxesPos)
+        #current_state.print_board(print_board)
+
+    # Cambio para cuando no se encuentra una solución
+    return None, 0, len(visited_states), len(frontier_nodes)
 
 
 def manhattan_heuristic(board):

@@ -61,7 +61,12 @@ def main():
     start = time.time()
 
     (success, cost, nodes_count, frontier_nodes) = algorithms.bfs(state, level)
-    print((success, cost, nodes_count, frontier_nodes))
+
+    for node in success:
+        node.state.print_board(soko.regenerate(level, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
+        print()
+
+  #  print((success, cost, nodes_count, frontier_nodes))
 
     # Registrar el tiempo de finalización
     end = time.time()
