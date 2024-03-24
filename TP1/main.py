@@ -96,6 +96,7 @@ def main():
     delta = end - start
 
     print('\nResultados' if path != 1 else '\nResult: Couldn\'t find solution\n')
+    print('Se recorrio el nivel: ' + str(level))
     print('Se utilizo el metodo: ' + method)
     if method == 'greedy' or method == 'astar':
         print('Con la heuristica: ' + heuristic)
