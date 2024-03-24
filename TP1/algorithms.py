@@ -40,6 +40,8 @@ def bfs(state, board):
 
     # Cambio para cuando no se encuentra una solución
     return None, 0, len(visited_states), len(frontier_nodes)
+
+
 def dfs(state, board):
     visited_states = set()
     frontier_nodes = deque() 
@@ -80,12 +82,12 @@ def greedy(state, board, heuristic):
     tree = Tree(state)
     root = tree.get_root()
     visited_states.add(state)
-    frontier_nodes.append((root, heuristic(state)))
+    frontier_nodes.append((root, heuristic(state, board)))
 
     movimientos = [(0, -1), (-1, 0), (1, 0), (0, 1)]
 
     while len(frontier_nodes) > 0:
-        current_node = frontier_nodes.pop(0)
+        current_node, _heuristic = frontier_nodes.pop(0)
         current_state = current_node.state
 
 
@@ -102,14 +104,14 @@ def greedy(state, board, heuristic):
                 if new_state not in visited_states:
                     visited_states.add(new_state)
                     next_node = current_node.add_child(new_state)
-                    frontier_nodes.append(next_node, heuristic(new_state, board))
+                    frontier_nodes.append((next_node, heuristic(new_state, board)))
         
         frontier_nodes.sort(key=lambda x: x[1])
     return 1, 0, len(visited_states), len(frontier_nodes)
     
 
 
-def manhattan_heuristic(board, state):
+def manhattan_heuristic(state, board):
 #    distance = 0
 #    for i, row in enumerate(board.board):  # Acceder a board.board en lugar de board
 #        for j, cell in enumerate(row):
