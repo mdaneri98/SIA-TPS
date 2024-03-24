@@ -1,6 +1,6 @@
 # TP1 SIA - Grupo 6
 
-#Integrantes
+## Integrantes
 - Daneria, Matias
 - Flores, Magdalena
 - Limachi, Desiree
@@ -12,12 +12,11 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 
 ### Requisitos
 
-- Python3
-- 
+- Python3 (versión 3.8.5 o superior)
 
 ## Ejecución
 
-Para ejecutar el mismo se deberá posicionar en la carpeta raíz del proyecto: 
+Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto: 
 ```
 python main.py --level 2 --method bfs 
 ```
