@@ -19,13 +19,13 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 
 Para ejecutar el mismo se deberá posicionar en la carpeta raíz del proyecto: 
 ```
-python main.py -l 2 -m bfs 
+python main.py --level 2 -emethod bfs 
 ```
 
 Significado de cada uno de los parámetros: 
 | Parámetro |  Descripción | Valores soportados |
 |----       | ------------------ | ------------------ |
-| -l             | Indica el nivel a resolver. | [1-5]|
-| -m             | Indica el método de búsqueda que utilizará para resolver el tablero.  | bfs, dfs, astar, greedy|
-| -H             | Indica la heurística que se utilizará.  | manhattan, combined|
+| --level             | Indica el nivel a resolver. | [1-5]|
+| --method            | Indica el método de búsqueda que utilizará para resolver el tablero.  | bfs, dfs, astar, greedy|
+| --heuristic         | Indica la heurística que se utilizará.  | manhattan, combined|
 

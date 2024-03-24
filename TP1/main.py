@@ -82,9 +82,16 @@ def main():
     # Registrar el tiempo de finalización
     end = time.time()
 
-    for node in path:
-        node.state.print_board(soko.regenerate(board, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
-        print()
+    original_stdout = sys.stdout
+
+    # Abrir un archivo para escribir
+    with open('output.txt', 'w') as f:
+        # Redirigir la salida estándar al archivo
+        sys.stdout = f
+        for node in path:
+            node.state.print_board(soko.regenerate(board, node.state.playerPos, node.state.goalsPos, node.state.boxesPos))
+            print()
+    sys.stdout = original_stdout
 
     delta = end - start
 
