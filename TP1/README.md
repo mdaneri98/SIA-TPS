@@ -16,6 +16,14 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 - pip3
 - pipenv
 
+### Instalación
+
+En la carpeta del tp1 ejecutar.
+```sh
+pipenv install
+```
+para instalar las dependencias necesarias en el ambiente virtual.
+
 ## Ejecución
 
 Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto: 
