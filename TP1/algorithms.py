@@ -152,14 +152,15 @@ def astar(initialState, boardMatrix, heuristic):
 
 
 def manhattan_heuristic(state, board):
+    total_distance = 0  # Acumula la distancia total para todas las cajas
     for box_pos in state.boxesPos:
         min_distance = float('inf')  # Inicializar con infinito para encontrar el mínimo
         for goal_pos in state.goalsPos:
             distance = abs(box_pos[0] - goal_pos[0]) + abs(box_pos[1] - goal_pos[1])
             min_distance = min(min_distance, distance)
-        distance += min_distance
+        total_distance += min_distance  # Acumular la distancia mínima para esta caja
 
-    return distance
+    return total_distance
 
 
 def closest_target_distance(board, x, y):
