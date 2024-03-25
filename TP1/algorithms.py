@@ -172,7 +172,7 @@ def closest_target_distance(board, x, y):
     return min_distance
 
 
-def combined_heuristic(board, state):
+def combined_heuristic(state, board):
     distance = 0
     for box in state.boxesPos:
         min_distance_with_turns = float('inf')
