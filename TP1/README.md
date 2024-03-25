@@ -13,6 +13,8 @@ Se implementó un programa en Python para encontrar soluciones con diferentes m�
 ### Requisitos
 
 - Python3 (versión 3.8.5 o superior)
+- pip3
+- pipenv
 
 ## Ejecución
 
