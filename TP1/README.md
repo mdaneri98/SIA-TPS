@@ -27,7 +27,8 @@ para instalar las dependencias necesarias en el ambiente virtual.
 ## Ejecución
 
 Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto: 
-```
+```python
+pipenv shell
 python main.py --level 2 --method bfs --heuristic manhattan
 ```
 
