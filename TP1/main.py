@@ -54,8 +54,6 @@ def start(*args):
         parsed_args = utils.readCommand(sys.argv)
         level, method, heuristic = parsed_args.values()
 
-    print(level, method, heuristic)
-
     heuristicFunction = algorithms.manhattan_heuristic
     if heuristic == "combined":
         heuristicFunction = algorithms.combined_heuristic
@@ -80,8 +78,8 @@ def start(*args):
         path, cost, exploredNodes, frontierNodes = algorithms.dfs(initialState, boardMatrix)
     elif method == 'greedy':
         path, cost, exploredNodes, frontierNodes = algorithms.greedy(initialState, boardMatrix, heuristicFunction)
-    #elif method == 'astar':
-    #    path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
+    elif method == 'astar':
+        path, cost, exploredNodes, frontierNodes = algorithms.astar(initialState, boardMatrix, heuristicFunction)
 
     # Registrar el tiempo de finalización
     end = time.time()

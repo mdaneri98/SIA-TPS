@@ -43,6 +43,8 @@ class Node(object):
         path.reverse()
         return path
     
+    def __str__(self):
+        return f"Node: {self.state}"
 
 class Tree(object):
     """Represents a tree"""
