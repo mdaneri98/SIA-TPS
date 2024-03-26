@@ -161,5 +161,6 @@ plot_average_delta_by_method_and_heuristic_filtered(df)
 plot_average_cost_by_method(df)
 plot_average_explored_nodes_by_method(df)
 
-
+tiempo_de_resolucion(df, 1)
+tiempo_de_resolucion(df, 2)
 tiempo_de_resolucion(df, 3)
