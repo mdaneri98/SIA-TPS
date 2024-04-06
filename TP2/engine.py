@@ -1,11 +1,12 @@
 from typing import Dict, List
 from character import Character
 import random
+from selection import *
 
 # Definir constantes
-NUM_GENERACIONES = 5
-TAMANO_POBLACION = 100
-NUM_INDIVIDUOS_ELITE = 10
+NUM_GENERACIONES = 3
+TAMANO_POBLACION = 7
+NUM_INDIVIDUOS_ELITE = 4
 PROBABILIDAD_MUTACION = 0.1
 
 
@@ -27,13 +28,8 @@ def cruce_un_punto(first_parent: Character, second_parent: Character) -> tuple:
 
     return child1, child2
 
-
-def seleccion_elitista(population):
-    # Seleccionamos los individuos de la nueva generación
-    elite_indices = sorted(range(len(population)), key=lambda i: population[i].performance(), reverse=True)[:NUM_INDIVIDUOS_ELITE]
-    elite = [population[i] for i in elite_indices]
-    return elite
-
+def calcular_aptitudes(population):
+    return [individual.performance() for individual in population]
 
 class GeneticAlgorithmEngine:
 
@@ -66,21 +62,30 @@ class GeneticAlgorithmEngine:
         return character
 
 
-    def select(self):
+    #def select(self):
+    def select(self, selection_method, param=None):
         current_population = self.population[self.generation]
-        elite = seleccion_elitista(current_population)
+        aptitudes = calcular_aptitudes(current_population)
+        #elite = seleccion_elitista(current_population, aptitudes)
+
+        if selection_method.__name__ == 'seleccion_boltzmann' is not None and param:
+            method = selection_method(current_population, aptitudes, param)
+        elif param is not None and selection_method.__name__ in ['seleccion_torneo_deterministico', 'seleccion_torneo_probabilistico']:
+            method = selection_method(current_population, aptitudes, param)
+        else:
+            method = selection_method(current_population, aptitudes)
+
 
         # Insertamos la nueva generación.
         self.generation += 1
-        self.population[self.generation] = elite
+        self.population[self.generation] = method
 
 
     def start(self):
         self.generate_initial()
 
         for _ in range(NUM_GENERACIONES):
-            self.select()
-            self.crossover()
+            self.select(seleccion_ranking)
             
 
             # Imprimimos resultados.
