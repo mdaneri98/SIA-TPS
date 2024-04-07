@@ -58,6 +58,8 @@ def mutacion_uniforme(individuo):
             individuo[caracteristica] = max(0, min(individuo[caracteristica], PUNTOS_TOTALES))
     return individuo
 
+def mutacion_
+
 
 def seleccion_elitista(poblacion, aptitudes):
     elite_indices = sorted(range(len(aptitudes)), key=lambda i: aptitudes[i], reverse=True)[:NUM_INDIVIDUOS_ELITE]

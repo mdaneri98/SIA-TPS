@@ -22,7 +22,7 @@ class Item:
     @staticmethod
     def create_item(strength, agility, expertise, resistance, life):
         points = strength + agility + expertise + resistance + life
-        if (points > 150):
+        if (points > 150): # != ?
             return "Points exceed limit"
         item = Item(strength, agility, expertise, resistance, life)
         item.points = points
@@ -112,7 +112,7 @@ class Character:
         
 
     def add_item(self, item: Item) -> bool:
-        if self.itemPoints + item.strength + item.agility + item.expertise + item.resistance + item.life > 150:
+        if self.itemPoints + item.strength + item.agility + item.expertise + item.resistance + item.life > 150: 
             return False
         self.items.append(item)
         self.itemPoints += item.points
