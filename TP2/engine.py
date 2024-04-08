@@ -2,6 +2,7 @@ from typing import Dict, List
 from character import Character
 import random
 from selection import *
+from arguments import ProgramArguments
 
 # Definir constantes
 NUM_GENERACIONES = 3
@@ -33,10 +34,10 @@ def calcular_aptitudes(population):
 
 class GeneticAlgorithmEngine:
 
-    def __init__(self):
-        #self.n = n
+    def __init__(self, arguments: ProgramArguments):
         self.generation = 0
         self.population: Dict[int:List] = {}
+        self.arguments = arguments
 
 
     def generate_initial(self):
