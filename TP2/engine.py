@@ -2,32 +2,9 @@ from typing import Dict, List
 from character import Character
 import random
 from selection import *
+from mutacion import *
 from arguments import ProgramArguments
-
-# Definir constantes
-NUM_GENERACIONES = 3
-TAMANO_POBLACION = 7
-NUM_INDIVIDUOS_ELITE = 4
-PROBABILIDAD_MUTACION = 0.1
-
-
-def cruce_un_punto(first_parent: Character, second_parent: Character) -> tuple:
-    # Obtener los genes de cada padre
-    genes1 = first_parent.get_genes()
-    genes2 = second_parent.get_genes()
-    
-    # Elegir un punto de cruce al azar dentro del rango más pequeño de items de ambos padres
-    min_len = min(len(genes1), len(genes2))
-    punto_cruce = random.randint(0, min_len - 1)
-
-    # Efectuamos la cruza de genes.
-    child_genes1 = genes2[:punto_cruce] + genes1[punto_cruce:]
-    child_genes2 = genes1[:punto_cruce] + genes2[punto_cruce:]
-    
-    child1 = Character.from_genes(child_genes1)
-    child2 = Character.from_genes(child_genes2)
-
-    return child1, child2
+from crossover import *
 
 def calcular_aptitudes(population):
     return [individual.performance() for individual in population]
@@ -40,63 +17,133 @@ class GeneticAlgorithmEngine:
         self.arguments = arguments
 
 
-    def generate_initial(self):
+    def add_generation(self, new_population: List):
+        self.generation += 1
+        self.population[self.generation] = list(new_population)
+
+
+    def generate_initial(self, n):
         # Inicializa la lista para la generación actual si aún no existe
         if self.generation not in self.population:
             self.population[self.generation] = []
-            
-        for i in range(TAMANO_POBLACION):
+        
+        for _ in range(n):
             ind = Character.create_random_character()
             self.population[self.generation].append(ind)
 
 
-    def crossover(self):
+    def crossover(self, crossover_method_name: str, k: int, probability: float):
         current_population = self.population[self.generation]
-        while len(current_population) < TAMANO_POBLACION:
+        
+        childs = []
+        while len(childs) < k:
                 first_parent, second_parent = random.choices(current_population, k=2)
-                first_child, second_child = cruce_un_punto(first_parent, second_parent)
+
+                if crossover_method_name == 'cruce_un_punto':
+                    method = Crossover.cruce_un_punto
+                    args = (first_parent, second_parent)
+                elif crossover_method_name == 'cruce_dos_puntos':
+                    method = Crossover.cruce_dos_puntos
+                    args = (first_parent, second_parent)
+                elif crossover_method_name == 'cruce_anular':
+                    method = Crossover.cruce_anular
+                    args = (first_parent, second_parent)
+                elif crossover_method_name == 'cruce_uniforme':
+                    method = Crossover.cruce_uniforme
+                    args = (first_parent, second_parent, probability)
+
+                first_child, second_child = method(*args)
                 first_child = self.mutate(first_child)
                 second_child = self.mutate(second_child)
-                self.population[self.generation].extend([first_child, second_child])
+                childs.extend([first_child, second_child])
+            
+        return childs
+
 
     def mutate(self, character: Character):
         return character
 
 
-    #def select(self):
-    def select(self, selection_method, param=None):
-        current_population = self.population[self.generation]
-        aptitudes = calcular_aptitudes(current_population)
-        #elite = seleccion_elitista(current_population, aptitudes)
+    def select(self, selection_method_name: str, population: List, n: int, k: int, m: int, threshold: float):
+        aptitudes = calcular_aptitudes(population)
 
-        if selection_method.__name__ == 'seleccion_boltzmann' is not None and param:
-            method = selection_method(current_population, aptitudes, param)
-        elif param is not None and selection_method.__name__ in ['seleccion_torneo_deterministico', 'seleccion_torneo_probabilistico']:
-            method = selection_method(current_population, aptitudes, param)
+        if selection_method_name == 'seleccion_boltzmann':
+            selected_population = seleccion_boltzmann(population, aptitudes)
+        elif selection_method_name == 'seleccion_torneo_deterministico':
+            selected_population = seleccion_torneo_deterministico(population, aptitudes, k, m)
+        elif selection_method_name == 'seleccion_torneo_probabilistico':
+            selected_population = seleccion_torneo_probabilistico(population, aptitudes, k, threshold)
         else:
-            method = selection_method(current_population, aptitudes)
+            selected_population = seleccion_elitista(population, aptitudes)
 
-
-        # Insertamos la nueva generación.
-        self.generation += 1
-        self.population[self.generation] = method
+        # Retornamos la nueva generación.
+        return selected_population
 
 
     def start(self):
-        self.generate_initial()
+        # Poblacion 
+        n = int(self.arguments['poblacion']['cantidad_poblacion'])
+        k = int(self.arguments['poblacion']['k'])
 
-        for _ in range(NUM_GENERACIONES):
-            self.select(seleccion_ranking)
+        # Seleccion
+        selection_method_name1 = self.arguments['seleccion']['metodo1']
+        selection_method_name2 = self.arguments['seleccion']['metodo2']
+        selection_method_name3 = self.arguments['seleccion']['metodo1']
+        selection_method_name4 = self.arguments['seleccion']['metodo2']
+        A = float(self.arguments['seleccion']['a'])
+        B = float(self.arguments['seleccion']['b'])
+        m = int(self.arguments['seleccion']['m'])
+        threshold = float(self.arguments['seleccion']['threshold'])
+        
+        # Crossover
+        crossover_method_name = self.arguments['crossover']['metodo']
+
+        # Condicion de corte
+        max_generaciones = int(self.arguments['corte']['max_generaciones'])
+        
+
+        self.generate_initial(n)
+
+
+        for _ in range(max_generaciones):
+            # --- Generamos la nueva población --- 
+            count_method1 = ceil(A*k)
+            count_method2 = k - count_method1
+
+            current_population = self.population[self.generation]
+            selection1 = self.select(selection_method_name1, current_population, n, count_method1, m, threshold)
+            selection2 = self.select(selection_method_name2, current_population, n, count_method2, m, threshold)
+            parents_population = selection1 + selection2
+
+            # --- Realizamos el crossover ---
+            childs_population = self.crossover(crossover_method_name, k, 0.8)
             
+            # --- Realizamos la mutación ---
+            for child in childs_population:
+                mutacion_multigen(child, self.generation, True)
 
-            # Imprimimos resultados.
+            # --- Reemplazamos ---
+            count_method3 = ceil(B*k)
+            count_method4 = n - count_method3
+
+            # Seleccionamos n individuos de la nueva población parents + childs 
+            big_population = parents_population + childs_population
+
+            selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold)
+            selection4 = self.select(selection_method_name4, big_population, n + k, count_method4, m, threshold)
+
+            new_population = selection3 + selection4
+            self.add_generation(new_population)
+
+
+            # Imprimimos la nueva generación.
             print(f"Generación {self.generation}:\n")
             for ch in self.population[self.generation]:
                 print(f"{ch}")
 
             # Obtener el individuo con la mejor performance
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
-            print(f"Mejor desempeño = {ind_best_performance}")
+            print(f"Mejor desempeño = {ind_best_performance}\n")
 
         print("Algoritmo genético completado.")
 

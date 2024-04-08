@@ -20,6 +20,7 @@ def calculate_probability_mutation(generation,uniform):
     else :
         return (PROBABILIDAD_MUTACION / (generation + 1))
 
+
 def mutacion_multigen(individuo: Character, generation,uniform =True):
     
     prob_mutacion = calculate_probability_mutation(generation,uniform)
@@ -79,6 +80,7 @@ def mutacion_multigen(individuo: Character, generation,uniform =True):
 
     new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
     return new_ch
+
 
 def mutacion_gen(individuo: Character,generation,uniform=True):
 

@@ -29,6 +29,7 @@ def seleccion_ruleta(poblacion, aptitudes):
                 break
     return seleccionados
 
+
 def seleccion_universal(poblacion, aptitudes):
     # Calcula la suma total de las aptitudes
     suma_aptitudes = sum(aptitudes)
@@ -51,6 +52,7 @@ def seleccion_universal(poblacion, aptitudes):
 
     return seleccionados
 
+
 def seleccion_boltzmann(poblacion, aptitudes, temperatura):
     probabilidades = [math.exp(aptitud / temperatura) for aptitud in aptitudes]
     suma_probabilidades = sum(probabilidades)
@@ -67,6 +69,7 @@ def seleccion_boltzmann(poblacion, aptitudes, temperatura):
                 seleccionados.append(poblacion[i])
                 break
     return seleccionados
+
 
 def seleccion_ranking(poblacion, aptitudes):
     # Ordenar la población y las aptitudes en función de las aptitudes de los individuos
@@ -91,19 +94,35 @@ def seleccion_ranking(poblacion, aptitudes):
     
     return seleccionados
 
-def seleccion_torneo_deterministico(poblacion, aptitudes, threshold):
+
+def seleccion_torneo_deterministico(poblacion, aptitudes, k, m):
+    '''
+        @param k: Cantidad de individuos a seleccionar.
+        @param m: Cantidad de individuos por torneo.
+    '''
     seleccionados = []
-    for _ in range(len(poblacion)):
-        torneo = random.sample(range(len(poblacion)), threshold)  # Seleccionar aleatoriamente el tamaño del torneo
-        ganador_torneo = max(torneo, key=lambda i: aptitudes[i])  # Seleccionar el individuo con la mayor aptitud en el torneo
+    for j in range(k):
+        # Seleccionamos M individuos de la población de tamaño N.
+        torneo = random.sample(range(len(poblacion)), m)  
+
+        # Seleccionar el individuo con la mayor aptitud en el torneo
+        ganador_torneo = max(torneo, key=lambda i: aptitudes[i])
         seleccionados.append(poblacion[ganador_torneo])
+
     return seleccionados
 
-def seleccion_torneo_probabilistico(poblacion, aptitudes, threshold):
+
+def seleccion_torneo_probabilistico(poblacion, aptitudes, k, threshold):
     seleccionados = []
-    for _ in range(len(poblacion)):
-        torneo = random.sample(range(len(poblacion)), threshold)  # Seleccionar aleatoriamente el tamaño del torneo
-        probabilidad_seleccion = [aptitudes[i] / sum(aptitudes) for i in torneo]  # Calcular la probabilidad de selección de cada individuo en el torneo
-        ganador_torneo = random.choices(torneo, weights=probabilidad_seleccion)[0]  # Seleccionar un individuo del torneo con base en las probabilidades
+    for _ in range(k):
+        # Seleccionamos 2 individuos de la población de tamaño N.
+        torneo = random.sample(range(len(poblacion)), 2)
+        
+        r = random.random()
+        if r < threshold:
+            # Seleccionar el individuo con la mayor aptitud en el torneo
+            ganador_torneo = max(torneo, key=lambda i: aptitudes[i])
+        else:
+            ganador_torneo = min(torneo, key=lambda i: aptitudes[i])
         seleccionados.append(poblacion[ganador_torneo])
     return seleccionados
