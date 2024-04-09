@@ -53,20 +53,30 @@ class GeneticAlgorithmEngine:
                     args = (first_parent, second_parent, probability)
 
                 first_child, second_child = method(*args)
-                first_child = self.mutate(first_child)
-                second_child = self.mutate(second_child)
+                #first_child = self.mutate(first_child)
+                #second_child = self.mutate(second_child)
                 childs.extend([first_child, second_child])
             
         return childs
 
 
-    def mutate(self, character: Character):
+    # def mutate(self, character: Character):
+    #     return character
+    
+    def mutate(self, selection_method_name: str, individuo: Character, delta_items : float,delta_height : float, proba_mutacion : float, generacion : int):
+        if selection_method_name == 'mutacion_multigen_uniform':
+            character = mutacion_multigen(individuo, generacion , proba_mutacion, delta_items, delta_height, True)
+        if selection_method_name == 'mutacion_multigen_no_uniforme':
+             character = mutacion_multigen(individuo, generacion , proba_mutacion, delta_items, delta_height, False)
+        if selection_method_name == 'mutacion_gen_uniform':
+            character = mutacion_gen(individuo, generacion , proba_mutacion, delta_height ,True)
+        if selection_method_name == 'mutacion_gen_no_uniforme' :
+            character = mutacion_gen(individuo, generacion , proba_mutacion, delta_height ,False)
         return character
 
 
     def select(self, selection_method_name: str, population: List, n: int, k: int, m: int, threshold: float):
         aptitudes = calcular_aptitudes(population)
-
         if selection_method_name == 'seleccion_boltzmann':
             selected_population = seleccion_boltzmann(population, aptitudes)
         elif selection_method_name == 'seleccion_torneo_deterministico':
@@ -100,10 +110,18 @@ class GeneticAlgorithmEngine:
 
         # Condicion de corte
         max_generaciones = int(self.arguments['corte']['max_generaciones'])
+
+        #Mutacion
+        selection_mut_name1 = self.arguments['mutacion']['metodo1']
+        selection_mut_name2 = self.arguments['mutacion']['metodo2']
+        selection_mut_name3 = self.arguments['mutacion']['metodo1']
+        selection_mut_name4 = self.arguments['mutacion']['metodo2']
+        probabilidad_mutacion = float(self.arguments['mutacion']['probabilidad_mutacion'])
+        delta_items = float(self.arguments['mutacion']['delta_items'])
+        delta_height =  float(self.arguments['mutacion']['delta_height'])
         
 
         self.generate_initial(n)
-
 
         for _ in range(max_generaciones):
             # --- Generamos la nueva población --- 
@@ -120,7 +138,7 @@ class GeneticAlgorithmEngine:
             
             # --- Realizamos la mutación ---
             for child in childs_population:
-                mutacion_multigen(child, self.generation, True)
+                child = self.mutate(selection_mut_name4, child, delta_items,delta_height, probabilidad_mutacion, self.generation)
 
             # --- Reemplazamos ---
             count_method3 = ceil(B*k)

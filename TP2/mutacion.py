@@ -14,16 +14,16 @@ DELTA_HEIGHT = 0.1
 CharacterType = Enum('Type', ['Guerrero', 'Arquero', 'Defensor', 'Infiltrado'])
 
 
-def calculate_probability_mutation(generation,uniform):
+def calculate_probability_mutation(generation,uniform, probabilidad_mutacion)->float:
     if (uniform) : 
-        return PROBABILIDAD_MUTACION
+        return probabilidad_mutacion
     else :
-        return (PROBABILIDAD_MUTACION / (generation + 1))
+        return (probabilidad_mutacion / (generation + 1))
 
 
-def mutacion_multigen(individuo: Character, generation,uniform =True):
+def mutacion_multigen(individuo: Character, generation : int, probabilidad_mutacion : float, delta_items : float, delta_height : float, uniform =True):
     
-    prob_mutacion = calculate_probability_mutation(generation,uniform)
+    prob_mutacion = calculate_probability_mutation(generation,uniform, probabilidad_mutacion)
 
     genes = individuo.get_genes()
     new_type = genes[0]  # Initialiser avec la valeur actuelle
@@ -32,14 +32,14 @@ def mutacion_multigen(individuo: Character, generation,uniform =True):
     
     # Mutate the type of character (gene 0)
     if random.random() < prob_mutacion:
-        print ("caca1")
+        
         random_type = random.choice(list(CharacterType))
         new_type = random_type.name
     
     # Mutate the height (gene 1)
     if random.random() < prob_mutacion:
-        print ("caca2")
-        new_height = genes[1] + random.uniform(-DELTA_HEIGHT, DELTA_HEIGHT)
+        
+        new_height = genes[1] + random.uniform(-delta_height, delta_height)
         new_height = max(1.3, min(new_height, 2.0))  # Limit height between 1.3 and 2.0 meters
     
 
@@ -50,7 +50,7 @@ def mutacion_multigen(individuo: Character, generation,uniform =True):
     
     for i in range(2, len(genes)):
         if random.random() < prob_mutacion:
-            print("caca3")
+            
             indices_mutations.append(i)
             sum += genes[i]
             
@@ -58,14 +58,14 @@ def mutacion_multigen(individuo: Character, generation,uniform =True):
     nb_mutated = len(indices_mutations)
 
     if nb_mutated > 1 : 
-        print("caca3")
+        
         valeurs_originales = [genes[i] for i in indices_mutations]
         goal = -1
         while(goal!=sum):
             for i, valeur in zip(indices_mutations, valeurs_originales):
                 genes[i] = valeur
             goal =0
-            cst = random.uniform(-DELTA_ITEMS, DELTA_ITEMS)
+            cst = random.uniform(-delta_items, delta_items)
             cst2 = cst / (nb_mutated-1) 
 
             index_gene_principal = random.choice(indices_mutations)
@@ -82,7 +82,7 @@ def mutacion_multigen(individuo: Character, generation,uniform =True):
     return new_ch
 
 
-def mutacion_gen(individuo: Character,generation,uniform=True):
+def mutacion_gen(individuo: Character, generation : int, probabilidad_mutacion : float, delta_height : float ,uniform=True):
 
     prob_mutacion = calculate_probability_mutation(generation,uniform)
     genes = individuo.get_genes()
@@ -91,7 +91,7 @@ def mutacion_gen(individuo: Character,generation,uniform=True):
     
     # Mutate the type of character (gene 0)
     if random.random() < prob_mutacion:
-        print ("caca1")
+        
         random_type = random.choice(list(CharacterType))
         new_type = random_type.name
         new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
@@ -99,8 +99,8 @@ def mutacion_gen(individuo: Character,generation,uniform=True):
     
     # Mutate the height (gene 1)
     if random.random() < prob_mutacion:
-        print ("caca2")
-        new_height = genes[1] + random.uniform(-DELTA_HEIGHT, DELTA_HEIGHT)
+       
+        new_height = genes[1] + random.uniform(-delta_height, delta_height)
         new_height = max(1.3, min(new_height, 2.0))  # Limit height between 1.3 and 2.0 meters
         new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
         return new_ch
@@ -110,10 +110,3 @@ def mutacion_gen(individuo: Character,generation,uniform=True):
     #here we don t need to modify the other genes cause their sum must be 150 so if we touch one of them 
     #we need the modify an other and we would not doing mutation with 1 gene anymore 
     
-
-
-# Test
-
-
-
-#test
