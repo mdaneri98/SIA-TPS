@@ -54,6 +54,12 @@ class Crossover:
     @staticmethod
     def cruce_anular(first_parent: Character, second_parent: Character) -> tuple:
         '''
+            Este método realiza un cruce anular entre dos padres para producir dos hijos.
+            Se selecciona un punto de cruce al azar y una longitud para el segmento de genes a intercambiar.
+            Si la suma del punto de cruce y la longitud excede el tamaño del gen, el intercambio continúa desde el inicio del gen.
+
+            ## Ejemplo.
+            
             len(gen1) = 12
             P = 11 && L = 5 
 
@@ -86,6 +92,9 @@ class Crossover:
         child_genes2 = genes2[0:punto_cruce] + genes1[punto_cruce:punto_cruce + long]
         if (diff > 0):
             child_genes2.extend(genes1[0:diff])
+
+        print(child_genes1)
+        print(child_genes2)
 
         child1 = Character.from_genes(child_genes1)
         child2 = Character.from_genes(child_genes2)

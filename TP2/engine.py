@@ -11,7 +11,7 @@ def calcular_aptitudes(population):
 
 class GeneticAlgorithmEngine:
 
-    def __init__(self, arguments: ProgramArguments):
+    def __init__(self, arguments):
         self.generation = 0
         self.population: Dict[int:List] = {}
         self.arguments = arguments
@@ -36,7 +36,8 @@ class GeneticAlgorithmEngine:
         current_population = self.population[self.generation]
         
         childs = []
-        while len(childs) < k:
+        # Por cada dos padres, dos hijos.
+        for _ in range(0, k, 2):
                 first_parent, second_parent = random.choices(current_population, k=2)
 
                 if crossover_method_name == 'cruce_un_punto':
@@ -56,7 +57,7 @@ class GeneticAlgorithmEngine:
                 #first_child = self.mutate(first_child)
                 #second_child = self.mutate(second_child)
                 childs.extend([first_child, second_child])
-            
+        
         return childs
 
 
@@ -120,7 +121,6 @@ class GeneticAlgorithmEngine:
         delta_items = float(self.arguments['mutacion']['delta_items'])
         delta_height =  float(self.arguments['mutacion']['delta_height'])
         
-
         self.generate_initial(n)
 
         for _ in range(max_generaciones):
@@ -131,21 +131,26 @@ class GeneticAlgorithmEngine:
             current_population = self.population[self.generation]
             selection1 = self.select(selection_method_name1, current_population, n, count_method1, m, threshold)
             selection2 = self.select(selection_method_name2, current_population, n, count_method2, m, threshold)
+            # Seleccionamos K individuos de la generación anterior mediante dos algoritmos diferentes.
             parents_population = selection1 + selection2
-
-            # --- Realizamos el crossover ---
-            childs_population = self.crossover(crossover_method_name, k, 0.8)
+            print(f"Parents len: {len(parents_population)}")
             
+            # --- Realizamos el crossover ---
+            # Generamos la cruza de los K padres, generando K hijos.
+            childs_population = self.crossover(crossover_method_name, k, 0.8)
+            print(f"Child len: {len(childs_population)}")
+
             # --- Realizamos la mutación ---
             for child in childs_population:
                 child = self.mutate(selection_mut_name4, child, delta_items,delta_height, probabilidad_mutacion, self.generation)
 
             # --- Reemplazamos ---
-            count_method3 = ceil(B*k)
+            count_method3 = ceil(B*n)
             count_method4 = n - count_method3
 
-            # Seleccionamos n individuos de la nueva población parents + childs 
+            # Seleccionamos 2K individuos de la nueva población 
             big_population = parents_population + childs_population
+            print(f"big_population len: {len(big_population)}")
 
             selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold)
             selection4 = self.select(selection_method_name4, big_population, n + k, count_method4, m, threshold)
@@ -156,8 +161,8 @@ class GeneticAlgorithmEngine:
 
             # Imprimimos la nueva generación.
             print(f"Generación {self.generation}:\n")
-            for ch in self.population[self.generation]:
-                print(f"{ch}")
+            for i, ch in enumerate(self.population[self.generation]):
+                print(f"{i}: {ch}")
 
             # Obtener el individuo con la mejor performance
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
