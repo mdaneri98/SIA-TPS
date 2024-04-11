@@ -76,16 +76,22 @@ class GeneticAlgorithmEngine:
         return character
 
 
-    def select(self, selection_method_name: str, population: List, n: int, k: int, m: int, threshold: float):
+    def select(self, selection_method_name: str, population: List, n: int, k: int, m: int, threshold: float, temperatura_inicial: float):
         aptitudes = calcular_aptitudes(population)
         if selection_method_name == 'seleccion_boltzmann':
-            selected_population = seleccion_boltzmann(population, aptitudes)
+            selected_population = seleccion_boltzmann(population, aptitudes, k, temperatura_inicial)
+        elif selection_method_name == 'seleccion_ruleta':
+            selected_population = seleccion_ruleta(population, aptitudes, k)
+        elif selection_method_name == 'seleccion_ranking':
+            selected_population = seleccion_ranking(population, aptitudes, k)
+        elif selection_method_name == 'seleccion_ruleta':
+            selected_population = seleccion_universal(population, aptitudes, k)
         elif selection_method_name == 'seleccion_torneo_deterministico':
             selected_population = seleccion_torneo_deterministico(population, aptitudes, k, m)
         elif selection_method_name == 'seleccion_torneo_probabilistico':
             selected_population = seleccion_torneo_probabilistico(population, aptitudes, k, threshold)
         else:
-            selected_population = seleccion_elitista(population, aptitudes)
+            selected_population = seleccion_elitista(population, aptitudes, k)
 
         # Retornamos la nueva generación.
         return selected_population
@@ -105,6 +111,7 @@ class GeneticAlgorithmEngine:
         B = float(self.arguments['seleccion']['b'])
         m = int(self.arguments['seleccion']['m'])
         threshold = float(self.arguments['seleccion']['threshold'])
+        temperatura_inicial = float(self.arguments['seleccion']['temperatura_inicial'])
         
         # Crossover
         crossover_method_name = self.arguments['crossover']['metodo']
@@ -125,16 +132,16 @@ class GeneticAlgorithmEngine:
 
         for _ in range(max_generaciones):
             # --- Generamos la nueva población --- 
+            # Seleccionamos los k padres, que harán el 'crossover' y generarán el nuevo conj. de hijos.
             count_method1 = ceil(A*k)
             count_method2 = k - count_method1
 
             current_population = self.population[self.generation]
-            selection1 = self.select(selection_method_name1, current_population, n, count_method1, m, threshold)
-            selection2 = self.select(selection_method_name2, current_population, n, count_method2, m, threshold)
-            # Seleccionamos K individuos de la generación anterior mediante dos algoritmos diferentes.
+            selection1 = self.select(selection_method_name1, current_population, n, count_method1, m, threshold, temperatura_inicial)
+            selection2 = self.select(selection_method_name2, current_population, n, count_method2, m, threshold, temperatura_inicial)
             parents_population = selection1 + selection2
-            print(f"Parents len: {len(parents_population)}")
-            
+            print(f"parents len: {len(parents_population)}")
+
             # --- Realizamos el crossover ---
             # Generamos la cruza de los K padres, generando K hijos.
             childs_population = self.crossover(crossover_method_name, k, 0.8)
@@ -142,7 +149,7 @@ class GeneticAlgorithmEngine:
 
             # --- Realizamos la mutación ---
             for child in childs_population:
-                child = self.mutate(selection_mut_name4, child, delta_items,delta_height, probabilidad_mutacion, self.generation)
+                child = self.mutate(selection_mut_name4, child, delta_items, delta_height, probabilidad_mutacion, self.generation)
 
             # --- Reemplazamos ---
             count_method3 = ceil(B*n)
@@ -152,8 +159,8 @@ class GeneticAlgorithmEngine:
             big_population = parents_population + childs_population
             print(f"big_population len: {len(big_population)}")
 
-            selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold)
-            selection4 = self.select(selection_method_name4, big_population, n + k, count_method4, m, threshold)
+            selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold, temperatura_inicial)
+            selection4 = self.select(selection_method_name4, big_population, n + k, count_method4, m, threshold, temperatura_inicial)
 
             new_population = selection3 + selection4
             self.add_generation(new_population)

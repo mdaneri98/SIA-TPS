@@ -7,22 +7,22 @@ TAMANO_POBLACION = 100
 NUM_INDIVIDUOS_ELITE = 10
 PROBABILIDAD_MUTACION = 0.1
 
-def seleccion_elitista(poblacion, aptitudes):
+def seleccion_elitista(poblacion, aptitudes, k):
     # Ordenar los índices de la población en función de la aptitud de cada individuo
-    elite_indices = sorted(range(len(aptitudes)), key=lambda i: aptitudes[i], reverse=True)[:NUM_INDIVIDUOS_ELITE]
+    elite_indices = sorted(range(len(aptitudes)), key=lambda i: aptitudes[i], reverse=True)[:k]
     # Seleccionar a los individuos elite según los índices obtenidos
     elite = [poblacion[i] for i in elite_indices]
     return elite
 
 
-def seleccion_ruleta(poblacion, aptitudes):
+def seleccion_ruleta(poblacion, aptitudes, k):
     suma_aptitudes = sum(aptitudes)
-    probabilidad_seleccion = [aptitud / suma_aptitudes for aptitud in aptitudes]
+    aptitud_relativa = [aptitud / suma_aptitudes for aptitud in aptitudes]
     seleccionados = []
-    for _ in range(len(poblacion)):
+    for _ in range(k):
         r = random.random()
         acumulada = 0
-        for i, probabilidad in enumerate(probabilidad_seleccion):
+        for i, probabilidad in enumerate(aptitud_relativa):
             acumulada += probabilidad
             if r <= acumulada:
                 seleccionados.append(poblacion[i])
@@ -30,37 +30,36 @@ def seleccion_ruleta(poblacion, aptitudes):
     return seleccionados
 
 
-def seleccion_universal(poblacion, aptitudes):
+def seleccion_universal(poblacion, aptitudes, k):
     # Calcula la suma total de las aptitudes
     suma_aptitudes = sum(aptitudes)
 
-    # Genera una lista acumulativa de probabilidades
-    probabilidades_acumulativas = []
+    # Generamos la lista de aptitudes relativas acumuladas qi
+    aptitudes_relativas_acumuladas = []
     acumulado = 0
     for aptitud in aptitudes:
         acumulado += aptitud / suma_aptitudes
-        probabilidades_acumulativas.append(acumulado)
+        aptitudes_relativas_acumuladas.append(acumulado)
 
-    # Genera números aleatorios y selecciona individuos
+    # Genera números aleatorios y selecciona k individuos
     seleccionados = []
-    for _ in range(len(poblacion)):
+    for _ in range(k):
         r = random.random()
-        for i, probabilidad in enumerate(probabilidades_acumulativas):
+        for i, probabilidad in enumerate(aptitudes_relativas_acumuladas):
             if r <= probabilidad:
                 seleccionados.append(poblacion[i])
                 break
-
     return seleccionados
 
 
-def seleccion_boltzmann(poblacion, aptitudes, temperatura):
+def seleccion_boltzmann(poblacion, aptitudes, k, temperatura):
     probabilidades = [math.exp(aptitud / temperatura) for aptitud in aptitudes]
     suma_probabilidades = sum(probabilidades)
     # Normalizamos las probabilidades para asegurarnos de que sumen 1 y puedan utilizarse como probabilidades de selección.
     probabilidades_normalizadas = [prob / suma_probabilidades for prob in probabilidades]
 
     seleccionados = []
-    for _ in range(len(poblacion)):
+    for _ in range(k):
         r = random.random()
         acumulada = 0
         for i, probabilidad in enumerate(probabilidades_normalizadas):
@@ -68,14 +67,14 @@ def seleccion_boltzmann(poblacion, aptitudes, temperatura):
             if r <= acumulada:
                 seleccionados.append(poblacion[i])
                 break
+
     return seleccionados
 
 
-def seleccion_ranking(poblacion, aptitudes):
+def seleccion_ranking(poblacion, aptitudes, k):
     # Ordenar la población y las aptitudes en función de las aptitudes de los individuos
     # Los individuos más aptos van a tener una mayor probabilidad de ser seleccionados
     poblacion_ordenada = [individuo for _, individuo in sorted(zip(aptitudes, poblacion), reverse=True)]
-    aptitudes_ordenadas = sorted(aptitudes, reverse=True)
     
     # Calcular las probabilidades de selección basadas en el ranking
     n = len(poblacion)
@@ -83,7 +82,7 @@ def seleccion_ranking(poblacion, aptitudes):
     
     # Seleccionar individuos utilizando las probabilidades de selección
     seleccionados = []
-    for _ in range(n):
+    for _ in range(k):
         r = random.random()
         acumulada = 0
         for i, probabilidad in enumerate(probabilidades):
@@ -125,4 +124,5 @@ def seleccion_torneo_probabilistico(poblacion, aptitudes, k, threshold):
         else:
             ganador_torneo = min(torneo, key=lambda i: aptitudes[i])
         seleccionados.append(poblacion[ganador_torneo])
+        
     return seleccionados
