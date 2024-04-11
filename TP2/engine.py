@@ -5,6 +5,7 @@ from selection import *
 from mutacion import *
 from arguments import ProgramArguments
 from crossover import *
+from end_condition import *
 
 def calcular_aptitudes(population):
     return [individual.performance() for individual in population]
@@ -114,6 +115,16 @@ class GeneticAlgorithmEngine:
         return selected_population
 
 
+    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, previous_population, delta):
+        if stop_method == 'cantidad_generaciones':
+            return (check_max_generation, (self.generation + 1, max_generations))
+        elif stop_method == 'solucion_aceptable':
+            return (check_optimal_fitness, (self.population[self.generation], optimal_fitness, optimal_fitness_error))
+        elif stop_method == 'contenido':
+            return (check_content, (self.population[self.generation], previous_population, delta))
+        return "No stop method given"
+
+
     def start(self):
         # Poblacion 
         n = int(self.arguments['poblacion']['cantidad_poblacion'])
@@ -136,7 +147,11 @@ class GeneticAlgorithmEngine:
         crossover_probability = float(self.arguments['crossover']['probability'])
 
         # Condicion de corte
-        max_generaciones = int(self.arguments['corte']['max_generaciones'])
+        stop_method = self.arguments['corte']['metodo']
+        max_generations = int(self.arguments['corte']['max_generaciones'])
+        optimal_fitness = int(self.arguments['corte']['optimal_fitness'])
+        optimal_fitness_error = int(self.arguments['corte']['optimal_fitness_error'])
+        delta = float(self.arguments['corte']['delta'])
 
         #Mutacion
         selection_mut_name1 = self.arguments['mutacion']['metodo1']
@@ -149,7 +164,8 @@ class GeneticAlgorithmEngine:
         
         self.generate_initial(n, characterType)
 
-        for _ in range(max_generaciones):
+        stop = False
+        while not stop:
             # --- Generamos la nueva población --- 
             # Seleccionamos los k padres, que harán el 'crossover' y generarán el nuevo conj. de hijos.
             count_method1 = ceil(A*k)
@@ -188,7 +204,12 @@ class GeneticAlgorithmEngine:
 
             # Obtener el individuo con la mejor performance
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
-            print(f"Mejor desempeño = {ind_best_performance}\n")
 
-        print("Algoritmo genético completado.")
+            # Chequeamos la stop condition. No varía, pero si elejimos 'content' usa la población anterior y rompería.
+            stop_method_f, stop_method_args = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, self.population[self.generation-1], delta)
+            print(f"args {stop_method_args}")
+            stop_method_f(stop_method_args)
+            
+
+
 
