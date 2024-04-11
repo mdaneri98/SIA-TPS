@@ -54,9 +54,12 @@ class GeneticAlgorithmEngine:
                     args = (first_parent, second_parent, probability)
 
                 first_child, second_child = method(*args)
-                #first_child = self.mutate(first_child)
-                #second_child = self.mutate(second_child)
-                childs.extend([first_child, second_child])
+                childs.append(first_child)
+                
+                # Si k es impar -> no hay que añadir el segundo hijo en el último step.
+                if len(childs) == k:
+                    break
+                childs.append(second_child)
         
         return childs
 
@@ -105,8 +108,8 @@ class GeneticAlgorithmEngine:
         # Seleccion
         selection_method_name1 = self.arguments['seleccion']['metodo1']
         selection_method_name2 = self.arguments['seleccion']['metodo2']
-        selection_method_name3 = self.arguments['seleccion']['metodo1']
-        selection_method_name4 = self.arguments['seleccion']['metodo2']
+        selection_method_name3 = self.arguments['seleccion']['metodo3']
+        selection_method_name4 = self.arguments['seleccion']['metodo4']
         A = float(self.arguments['seleccion']['a'])
         B = float(self.arguments['seleccion']['b'])
         m = int(self.arguments['seleccion']['m'])
@@ -155,7 +158,7 @@ class GeneticAlgorithmEngine:
             count_method3 = ceil(B*n)
             count_method4 = n - count_method3
 
-            # Seleccionamos 2K individuos de la nueva población 
+            # Seleccionamos N + K individuos de la nueva población 
             big_population = parents_population + childs_population
             print(f"big_population len: {len(big_population)}")
 

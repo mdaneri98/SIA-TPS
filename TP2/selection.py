@@ -73,8 +73,8 @@ def seleccion_boltzmann(poblacion, aptitudes, k, temperatura):
 
 def seleccion_ranking(poblacion, aptitudes, k):
     # Ordenar la población y las aptitudes en función de las aptitudes de los individuos
-    # Los individuos más aptos van a tener una mayor probabilidad de ser seleccionados
-    poblacion_ordenada = [individuo for _, individuo in sorted(zip(aptitudes, poblacion), reverse=True)]
+    # Ordena la población basada únicamente en las aptitudes, sin intentar desempatar con las instancias de Character directamente
+    poblacion_ordenada = [individuo for aptitud, individuo in sorted(zip(aptitudes, poblacion), key=lambda x: x[0], reverse=True)]
     
     # Calcular las probabilidades de selección basadas en el ranking
     n = len(poblacion)
