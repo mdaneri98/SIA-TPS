@@ -159,7 +159,7 @@ class GeneticAlgorithmEngine:
             count_method4 = n - count_method3
 
             # Seleccionamos N + K individuos de la nueva población 
-            big_population = parents_population + childs_population
+            big_population = current_population + childs_population
             print(f"big_population len: {len(big_population)}")
 
             selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold, temperatura_inicial)
@@ -167,7 +167,6 @@ class GeneticAlgorithmEngine:
 
             new_population = selection3 + selection4
             self.add_generation(new_population)
-
 
             # Imprimimos la nueva generación.
             print(f"Generación {self.generation}:\n")
