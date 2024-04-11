@@ -9,6 +9,20 @@ from crossover import *
 def calcular_aptitudes(population):
     return [individual.performance() for individual in population]
 
+def get_type(arguments) -> CharacterType:
+    type_str = arguments['poblacion']['tipo']
+    if type_str == 'guerrero':
+        return CharacterType.Guerrero
+    elif type_str == 'arquero':
+        return CharacterType.Arquero
+    elif type_str == 'infiltrado':
+        return CharacterType.Infiltrado
+    elif type_str == 'defensor':
+        return CharacterType.Defensor
+    
+    return "No valid character type"
+
+
 class GeneticAlgorithmEngine:
 
     def __init__(self, arguments):
@@ -22,13 +36,13 @@ class GeneticAlgorithmEngine:
         self.population[self.generation] = list(new_population)
 
 
-    def generate_initial(self, n):
+    def generate_initial(self, n, characterType: CharacterType):
         # Inicializa la lista para la generación actual si aún no existe
         if self.generation not in self.population:
             self.population[self.generation] = []
         
         for _ in range(n):
-            ind = Character.create_random_character()
+            ind = Character.create_random_character(characterType)
             self.population[self.generation].append(ind)
 
 
@@ -104,6 +118,7 @@ class GeneticAlgorithmEngine:
         # Poblacion 
         n = int(self.arguments['poblacion']['cantidad_poblacion'])
         k = int(self.arguments['poblacion']['k'])
+        characterType = get_type(self.arguments)
 
         # Seleccion
         selection_method_name1 = self.arguments['seleccion']['metodo1']
@@ -132,7 +147,7 @@ class GeneticAlgorithmEngine:
         delta_items = float(self.arguments['mutacion']['delta_items'])
         delta_height =  float(self.arguments['mutacion']['delta_height'])
         
-        self.generate_initial(n)
+        self.generate_initial(n, characterType)
 
         for _ in range(max_generaciones):
             # --- Generamos la nueva población --- 
@@ -144,12 +159,10 @@ class GeneticAlgorithmEngine:
             selection1 = self.select(selection_method_name1, current_population, n, count_method1, m, threshold, temperatura_inicial)
             selection2 = self.select(selection_method_name2, current_population, n, count_method2, m, threshold, temperatura_inicial)
             parents_population = selection1 + selection2
-            print(f"parents len: {len(parents_population)}")
 
             # --- Realizamos el crossover ---
             # Generamos la cruza de los K padres, generando K hijos.
             childs_population = self.crossover(crossover_method_name, k, crossover_probability)
-            print(f"Child len: {len(childs_population)}")
 
             # --- Realizamos la mutación ---
             for child in childs_population:
@@ -161,7 +174,6 @@ class GeneticAlgorithmEngine:
 
             # Seleccionamos N + K individuos de la nueva población 
             big_population = current_population + childs_population
-            print(f"big_population len: {len(big_population)}")
 
             selection3 = self.select(selection_method_name3, big_population, n + k, count_method3, m, threshold, temperatura_inicial)
             selection4 = self.select(selection_method_name4, big_population, n + k, count_method4, m, threshold, temperatura_inicial)

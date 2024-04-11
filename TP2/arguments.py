@@ -1,7 +1,7 @@
 import json
 import os
 import configparser
-
+from character import CharacterType
 
 
 
@@ -16,7 +16,7 @@ class ProgramArguments():
         config = configparser.ConfigParser()
         config.read(path)
         self.arguments = {section: dict(config[section]) for section in config.sections()}
-        
+
 
     def read_program_arguments(self, section, argument):
         return self.arguments[section][argument]

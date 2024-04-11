@@ -99,10 +99,10 @@ class Character:
         return 100 * tanh(0.01 * items_life)
 
     @staticmethod
-    def create_random_character():
-        random_type = random.choice(list(CharacterType))
+    def create_random_character(characterType):
+        #random_type = random.choice(list(CharacterType))
         random_height = random.uniform(1.3, 2.0)
-        ch = Character(random_type, random_height)
+        ch = Character(characterType, random_height)
         
         item = Item.create_random_item()
         while (ch.add_item(item)):
@@ -118,17 +118,19 @@ class Character:
         self.itemPoints += item.points
         return True
 
+
     def performance(self):
-        if self.type == CharacterType.Guerrero:
+        if self.type.name == "Guerrero":
             return 0.6 * self.attack + 0.4 * self.defense
-        elif self.type == CharacterType.Arquero:
+        elif self.type.name == "Arquero":
             return 0.9 * self.attack + 0.1 * self.defense
-        elif self.type == CharacterType.Defensor:
+        elif self.type.name == "Defensor":
             return 0.1 * self.attack + 0.9 * self.defense
-        elif self.type == CharacterType.Infiltrado:
+        elif self.type.name == "Infiltrado":
             return 0.8 * self.attack + 0.3 * self.defense
         else:
             return "Tipo de personaje no válido."
+
 
     def get_genes(self) -> list:
         item_genes = [item.get_genes() for item in self.items]  # Múltiplo de 5
@@ -138,6 +140,7 @@ class Character:
             genes.extend(item.get_genes())
         
         return genes
+
 
     @staticmethod
     def from_genes(genes: dict) -> 'Character':
