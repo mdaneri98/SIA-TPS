@@ -118,6 +118,7 @@ class GeneticAlgorithmEngine:
         
         # Crossover
         crossover_method_name = self.arguments['crossover']['metodo']
+        crossover_probability = float(self.arguments['crossover']['probability'])
 
         # Condicion de corte
         max_generaciones = int(self.arguments['corte']['max_generaciones'])
@@ -147,7 +148,7 @@ class GeneticAlgorithmEngine:
 
             # --- Realizamos el crossover ---
             # Generamos la cruza de los K padres, generando K hijos.
-            childs_population = self.crossover(crossover_method_name, k, 0.8)
+            childs_population = self.crossover(crossover_method_name, k, crossover_probability)
             print(f"Child len: {len(childs_population)}")
 
             # --- Realizamos la mutación ---
