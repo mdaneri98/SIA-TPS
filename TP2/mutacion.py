@@ -31,10 +31,10 @@ def mutacion_multigen(individuo: Character, generation : int, probabilidad_mutac
     indices_mutations = []
     
     # Mutate the type of character (gene 0)
-    if random.random() < prob_mutacion:
+    # if random.random() < prob_mutacion:
         
-        random_type = random.choice(list(CharacterType))
-        new_type = random_type.name
+    #     random_type = random.choice(list(CharacterType))
+    #     new_type = random_type.name
     
     # Mutate the height (gene 1)
     if random.random() < prob_mutacion:
@@ -65,8 +65,8 @@ def mutacion_multigen(individuo: Character, generation : int, probabilidad_mutac
             for i, valeur in zip(indices_mutations, valeurs_originales):
                 genes[i] = valeur
             goal =0
-            cst = random.uniform(-delta_items, delta_items)
-            cst2 = cst / (nb_mutated-1) 
+            cst = round(random.uniform(-delta_items, delta_items),4)
+            cst2 = round((cst / (nb_mutated-1) ),4)
 
             index_gene_principal = random.choice(indices_mutations)
             genes[index_gene_principal] += cst
@@ -79,23 +79,24 @@ def mutacion_multigen(individuo: Character, generation : int, probabilidad_mutac
                 goal += genes[index]
 
     new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
+    
     return new_ch
 
 
 def mutacion_gen(individuo: Character, generation : int, probabilidad_mutacion : float, delta_height : float ,uniform=True):
 
-    prob_mutacion = calculate_probability_mutation(generation,uniform)
+    prob_mutacion = calculate_probability_mutation(generation,uniform,probabilidad_mutacion)
     genes = individuo.get_genes()
     new_type = genes[0]  # Initialiser avec la valeur actuelle
     new_height = genes[1]
     
     # Mutate the type of character (gene 0)
-    if random.random() < prob_mutacion:
+    # if random.random() < prob_mutacion:
         
-        random_type = random.choice(list(CharacterType))
-        new_type = random_type.name
-        new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
-        return new_ch
+    #     random_type = random.choice(list(CharacterType))
+    #     new_type = random_type.name
+    #     new_ch = Character.from_genes([new_type,new_height] + genes[2:]) 
+    #     return new_ch
     
     # Mutate the height (gene 1)
     if random.random() < prob_mutacion:

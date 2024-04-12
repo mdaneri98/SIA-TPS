@@ -115,13 +115,13 @@ class GeneticAlgorithmEngine:
         return selected_population
 
 
-    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, previous_population, delta):
+    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta):
         if stop_method == 'cantidad_generaciones':
-            return (check_max_generation, (self.generation + 1, max_generations))
+            return (check_max_generation(self.generation , max_generations))
         elif stop_method == 'solucion_aceptable':
-            return (check_optimal_fitness, (self.population[self.generation], optimal_fitness, optimal_fitness_error))
+            return (check_optimal_fitness(self.population[self.generation], optimal_fitness, optimal_fitness_error))
         elif stop_method == 'contenido':
-            return (check_content, (self.population[self.generation], previous_population, delta))
+            return (check_content(self.population[self.generation], self.population[self.generation-1], delta))
         return "No stop method given"
 
 
@@ -156,13 +156,16 @@ class GeneticAlgorithmEngine:
         #Mutacion
         selection_mut_name1 = self.arguments['mutacion']['metodo1']
         selection_mut_name2 = self.arguments['mutacion']['metodo2']
-        selection_mut_name3 = self.arguments['mutacion']['metodo1']
-        selection_mut_name4 = self.arguments['mutacion']['metodo2']
+        selection_mut_name3 = self.arguments['mutacion']['metodo3']
+        selection_mut_name4 = self.arguments['mutacion']['metodo4']
         probabilidad_mutacion = float(self.arguments['mutacion']['probabilidad_mutacion'])
         delta_items = float(self.arguments['mutacion']['delta_items'])
         delta_height =  float(self.arguments['mutacion']['delta_height'])
         
         self.generate_initial(n, characterType)
+        print(f"Generación {self.generation}:\n")
+        for i, ch in enumerate(self.population[self.generation]):
+            print(f"{i}: {ch}")
 
         stop = False
         while not stop:
@@ -181,8 +184,12 @@ class GeneticAlgorithmEngine:
             childs_population = self.crossover(crossover_method_name, k, crossover_probability)
 
             # --- Realizamos la mutación ---
-            for child in childs_population:
-                child = self.mutate(selection_mut_name4, child, delta_items, delta_height, probabilidad_mutacion, self.generation)
+            
+            
+            
+            for i,child in enumerate(childs_population):
+                childs_population[i] = self.mutate(selection_mut_name1, child, delta_items, delta_height, probabilidad_mutacion, self.generation)
+                
 
             # --- Reemplazamos ---
             count_method3 = ceil(B*n)
@@ -206,9 +213,12 @@ class GeneticAlgorithmEngine:
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
 
             # Chequeamos la stop condition. No varía, pero si elejimos 'content' usa la población anterior y rompería.
-            stop_method_f, stop_method_args = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, self.population[self.generation-1], delta)
-            print(f"args {stop_method_args}")
-            stop_method_f(stop_method_args)
+            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta)
+            #print(f"args {stop_method_args}")
+            #stop_method_f(stop_method_args)
+        # 2 print para saber si hay bien mutaccion entre el inicio y la fin 
+        print(max(self.population[0],key=lambda individuo: individuo.performance()))
+        print(max(self.population[self.generation],key=lambda individuo: individuo.performance()))
             
 
 
