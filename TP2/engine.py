@@ -6,6 +6,7 @@ from mutacion import *
 from arguments import ProgramArguments
 from crossover import *
 from end_condition import *
+import csv
 
 def calcular_aptitudes(population):
     return [individual.performance() for individual in population]
@@ -126,6 +127,9 @@ class GeneticAlgorithmEngine:
 
 
     def start(self):
+        #CSV
+        archivo_csv = 'datos.csv'
+
         # Poblacion 
         n = int(self.arguments['poblacion']['cantidad_poblacion'])
         k = int(self.arguments['poblacion']['k'])
@@ -163,9 +167,10 @@ class GeneticAlgorithmEngine:
         delta_height =  float(self.arguments['mutacion']['delta_height'])
         
         self.generate_initial(n, characterType)
-        print(f"Generación {self.generation}:\n")
-        for i, ch in enumerate(self.population[self.generation]):
-            print(f"{i}: {ch}")
+        #print(f"Generación {self.generation}:\n")
+        #for i, ch in enumerate(self.population[self.generation]):
+        #    print(f"{i}: {ch}")
+
 
         stop = False
         while not stop:
@@ -183,10 +188,7 @@ class GeneticAlgorithmEngine:
             # Generamos la cruza de los K padres, generando K hijos.
             childs_population = self.crossover(crossover_method_name, k, crossover_probability)
 
-            # --- Realizamos la mutación ---
-            
-            
-            
+            # --- Realizamos la mutación ---           
             for i,child in enumerate(childs_population):
                 childs_population[i] = self.mutate(selection_mut_name1, child, delta_items, delta_height, probabilidad_mutacion, self.generation)
                 
@@ -205,9 +207,12 @@ class GeneticAlgorithmEngine:
             self.add_generation(new_population)
 
             # Imprimimos la nueva generación.
-            print(f"Generación {self.generation}:\n")
+            #print(f"Generación {self.generation}:\n")
             for i, ch in enumerate(self.population[self.generation]):
-                print(f"{i}: {ch}")
+            #    print(f"{i}: {ch}")
+                with open(archivo_csv, 'a', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow([i, ch.type, ch.performance(), ch.attack, ch.defense, ch.itemPoints])
 
             # Obtener el individuo con la mejor performance
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
@@ -216,6 +221,7 @@ class GeneticAlgorithmEngine:
             stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta)
             #print(f"args {stop_method_args}")
             #stop_method_f(stop_method_args)
+
         # 2 print para saber si hay bien mutaccion entre el inicio y la fin 
         print(max(self.population[0],key=lambda individuo: individuo.performance()))
         print(max(self.population[self.generation],key=lambda individuo: individuo.performance()))
