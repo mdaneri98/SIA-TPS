@@ -127,13 +127,13 @@ class GeneticAlgorithmEngine:
 
 
     def start(self):
-        #CSV
-        archivo_csv = 'datos.csv'
 
         # Poblacion 
         n = int(self.arguments['poblacion']['cantidad_poblacion'])
         k = int(self.arguments['poblacion']['k'])
         characterType = get_type(self.arguments)
+        #CSV
+        archivo_csv = f'datos_{characterType.name}.csv'
 
         # Seleccion
         selection_method_name1 = self.arguments['seleccion']['metodo1']
