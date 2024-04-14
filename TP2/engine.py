@@ -1,11 +1,13 @@
 from typing import Dict, List
 from character import Character
 import random
+import time
 from selection import *
 from mutacion import *
 from arguments import ProgramArguments
 from crossover import *
 from end_condition import *
+
 
 def calcular_aptitudes(population):
     return [individual.performance() for individual in population]
@@ -115,13 +117,13 @@ class GeneticAlgorithmEngine:
         return selected_population
 
 
-    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta):
+    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_t,time_limit):
         if stop_method == 'cantidad_generaciones':
             return (check_max_generation(self.generation , max_generations))
         elif stop_method == 'solucion_aceptable':
-            return (check_optimal_fitness(self.population[self.generation], optimal_fitness, optimal_fitness_error))
+            return (check_optimal_fitness(self.population[self.generation], optimal_fitness, optimal_fitness_error,start_t,time_limit))
         elif stop_method == 'contenido':
-            return (check_content(self.population[self.generation], self.population[self.generation-1], delta))
+            return (check_content(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit))
         return "No stop method given"
 
 
@@ -147,6 +149,8 @@ class GeneticAlgorithmEngine:
         crossover_probability = float(self.arguments['crossover']['probability'])
 
         # Condicion de corte
+        start_time = time.time()
+        time_limit = float(self.arguments['corte']['time_limit'])
         stop_method = self.arguments['corte']['metodo']
         max_generations = int(self.arguments['corte']['max_generaciones'])
         optimal_fitness = int(self.arguments['corte']['optimal_fitness'])
@@ -213,10 +217,11 @@ class GeneticAlgorithmEngine:
             ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
 
             # Chequeamos la stop condition. No varía, pero si elejimos 'content' usa la población anterior y rompería.
-            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta)
+            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_time,time_limit)
             #print(f"args {stop_method_args}")
             #stop_method_f(stop_method_args)
         # 2 print para saber si hay bien mutaccion entre el inicio y la fin 
+
         print(max(self.population[0],key=lambda individuo: individuo.performance()))
         print(max(self.population[self.generation],key=lambda individuo: individuo.performance()))
             
