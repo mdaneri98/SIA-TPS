@@ -103,7 +103,7 @@ class Crossover:
 
     @staticmethod
     def cruce_uniforme(first_parent: Character, second_parent: Character, probability: float) -> tuple:
-        if (probability < 0 or probability > 1):
+        if probability < 0 or probability > 1:
             raise Exception("Probability must be a float in range(0,1)")
         
         # Obtener los genes de cada padre

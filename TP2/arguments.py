@@ -1,7 +1,7 @@
 import json
 import os
 import configparser
-from character import CharacterType
+
 
 
 

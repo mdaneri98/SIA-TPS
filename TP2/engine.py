@@ -224,7 +224,7 @@ class GeneticAlgorithmEngine:
             #    print(f"{i}: {ch}")
                 with open(archivo_csv, 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile)
-                    writer.writerow([i, ch.type, ch.performance(), ch.attack, ch.defense, ch.itemPoints])
+                    writer.writerow([i, ch.ch_type, ch.performance(), ch.attack, ch.defense, ch.itemPoints])
 
             # Obtener el individuo con la mejor performance
             ind_best_performance = (max(self.population[self.generation], key=lambda individuo: individuo.performance()), gen)
