@@ -71,33 +71,32 @@ class Crossover:
         
             Hay que tener en cuenta si P + L excede la longitud de la lista de genes -> intercambiar los del inicio.
         '''
+        start_index = 2
+
         # Obtener los genes de cada padre
         genes1 = first_parent.get_genes()
         genes2 = second_parent.get_genes()
-        
+
         # Elegir un punto de cruce al azar dentro del rango más pequeño de items de ambos padres
-        min_len = min(len(genes1), len(genes2))
-        punto_cruce = random.randint(0, min_len - 1)
+        len_genes = min(len(genes1), len(genes2))
+        long = random.randint(0, ceil(len_genes/2))
+        punto_cruce = random.randint(0, len_genes - 1)
 
-        
-        # Efectuamos la cruza de genes.
-        long = random.randint(0, ceil(min_len/2))
+        # Calcular el punto de finalización del cruce
+        end_index = start_index + long
 
-        diff = (long + punto_cruce) - len(genes1)
-        child_genes1 = genes1[0:punto_cruce] + genes2[punto_cruce:punto_cruce + long]
-        if (diff > 0):
-            child_genes1.extend(genes2[0:diff])
+        # Si end_index es mayor que la longitud de los genes, envolver alrededor
+        if end_index > len_genes:
+            end_index %= len_genes  # Encuentra la posición envolvente
+            # Realizar el cruce anular
+            genes1[start_index:], genes2[start_index:] = genes2[start_index:], genes1[start_index:]
+            genes1[:end_index], genes2[:end_index] = genes2[:end_index], genes1[:end_index]
+        else:
+            # Realizar el cruce sin envolver alrededor
+            genes1[start_index:end_index], genes2[start_index:end_index] = genes2[start_index:end_index], genes1[start_index:end_index]
 
-        diff = (long + punto_cruce) - len(genes2)
-        child_genes2 = genes2[0:punto_cruce] + genes1[punto_cruce:punto_cruce + long]
-        if (diff > 0):
-            child_genes2.extend(genes1[0:diff])
-
-        print(child_genes1)
-        print(child_genes2)
-
-        child1 = Character.from_genes(child_genes1)
-        child2 = Character.from_genes(child_genes2)
+        child1 = Character.from_genes(genes1)
+        child2 = Character.from_genes(genes2)
 
         return child1, child2
     
