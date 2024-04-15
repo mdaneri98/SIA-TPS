@@ -20,8 +20,6 @@ def check_max_generation(generation, max_generations):
     if (generation >= max_generations):
         return True
 
-def calculate_diversity(population, prev_population_genes, threshold):
-
 
 #Diversidad insuficiente: Si la población de soluciones generadas por el algoritmo se vuelve 
 #muy homogénea o pierde diversidad y el algoritmo podría quedarse atrapado en un óptimo local.
