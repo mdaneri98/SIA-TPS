@@ -97,6 +97,10 @@ class Character:
     def life(self):
         items_life = sum(item.life for item in self.items)
         return 100 * tanh(0.01 * items_life)
+    
+    @property
+    def height(self):
+        return self.height
 
     @staticmethod
     def create_random_character(characterType):
