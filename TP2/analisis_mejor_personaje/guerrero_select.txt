@@ -1,0 +1,8 @@
+Elitista | Character Type.Guerrero | Performance: 41.14727654105267 | Attack: 68.57815997817421 | Defense: 0.0009513853703595543 | Items points: 150.0 99
+Ranking | Character Type.Guerrero | Performance: 37.62746645302139 | Attack: 62.44284765311251 | Defense: 0.40439465288472565 | Items points: 150.0 99
+Ruleta | Character Type.Guerrero | Performance: 30.964945954004946 | Attack: 51.03612478925908 | Defense: 0.8581777011237567 | Items points: 146.30350000000004 99
+Universal | Character Type.Guerrero | Performance: 41.074507341414396 | Attack: 68.45722723520537 | Defense: 0.0004275007279344845 | Items points: 150.0 99
+Boltzmann | Character Type.Guerrero | Performance: 41.23217184783836 | Attack: 68.72018673950247 | Defense: 0.00014951034220083478 | Items points: 150.0 99
+Deterministico | Character Type.Guerrero | Performance: 41.23050208594307 | Attack: 68.71726531812071 | Defense: 0.000357237676620755 | Items points: 150.0 99
+Probabilistico | Character Type.Guerrero | Performance: 34.01853658483528 | Attack: 56.69353914398917 | Defense: 0.006032746104453771 | Items points: 149.99999999999997 99
+

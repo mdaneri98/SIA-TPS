@@ -1,0 +1,8 @@
+Elitista | Character Type.Infiltrado | Performance: 54.785363666051225 | Attack: 68.48147097002209 | Defense: 0.0006229667785165073 | Items points: 150.0 99
+Ranking | Character Type.Infiltrado | Performance: 54.8542175290305 | Attack: 68.56755485852094 | Defense: 0.0005788073791568856 | Items points: 150.0 99
+Ruleta | Character Type.Infiltrado | Performance: 49.7524356154347 | Attack: 62.13978906018045 | Defense: 0.13534789096779068 | Items points: 150.0 99
+Universal | Character Type.Infiltrado | Performance: 54.82952411203732 | Attack: 68.53672154069173 | Defense: 0.0004895982797746207 | Items points: 150.0 99
+Boltzmann | Character Type.Infiltrado | Performance: 47.35646831166672 | Attack: 59.19547690003369 | Defense: 0.0002893054658565492 | Items points: 150.0 99
+Deterministico | Character Type.Infiltrado | Performance: 54.96871954113718 | Attack: 68.71086475093017 | Defense: 9.246797682390445e-05 | Items points: 150.0 99
+Probabilistico | Character Type.Infiltrado | Performance: 52.14560814918043 | Attack: 65.14045352809147 | Defense: 0.11081775569084361 | Items points: 150.0 99
+

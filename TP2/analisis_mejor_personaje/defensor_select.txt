@@ -1,0 +1,7 @@
+Elitista | Character Type.Defensor | Performance: 58.1338263849231 | Attack: 0.00027580190327650047 | Defense: 64.59310978303641 | Items points: 150.0 99
+Ranking | Character Type.Defensor | Performance: 42.29053462390781 | Attack: 0.018519641909349006 | Defense: 46.987425177463194 | Items points: 150.0 99
+Ruleta | Character Type.Defensor | Performance: 56.95580913098863 | Attack: 0.0002642775964512173 | Defense: 63.284203003587756 | Items points: 150.0 99
+Universal | Character Type.Defensor | Performance: 58.09744122177249 | Attack: 0.0014344414085022627 | Defense: 64.55255308625738 | Items points: 150.0 99
+Boltzmann | Character Type.Defensor | Performance: 42.554032610736805 | Attack: 0.0011391624582970218 | Defense: 47.28213188276775 | Items points: 150.0 99
+Deterministico | Character Type.Defensor | Performance: 58.21971015215909 | Attack: 7.931133311734231e-06 | Defense: 64.68856595449529 | Items points: 150.0 99
+Probabilistico | Character Type.Defensor | Performance: 57.28867281337734 | Attack: 0.035422164016707926 | Defense: 63.650145107750745 | Items points: 150.0 99

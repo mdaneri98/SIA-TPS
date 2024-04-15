@@ -1,0 +1,8 @@
+Elitista | Character Type.Arquero | Performance: 61.48094166769349 | Attack: 68.31139385187782 | Defense: 0.006872010034540608 | Items points: 150.0 99
+Ranking | Character Type.Arquero | Performance: 60.84298443035357 | Attack: 67.60191318405452 | Defense: 0.012625647044965351 | Items points: 150.0 99
+Ruleta | Character Type.Arquero | Performance: 60.18738157025343 | Attack: 66.87175260739599 | Defense: 0.02804223597041229 | Items points: 150.0 99
+Universal | Character Type.Arquero | Performance: 61.75060615294693 | Attack: 68.61173067422862 | Defense: 0.0004854614116264666 | Items points: 150.0 99
+Boltzmann | Character Type.Arquero | Performance: 61.7869191568401 | Attack: 68.65203224724956 | Defense: 0.0009013431549116804 | Items points: 149.99999999999997 99
+Deterministico | Character Type.Arquero | Performance: 53.292630421135854 | Attack: 59.21400581663662 | Defense: 0.0002518616289363558 | Items points: 150.0 99
+Probabilistico | Character Type.Arquero | Performance: 51.93190612531738 | Attack: 57.693924481754586 | Defense: 0.07374091738254966 | Items points: 150.0 99
+

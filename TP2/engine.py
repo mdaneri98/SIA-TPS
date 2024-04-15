@@ -118,8 +118,16 @@ class GeneticAlgorithmEngine:
         return selected_population
 
 
-    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_t,time_limit):
+    archivo_stop = 'archivo_stop.csv'
+    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_t,time_limit,gen):
         if stop_method == 'cantidad_generaciones':
+            with open('archivo_stop.csv', 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                if check_optimal_fitness(self.population[self.generation], optimal_fitness, optimal_fitness_error, start_t, time_limit):
+                    writer.writerow([gen, optimal_fitness, 'optimal'])
+                if check_content(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit):
+                    writer.writerow([gen, optimal_fitness, 'content'])
+            
             return (check_max_generation(self.generation , max_generations))
         elif stop_method == 'solucion_aceptable':
             return (check_optimal_fitness(self.population[self.generation], optimal_fitness, optimal_fitness_error,start_t,time_limit))
@@ -175,7 +183,7 @@ class GeneticAlgorithmEngine:
         #for i, ch in enumerate(self.population[self.generation]):
         #    print(f"{i}: {ch}")
 
-
+        gen = 0
         stop = False
         while not stop:
             # --- Generamos la nueva población --- 
@@ -219,17 +227,20 @@ class GeneticAlgorithmEngine:
                     writer.writerow([i, ch.type, ch.performance(), ch.attack, ch.defense, ch.itemPoints])
 
             # Obtener el individuo con la mejor performance
-            ind_best_performance = max(self.population[self.generation], key=lambda individuo: individuo.performance())
+            ind_best_performance = (max(self.population[self.generation], key=lambda individuo: individuo.performance()), gen)
+            
 
             # Chequeamos la stop condition. No varía, pero si elejimos 'content' usa la población anterior y rompería.
-            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_time,time_limit)
+            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_time,time_limit, gen)
+            gen+=1
             #print(f"args {stop_method_args}")
             #stop_method_f(stop_method_args)
 
         # 2 print para saber si hay bien mutaccion entre el inicio y la fin 
 
-        print(max(self.population[0],key=lambda individuo: individuo.performance()))
-        print(max(self.population[self.generation],key=lambda individuo: individuo.performance()))
+        print(ind_best_performance[0], ind_best_performance[1])
+        #print(max(self.population[0],key=lambda individuo: individuo.performance()))
+        #print(max(self.population[self.generation],key=lambda individuo: individuo.performance()))
             
 
 
