@@ -10,11 +10,12 @@ GenesOrder = ['ch_type', 'Height', 'Strength', 'Agility', 'Expertise', 'Resistan
 class Item:
 
     def __init__(self, strength, agility, expertise, resistance, life):
-        self.strength = strength
-        self.agility = agility
-        self.expertise = expertise
-        self.resistance = resistance
-        self.life = life
+        normalized_strength, normalized_agility, normalized_expertise, normalized_resistance, normalized_life = self._normalize_item(strength, agility, expertise, resistance, life)
+        self.strength = normalized_strength
+        self.agility = normalized_agility
+        self.expertise = normalized_expertise
+        self.resistance = normalized_resistance
+        self.life = normalized_life
 
     @property
     def points(self):
@@ -25,17 +26,17 @@ class Item:
         """ Normalizes the items to sum 150 """
         items = [strength, agility, expertise, resistance, life]
         total: float = 0.0
-        for item in items:
-            total += items[item]
+        for value in items:
+            total += value
 
         if total == 150.0:
-            return
+            return items
 
         factor: float = 150.0 / total
-        for item in items:
-            items[item] *= factor
+        for i, item in enumerate(items):
+            items[i] *= factor
 
-        return items
+        return tuple(items)
 
     @staticmethod
     def create_item(strength, agility, expertise, resistance, life):
@@ -155,7 +156,7 @@ class Character:
         return genes
 
     @staticmethod
-    def from_genes(genes: dict) -> 'Character':
+    def from_genes(genes: list) -> 'Character':
         ch = Character(Character_type[genes[0]], genes[1])
 
         for i in range(2, len(genes), 5):

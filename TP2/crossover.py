@@ -39,7 +39,7 @@ class Crossover:
         punto_cruce1 = random.randint(0, min_len - 1)
         punto_cruce2 = random.randint(0, min_len - 1)
 
-        cruces = [punto_cruce1, punto_cruce2].sort()
+        cruces = sorted([punto_cruce1, punto_cruce2])
 
         # Efectuamos la cruza de genes.
         child_genes1 = genes1[:cruces[0]] + genes2[cruces[0]:cruces[1]] + genes1[cruces[1]:]
@@ -87,7 +87,7 @@ class Crossover:
 
         # Si end_index es mayor que la longitud de los genes, envolver alrededor
         if end_index > len_genes:
-            end_index %= len_genes  # Encuentra la posición envolvente
+            end_index %= len_genes
             # Realizar el cruce anular
             genes1[start_index:], genes2[start_index:] = genes2[start_index:], genes1[start_index:]
             genes1[:end_index], genes2[:end_index] = genes2[:end_index], genes1[:end_index]
