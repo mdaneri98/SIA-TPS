@@ -105,7 +105,7 @@ class GeneticAlgorithmEngine:
             selected_population = seleccion_ruleta(population, aptitudes, k)
         elif selection_method_name == 'seleccion_ranking':
             selected_population = seleccion_ranking(population, aptitudes, k)
-        elif selection_method_name == 'seleccion_ruleta':
+        elif selection_method_name == 'seleccion_universal':
             selected_population = seleccion_universal(population, aptitudes, k)
         elif selection_method_name == 'seleccion_torneo_deterministico':
             selected_population = seleccion_torneo_deterministico(population, aptitudes, k, m)
