@@ -1,6 +1,6 @@
 import time
 import math
-
+from character import Character, Character_type
 
 def avg_performance(population):
     return sum([character.performance() for character in population]) / len(population)
@@ -19,13 +19,13 @@ def check_optimal_fitness(population, optimal_fitness, optimal_fitness_error,sta
 def check_max_generation(generation, max_generations): 
     if (generation >= max_generations):
         return True
- 
-def standard_deviation(dataset):
-    mean = sum(dataset) / len(dataset)
-    variance = sum([(x - mean) ** 2 for x in dataset]) / len(dataset)
-    return math.sqrt(variance)
 
-def calculate_diversity(population):
+def calculate_diversity(population, prev_population_genes, threshold):
+
+
+#Diversidad insuficiente: Si la población de soluciones generadas por el algoritmo se vuelve 
+#muy homogénea o pierde diversidad y el algoritmo podría quedarse atrapado en un óptimo local.
+def check_structural(population, prev_population_genes, delta):
     population_genes = [[], [], [], [], [], []]
     
     for character in population:
@@ -37,12 +37,17 @@ def calculate_diversity(population):
         population_genes[4].append(genes["life"])
         population_genes[5].append(character.height())
     
-    standard_deviations = [standard_deviation(stat) for stat in population_genes]
-    return sum(standard_deviations) / len(standard_deviations)
+    diversidad = 0
+    for i in range(len(population_genes)):
+        for j in range(len(population_genes[i])):
+            if abs(population_genes[i][j] - prev_population_genes[i][j]) > delta:
+                diversidad += 1
 
-#Diversidad insuficiente: Si la población de soluciones generadas por el algoritmo se vuelve 
-#muy homogénea o pierde diversidad y el algoritmo podría quedarse atrapado en un óptimo local.
-def check_structural_end_condition(population, previous_population, delta):
-    population_diversity = calculate_diversity(population)
-    previous_population_diversity = calculate_diversity(previous_population)
-    return abs(population_diversity - previous_population_diversity) < delta
+    # Actualiza prev_population_genes para la próxima llamada
+    prev_population_genes = population_genes
+
+    print(diversidad)
+
+    # Si la diversidad es mayor que el umbral, devuelve True, de lo contrario, False
+    return diversidad > delta
+
