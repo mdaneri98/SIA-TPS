@@ -84,4 +84,4 @@ def mostrar_tabla_corte():
     ventana.mainloop()
 
 
-mostrar_tabla_corte()
+mostrar_tabla_seleccion()
