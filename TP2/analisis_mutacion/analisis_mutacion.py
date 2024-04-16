@@ -86,11 +86,11 @@ def diviser_en_groupes(performances, taille_groupe):
 def calculer_moyennes(groupes):
     return [np.mean(groupe) for groupe in groupes]
 
-def afficher_graphe_items(groupes, delta_items):
+def afficher_graphe_altura(groupes, delta_items):
     plt.boxplot(groupes, positions=delta_items, widths=0.01)
-    plt.xlabel('Delta Items')
+    plt.xlabel('Delta altura')
     plt.ylabel('Performance')
-    plt.title('Rendimiento de los mejores individuos encontrados al final de la 70a generación \n en función del delta_items elegido ')
+    plt.title('Rendimiento de los mejores individuos encontrados al final de la 70a generación \n en función del delta_altura elegido ')
     plt.grid(True)
     plt.show()
 
@@ -110,15 +110,15 @@ groupes = diviser_en_groupes(performances, 10)
 moyennes = calculer_moyennes(groupes)
 
 # Afficher le graphe
-afficher_graphe_items(groupes, delta_items)
+afficher_graphe_altura(groupes, delta_items)
 
 
 
-def afficher_graphe_altura(groupes, delta_items):
+def afficher_graphe_items(groupes, delta_items):
     plt.boxplot(groupes, positions=delta_items, widths=0.01)
-    plt.xlabel('Delta Items')
+    plt.xlabel('Delta items')
     plt.ylabel('Performance')
-    plt.title('Rendimiento de los mejores individuos encontrados al final de la 70a generación \n en función del delta_altura elegido ')
+    plt.title('Rendimiento de los mejores individuos encontrados al final de la 70a generación \n en función del delta_items elegido ')
     plt.grid(True)
     plt.show()
 
@@ -138,4 +138,4 @@ groupes = diviser_en_groupes(performances, 50)
 moyennes = calculer_moyennes(groupes)
 
 # Afficher le graphe
-afficher_graphe_altura(groupes, delta_items)
+afficher_graphe_items(groupes, delta_items)
