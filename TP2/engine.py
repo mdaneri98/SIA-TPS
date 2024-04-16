@@ -134,7 +134,7 @@ class GeneticAlgorithmEngine:
         elif stop_method == 'contenido':
             return (check_content(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit))
         elif stop_method == 'estructural':
-            return (check_structural(self.population[self.generation], self.population[self.generation-1], delta))
+            return (check_structural(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit))
         
         return "No stop method given"
 
