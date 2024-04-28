@@ -20,32 +20,33 @@ def check_max_generation(generation, max_generations):
     if (generation >= max_generations):
         return True
 
+def save_genes(population):
+    population_genes = [[], [], [], [], []]
+
+    for character in population:
+        genes = character.get_genes()
+        population_genes[0].append(genes[2])
+        population_genes[1].append(genes[3])
+        population_genes[2].append(genes[4])
+        population_genes[3].append(genes[5])
+        population_genes[4].append(genes[6])
+
+    return population_genes
+
 
 #Diversidad insuficiente: Si la población de soluciones generadas por el algoritmo se vuelve 
 #muy homogénea o pierde diversidad y el algoritmo podría quedarse atrapado en un óptimo local.
-def check_structural(population, prev_population_genes, delta):
-    population_genes = [[], [], [], [], [], []]
-    
-    for character in population:
-        genes = character.get_genes()
-        population_genes[0].append(genes["strength"])
-        population_genes[1].append(genes["agility"])
-        population_genes[2].append(genes["expertise"])
-        population_genes[3].append(genes["resistance"])
-        population_genes[4].append(genes["life"])
-        population_genes[5].append(character.height())
-    
+def check_structural(population, previous_population, delta,start_t,time_limit): 
+    if (time.time()-start_t >= time_limit):
+        return True
     diversidad = 0
+    population_genes = save_genes(population)
+    prev_population_genes = save_genes(previous_population)
+
     for i in range(len(population_genes)):
         for j in range(len(population_genes[i])):
             if abs(population_genes[i][j] - prev_population_genes[i][j]) > delta:
                 diversidad += 1
 
-    # Actualiza prev_population_genes para la próxima llamada
-    prev_population_genes = population_genes
-
-    print(diversidad)
-
-    # Si la diversidad es mayor que el umbral, devuelve True, de lo contrario, False
-    return diversidad > delta
+    return diversidad >= delta
 

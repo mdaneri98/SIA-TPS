@@ -119,7 +119,7 @@ class GeneticAlgorithmEngine:
 
 
     archivo_stop = 'archivo_stop.csv'
-    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_t,time_limit,gen):
+    def stop(self, stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_t,time_limit,gen,deltaE):
         if stop_method == 'cantidad_generaciones':
             with open('archivo_stop.csv', 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile)
@@ -127,6 +127,8 @@ class GeneticAlgorithmEngine:
                     writer.writerow([gen, optimal_fitness, 'optimal'])
                 if check_content(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit):
                     writer.writerow([gen, optimal_fitness, 'content'])
+                if check_structural(self.population[self.generation], self.population[self.generation-1], deltaE,start_t,time_limit):
+                    writer.writerow([gen, optimal_fitness, 'estructural'])
             
             return (check_max_generation(self.generation , max_generations))
         elif stop_method == 'solucion_aceptable':
@@ -134,7 +136,7 @@ class GeneticAlgorithmEngine:
         elif stop_method == 'contenido':
             return (check_content(self.population[self.generation], self.population[self.generation-1], delta,start_t,time_limit))
         elif stop_method == 'estructural':
-            return (check_structural(self.population[self.generation], self.population[self.generation-1], delta))
+            return (check_structural(self.population[self.generation], self.population[self.generation-1], deltaE,start_t,time_limit))
         
         return "No stop method given"
 
@@ -170,7 +172,8 @@ class GeneticAlgorithmEngine:
         max_generations = int(self.arguments['corte']['max_generaciones'])
         optimal_fitness = int(self.arguments['corte']['optimal_fitness'])
         optimal_fitness_error = int(self.arguments['corte']['optimal_fitness_error'])
-        delta = float(self.arguments['corte']['delta'])
+        delta = float(self.arguments['corte']['delta1'])
+        deltaE = int(self.arguments['corte']['delta2'])
 
         #Mutacion
         selection_mut_name1 = self.arguments['mutacion']['metodo1']
@@ -234,7 +237,7 @@ class GeneticAlgorithmEngine:
             
 
             # Chequeamos la stop condition. No varía, pero si elejimos 'content' usa la población anterior y rompería.
-            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_time,time_limit, gen)
+            stop = self.stop(stop_method, max_generations, optimal_fitness, optimal_fitness_error, delta,start_time,time_limit, gen, deltaE)
             gen+=1
             #print(f"args {stop_method_args}")
             #stop_method_f(stop_method_args)

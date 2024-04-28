@@ -1,7 +1,7 @@
 # TP2 SIA - Grupo 6
 
 ## Integrantes
-- Daneria, Matias
+- Daneri, Matias
 - Flores, Magdalena
 - Limachi, Desiree
 - Rouquette, Joseph
