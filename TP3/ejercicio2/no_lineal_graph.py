@@ -1,11 +1,9 @@
-import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from perceptron import run_perceptron
+import pandas as pd
+from perceptrons.non_linear_perceptron import NonLinearPerceptron
 
-
-df = pd.read_csv('datos2.csv')
+df = pd.read_csv('datos.csv')
 
 data_set = []
 for _, row in df.iterrows():
@@ -31,10 +29,9 @@ ax.set_xlabel('X1')
 ax.set_ylabel('X2')
 ax.set_zlabel('X3')
 
-# --- Grafico ---
-_, w_min = run_perceptron(data_set)
-# x1 * w1 + x2 * w2 + x3 * w3 + w0 = 0
-
+# Corremos el algoritmo: w_min / x1 * w1 + x2 * w2 + x3 * w3 + w0 = 0 separe lo mejor posible.
+non_linear_perceptron = NonLinearPerceptron(data_set, 0.02, 1000)
+_, w_min = non_linear_perceptron.run()
 
 
 # Crear una malla para el plano de decisión
