@@ -1,9 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from perceptron import perceptron_training
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from perceptron import run_perceptron
 
-df = pd.read_csv('TP3-ej2-conjunto.csv')
+
+df = pd.read_csv('datos2.csv')
 
 data_set = []
 for _, row in df.iterrows():
@@ -30,16 +32,17 @@ ax.set_ylabel('X2')
 ax.set_zlabel('X3')
 
 # --- Grafico ---
-_, w_min = perceptron_training(data_set, 0.01, 1000)
-
-print(w_min)
+_, w_min = run_perceptron(data_set)
 # x1 * w1 + x2 * w2 + x3 * w3 + w0 = 0
 
 
 
 # Crear una malla para el plano de decisión
-xx, yy = np.meshgrid(range(-2, 3), range(-2, 3))
-zz = (-w_min[1] * w_min[0] - w_min[2] * xx - w_min[3] * yy) / w_min[3]
+xx, yy = np.meshgrid(np.linspace(min(x_values), max(x_values), num=10),
+                     np.linspace(min(y_values), max(y_values), num=10))
+# zz = (-w_min[1] * w_min[0] - w_min[2] * xx - w_min[3] * yy) / w_min[3]
+zz = (-w_min[1] * xx - w_min[2] * yy - w_min[0]) / w_min[3]
+
 
 # Dibujar el plano de decisión
 plane = ax.plot_surface(xx, yy, zz, alpha=0.5, color='blue')
