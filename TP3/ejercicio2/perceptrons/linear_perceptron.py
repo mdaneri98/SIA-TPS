@@ -1,14 +1,14 @@
-import sys
 import numpy as np
+import sys
 
-
-
-class LineraPerceptron:
+class LinearPerceptron:
 
     def __init__(self, data_set, learning_rate, limit):
         self.data_set = data_set
         self.learning_rate = learning_rate
         self.limit = limit
+
+        self.w_min = None
 
     def initialize_weights(self, n):
         return np.random.rand(n)
@@ -56,4 +56,17 @@ class LineraPerceptron:
 
             i += 1
 
+        self.w_min = w_min
+
         return intermediate_weights, w_min
+
+    def predict(self, x):
+        if self.w_min is None:
+            print("First you have to train the perceptron")
+            return None
+        else:
+            # Agregamos un '1' para poder multiplicar w0*1 en el dot product.
+            x_with_bias = np.insert(x, 0, 1)
+            return self.compute_excitement(x_with_bias, self.w_min)
+
+

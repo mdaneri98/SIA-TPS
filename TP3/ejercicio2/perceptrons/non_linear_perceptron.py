@@ -1,4 +1,3 @@
-import math
 import sys
 import numpy as np
 import sympy as sp
@@ -11,6 +10,9 @@ class NonLinearPerceptron:
         self.learning_rate = learning_rate
         self.limit = limit
 
+        self.w_min = None
+        self.min_val = None
+        self.max_val = None
         self.normalized_data = self.normalize_data()
 
         self.x_symbol = sp.symbols('x')
@@ -61,15 +63,36 @@ class NonLinearPerceptron:
 
             i += 1
 
+        self.w_min = w_min
+
         return intermediate_weights, w_min
 
     def normalize_data(self):
         # Normalización de la segunda columna a [-1, 1]
         y_values = np.array([item[1] for item in self.data_set])
-        min_val, max_val = y_values.min(), y_values.max()
+        self.min_val, self.max_val = y_values.min(), y_values.max()
 
-        normalized_data = [(x, 2 * ((y - min_val) / (max_val - min_val)) - 1) for x, y in self.data_set]
+        normalized_data = [(x, self.normalize_value(y)) for x, y in self.data_set]
         return normalized_data
+
+    def normalize_value(self, x):
+        """ Normaliza una entrada usando el mínimo y máximo utilizado en el entrenamiento. """
+        return 2 * ((x - self.min_val) / (self.max_val - self.min_val)) - 1
+
+    def denormalize_value(self, y_norm):
+        """ Convierte una salida normalizada de vuelta a su escala original. """
+        return (y_norm + 1) / 2 * (self.max_val - self.min_val) + self.min_val
 
     def run(self):
         return self.perceptron_training(self.normalized_data)
+
+    def predict(self, x):
+        if self.w_min is None:
+            print("First you have to train the perceptron")
+            return None
+        else:
+            # Agregamos un '1' para poder multiplicar w0*1 en el dot product.
+            x_with_bias = np.insert(x, 0, 1)
+            h = self.compute_excitement(x_with_bias, self.w_min)
+            return self.denormalize_value(h)
+
