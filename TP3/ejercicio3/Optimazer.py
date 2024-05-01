@@ -32,4 +32,5 @@ class AdamOptimizer(Optimizer):
         m_hat = self.m / (1 - self.beta1 ** self.t)
         v_hat = self.v / (1 - self.beta2 ** self.t)
 
+        ##theta_t <--theta{t - 1} - alpha*hat_m_t / (sqrt{\hat v_t} + epsilon)
         return weights - self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
