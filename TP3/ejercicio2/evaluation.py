@@ -1,6 +1,6 @@
+from perceptrons.simple_perceptron import LinearPerceptron
 from perceptrons.non_linear_perceptron import NonLinearPerceptron
 import matplotlib.pyplot as plt
-from perceptrons.linear_perceptron import LinearPerceptron
 import pandas as pd
 import numpy as np
 import random
@@ -18,13 +18,6 @@ def split_data(data, test_ratio):
     return train_set, test_set
 
 
-def mean_squared_error(y_true, y_pred):
-    '''
-    El MSE proporciona una medida cuantitativa de la magnitud del error en las predicciones del modelo.
-    Un valor más bajo indica que el modelo tiene un mejor rendimiento, con predicciones más cercanas a los valores reales.
-    Siempre es no negativo, y un valor de 0 indica un ajuste perfecto.
-    '''
-    return np.mean((y_true - y_pred) ** 2)
 
 
 def r2_score(y_true, y_pred):
@@ -33,13 +26,11 @@ def r2_score(y_true, y_pred):
     return 1 - (ss_res / ss_tot)
 
 
-def train_perceptron(data, learning_rate, epochs):
-    perceptron = NonLinearPerceptron(data, learning_rate, epochs)
-    perceptron.run()
-    return perceptron
+def accuracy(y_true, y_pred):
+    return np.mean(y_pred == y_true)
 
 
-def evaluate_epochs(train_data, test_data, learning_rate, epochs_list):
+def evaluate_non_linear_perceptron_epochs(train_data, test_data, learning_rate, epochs_list):
     results = []
     x_train = [features for features, _ in train_data]
     y_train = [label for _, label in train_data]
@@ -48,7 +39,8 @@ def evaluate_epochs(train_data, test_data, learning_rate, epochs_list):
 
     for epochs in epochs_list:
         # Entrenar el perceptrón
-        perceptron = train_perceptron(train_data, learning_rate, epochs)
+        perceptron = NonLinearPerceptron(train_data, learning_rate, epochs)
+        perceptron.train()
 
         # Predecir en el conjunto de entrenamiento
         y_train_pred = np.array([perceptron.predict(x) for x in x_train])
@@ -77,12 +69,14 @@ def evaluate():
     train_set, test_set = split_data(data_set, 0.2)
 
     epochs_list = [1, 10, 20, 50, 100, 150, 200, 250, 300]
-    evaluation = evaluate_epochs(train_set, test_set, 0.2, epochs_list)
+    linear_evaluation = evaluate_linear_perceptron_epochs(train_set, test_set, 0.2, epochs_list)
+    non_linear_evaluation = evaluate_non_linear_perceptron_epochs(train_set, test_set, 0.2, epochs_list)
 
-    return evaluation
+    return linear_evaluation, non_linear_evaluation
 
 
-def graph_evaluation(eval_data):
+
+def graph_evaluation_non_linear(eval_data):
     # Preparar los datos para graficar
     epochs = [result[0] for result in eval_data]
     train_mse = [result[1] for result in eval_data]
@@ -116,5 +110,6 @@ def graph_evaluation(eval_data):
     plt.show()
 
 
-eval_data = evaluate()
-graph_evaluation(eval_data)
+linear_eval, non_linear_eval = evaluate()
+graph_evaluation_non_linear(non_linear_eval)
+graph_evaluation_linear(linear_eval)
