@@ -1,0 +1,8 @@
+{
+    "perceptron_type": "TANH",
+    "learning_rate": 0.01,
+    "test_percentage": 0.2,
+    "max_epochs": 300,
+    "beta": 1,
+    "epsilon": 0.5
+}

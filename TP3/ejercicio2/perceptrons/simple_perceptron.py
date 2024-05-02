@@ -31,12 +31,12 @@ class SimplePerceptron(ABC):
         pass
 
     def compute_error(self, x_values: list[list[float]], expected_values: list[float]):
+        # expected_values ya debe estar normalizado.
         obtained_values = self.compute_for_values(x_values)  # Valores obtenidos por el perceptrón.
 
         total_error = 0
         for mu in range(0, len(expected_values)):
-            scaled_expected = self.activation_function(expected_values[mu])
-            total_error += (scaled_expected - obtained_values[mu]) ** 2
+            total_error += (expected_values[mu] - obtained_values[mu]) ** 2
         return total_error / 2
 
     def compute_for_values(self, x_values: list[list[float]]):
@@ -50,9 +50,14 @@ class SimplePerceptron(ABC):
         x_mu = np.array([1] + x_mu)
         return self.learning_rate * (expected - obtained) * self.activation_derivative(excitement) * x_mu
 
-    def normalize_value(self, x, new_max, new_min):
+    def normalize_value(self, x, new_min, new_max):
         """ Normaliza una entrada usando el mínimo y máximo utilizado en el entrenamiento. """
         return ((x - new_min) / (new_max - new_min)) * (self.activation_max - self.activation_min) + self.activation_min
+
+    def denormalize_value(self, y_norm, new_min, new_max):
+        """ Convierte una salida normalizada de vuelta a su escala original. """
+        return ((y_norm - self.activation_min) / (self.activation_max - self.activation_min)) * (
+                new_max - new_min) + new_min
 
     def train(self, x_train_set: list[list[float]], expected_train_values: list[float], x_test_set: list[list[float]],
               expected_test_values: list[float], scale: bool = False):
@@ -95,7 +100,12 @@ class SimplePerceptron(ABC):
 
         return epoch, train_errors, test_errors
 
-    def predict(self, x_values: list[list[float]], expected_values: list[float]) -> tuple[list[float], float]:
+    def predict(self, x_values: list[list[float]], expected_values: list[float], scale: bool = False) -> tuple[
+        list[float], float]:
+        if scale:
+            expected_values = [self.normalize_value(y, min(expected_values), max(expected_values)) for
+                               y in expected_values]
+
         result = []
         for x_mu in x_values:
             h_mu = self.compute_excitement(x_mu)
@@ -125,4 +135,5 @@ class NonLinearPerceptron(SimplePerceptron):
         return math.tanh(self.beta * x)
 
     def activation_derivative(self, x: float) -> float:
-        return self.beta * (1 - self.activation_function(x) ** 2)
+        return self.beta * (1 - (self.activation_function(x) ** 2))
+
