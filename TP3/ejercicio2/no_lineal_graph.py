@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from perceptrons.simple_perceptron import LinearPerceptron
-from perceptrons.non_linear_perceptron import NonLinearPerceptron
+
 
 df = pd.read_csv('datos.csv')
 

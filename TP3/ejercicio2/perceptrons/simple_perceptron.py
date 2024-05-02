@@ -7,14 +7,14 @@ from abc import ABC, abstractmethod
 class SimplePerceptron(ABC):
 
     def __init__(self, dim: int, learning_rate: float, limit: int,
-                 eps: float):
+                 eps: float, activation_min: float = None, activation_max: float = None):
         self.dim = dim
         self.learning_rate = learning_rate
         self.limit = limit
 
         # Debe completar la superclase
-        self.activation_max = None
-        self.activation_min = None
+        self.activation_max = activation_max
+        self.activation_min = activation_min
 
         self.eps = eps
         self.w = self.initialize_weights(dim + 1)  # Contamos el w0.
@@ -47,6 +47,7 @@ class SimplePerceptron(ABC):
         return np.dot(extended_x, self.w)
 
     def delta_weights(self, excitement, expected, obtained, x_mu):
+        x_mu = np.array([1] + x_mu)
         return self.learning_rate * (expected - obtained) * self.activation_derivative(excitement) * x_mu
 
     def normalize_value(self, x, new_max, new_min):
@@ -71,7 +72,7 @@ class SimplePerceptron(ABC):
 
         while min_error > self.eps and epoch < self.limit:
             mu = np.random.randint(len(x_train_set))
-            x_mu, = x_train_set[mu]
+            x_mu = x_train_set[mu]
             expected_mu = expected_train_values[mu]
 
             h_mu = self.compute_excitement(x_mu)
@@ -94,14 +95,16 @@ class SimplePerceptron(ABC):
 
         return epoch, train_errors, test_errors
 
-    def predict(self, x_values: list[list[float]]) -> list[float]:
+    def predict(self, x_values: list[list[float]], expected_values: list[float]) -> tuple[list[float], float]:
         result = []
         for x_mu in x_values:
             h_mu = self.compute_excitement(x_mu)
             o_mu = self.activation_function(h_mu)
             result.append(o_mu)
 
-        return result
+        test_mse = self.compute_error(x_values, expected_values)
+
+        return result, test_mse
 
 
 class LinearPerceptron(SimplePerceptron):
@@ -114,12 +117,9 @@ class LinearPerceptron(SimplePerceptron):
 
 class NonLinearPerceptron(SimplePerceptron):
 
-    def __int__(self, dim: int, beta: float, learning_rate: float, limit: int, activation_max: float,
-                activation_min: float, eps: float):
-        super().__init__(dim, learning_rate, limit, eps)
+    def __init__(self, dim: int, beta: float, learning_rate: float, limit: int, eps: float):
+        super().__init__(dim, learning_rate, limit, eps, -1, 1)
         self.beta = beta
-        self.activation_min = 0
-        self.activation_max = 1
 
     def activation_function(self, x: float) -> float:
         return math.tanh(self.beta * x)
