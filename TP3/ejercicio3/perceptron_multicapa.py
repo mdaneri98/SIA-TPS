@@ -1,96 +1,69 @@
-from Layer import Layer
 import numpy as np
 
-class MultiPerceptron:
-    ERROR_MIN = 0.01
 
-    def __init__(self, net_config, learn_rate, activation):
+class NeuralNetwork:
+    # hidden : número de capas ocultas
+    def __init__(self, dim, hidden_size, output_size, learning_rate, eps):
+        self.input_size = dim
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.learning_rate = learning_rate
+        self.eps = eps
 
-        self.layers = np.array(
-            [Layer(net_config[i], net_config[i - 1], activation, learn_rate) for i in range(1, len(net_config))])
+        self.weights_input_hidden = np.random.randn(dim, hidden_size)
+        self.bias = np.random.randn(hidden_size)
+        self.weights_hidden_output = np.random.randn(hidden_size, output_size)
+        self.bias_output = np.random.randn(output_size)
+        self.hidden_activation = None
 
-    def get_inputs(self, current_layer, inputs):
-        index = current_layer - 1
-        if index < 0:
-            return inputs
-        else:
-            return self.layers[index].get_all_outputs()
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
 
-    def get_expected(self, current_layer, current_neuron, expected_value):
-        if current_layer + 1 < len(self.layers):
-            return self.layers[current_layer + 1].get_neuron_delta(current_neuron)
-        else:
-            neuron = self.layers[current_layer].neurons[current_neuron]
-            return expected_value[current_neuron] - neuron.output
+    def sigmoid_derivative(self, x):
+        return x * (1 - x)
 
-    def plot(self):
-        for layer in self.layers:
-            layer.plot()
+    def forward(self, x):
+        # Propagación hacia adelante
+        # self.hidden_activation = self.sigmoid(np.dot(x, self.weights_input_hidden) + self.bias)
+        # self.output = self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
+        # return self.output
+        return np.dot(x, self.weights_input_hidden) + self.bias
 
-    def forward_propagation(self, inputs):
-        layer_index = 0
-        for layer in self.layers:
-            layer.propagation(self.get_inputs(layer_index, inputs))
-            layer_index += 1
+    def backward(self, x, y, output):
+        # Retropropagación del error
+        output_error = y - output
+        output_delta = output_error * self.sigmoid_derivative(output)
 
-    def back_propagation(self, data, expected_value):
-        for layer_index in range(len(self.layers) - 1, -1, -1):
-            inputs = self.get_inputs(layer_index, data)
-            neuron_index = 0
-            for neuron in self.layers[layer_index].neurons:
-                neuron_error = self.get_expected(layer_index, neuron_index, expected_value)
-                neuron.update_w(inputs, neuron_error)
-                neuron_index += 1
+        hidden_error = output_delta.dot(self.weights_hidden_output.T)
+        hidden_delta = hidden_error * self.sigmoid_derivative(self.hidden_activation)
 
-    def calculate_error(self, expected_output):
-        m = len(self.layers)
-        neurons = self.layers[m - 1].neurons
-        aux_sum = 0
-        for i in range(len(neurons)):
-            aux_sum += (expected_output[i] - neurons[i].output) ** 2
-        return aux_sum
+        # Calcular los gradientes de los parámetros
+        d_weights_hidden_output = self.hidden_activation.T.dot(output_delta)
+        d_bias_output = np.sum(output_delta)
+        d_weights_input_hidden = x.T.dot(hidden_delta)
+        d_bias = np.sum(hidden_delta)
 
-    def train(self, training, expected_output, max_gen):
-        current_gen = 0
-        error = 0
-        self.error_min = np.inf
+        # Actualizar los pesos y sesgos
+        self.weights_hidden_output += d_weights_hidden_output * self.learning_rate
+        self.bias_output += d_bias_output * self.learning_rate
+        self.weights_input_hidden += d_weights_input_hidden * self.learning_rate
+        self.bias += d_bias * self.learning_rate
 
-        errors = []
-        positions = np.arange(0, len(training))
+        # Retornar los gradientes de los pesos y sesgos
+        return d_weights_hidden_output, d_bias_output
 
-        while self.error_min > self.ERROR_MIN and current_gen < max_gen:
-            np.random.shuffle(positions)
-            for i in positions:
-                self.forward_propagation(training[i])
-                self.back_propagation(training[i], expected_output[i])
+    def train(self, X, y, epochs):
+        for epoch in range(epochs):
+            for x, target in zip(X, y):
+                x = np.array([x])  # Convertir a formato de fila
+                target = np.array([target])  # Convertir a formato de fila
+                output = self.forward(x)
+                self.backward(x, target, output)
 
-                error = self.calculate_error(expected_output[i])
-                if error < self.error_min:
-                    self.error_min = error
-                    errors.append(float(error))
-                    if self.error_min < self.ERROR_MIN:
-                        print("Terminado en %d generaciones" % current_gen)
-                        print("Error de %d" % self.error_min)
-                        return errors
-
-            current_gen += 1
-
-        return errors
-
-    def save(self, filepath):
-        with open(filepath, "w+") as file:
-            for layer in self.layers:
-                for neuron in layer.neurons:
-                    wcount = 1
-                    for weight in neuron.weights:
-                        file.write("w%d: %d" % (wcount, weight))
-                        wcount += 1
-                    file.write("\n")
-        print("¡Terminado!")
-
-    def test(self, test_set):
-        to_return = []
-        for data in test_set:
-            self.forward_propagation(data)
-            to_return.append(self.layers[-1].get_all_outputs())
-        return to_return
+    def predict(self, X):
+        predictions = []
+        for x in X:
+            x = np.array([x])  # Convertir a formato de fila
+            output = self.forward(x)
+            predictions.append(output)
+        return np.array(predictions)
