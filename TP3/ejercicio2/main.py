@@ -1,9 +1,18 @@
 from perceptrons.simple_perceptron import LinearPerceptron, NonLinearPerceptron
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import random
-import pandas as pd
+import json
 
+
+def get_config_params(config):
+    learning_rate = config["learning_rate"]
+    test_percentage = config["test_percentage"]
+    epoch_limit = config["max_epochs"]
+    beta = config["beta"]
+    eps = config["epsilon"]
+
+    return learning_rate, test_percentage, epoch_limit, beta, eps
 
 
 def split_data(data, test_ratio):
@@ -16,9 +25,8 @@ def split_data(data, test_ratio):
     return data.iloc[train_indices], data.iloc[test_indices]
 
 
-
 def initialize_data(test_ratio):
-    data = pd.read_csv('datos.csv')
+    data = pd.read_csv('ejercicio2/datos.csv')
 
     # Suponiendo que la última columna es la etiqueta
     features = data.columns[:-1]
@@ -43,52 +51,151 @@ def initialize_data(test_ratio):
     return train_features, train_labels, test_features, test_labels
 
 
-def start():
-    train_set, train_expected_set, test_set, test_expected_set = initialize_data(0.2)
+def show_output(train_errors: list[float],
+                test_obtained: list[float], test_mse: float, test_expected: list[float], eps: float,
+                scale_function=None):
+    """
+     # (epoch, train_errors, test_errors)
+    # (result, test_mse)
+    """
+    correct_predictions = 0
+    print("Expected         | Expected_Scaled    | Result            | Delta")
+    print("------------------------------------------------------------------")
 
+    for j in range(len(test_obtained)):
+        expected_str = f'{test_expected[j]}'.ljust(16)
+
+        expected_scaled = test_expected[j]
+        if scale_function:
+            expected_scaled = scale_function(test_expected[j], max(test_expected), min(test_expected))
+
+        expected_scaled_str = f'{expected_scaled:.3f}'.ljust(18)
+        result_str = f'{test_obtained[j]:.3f}'.ljust(17)
+        delta_str = f'{abs(test_obtained[j] - expected_scaled):.3f}'.ljust(15)
+        print(f'{expected_str} | {expected_scaled_str} | {result_str} | {delta_str}')
+
+        if abs(test_obtained[j] - expected_scaled) <= eps:
+            correct_predictions += 1
+
+    print(f'Correct predictions: {correct_predictions} out of {len(test_expected)}')
+    print(f'Training Error: {train_errors[-1]}')
+    print(f'Testing Error: {test_mse}')
+
+
+def generate_data_frame(config):
+    """
+    Generates the data frame based on the different learning_rates and epochs, for both perceptrons.
+    """
+    repeats = 10
+    result_list = []
+    config_aux = config.copy()
+
+    for run in range(1, repeats + 1):
+        for test_percentage in [0.2, 0.4, 0.6]:
+            config_aux['test_percentage'] = test_percentage
+            for learning_rate in [0.0001, 0.001, 0.01]:
+                config_aux['learning_rate'] = learning_rate
+                results = start(config_aux)
+
+                train_lineal_results = results['train']['linear']
+                for i in range(train_lineal_results['epoch']):
+                    result_list.append({
+                        "perceptron_type": 'Lineal',
+                        "test_percentage": test_percentage,
+                        "learning_rate": learning_rate,
+                        "mse": train_lineal_results['train_errors'][i],
+                        "epoch": i + 1,
+                    })
+
+                train_non_lineal_results = results['train']['non_linear']
+                for i in range(train_non_lineal_results['epoch']):
+                    result_list.append({
+                        "perceptron_type": 'No lineal',
+                        "test_percentage": test_percentage,
+                        "learning_rate": learning_rate,
+                        "mse": train_non_lineal_results['train_errors'][i],
+                        "epoch": i + 1,
+                    })
+
+    return pd.DataFrame(result_list)
+
+
+def start(config):
+    learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+
+    train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
     dim = len(train_set[0])
-    learning_rate = 0.02
-    epoch_limit = 100
-    eps = 0.5
-    beta = 1
 
     linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
     non_linear_perceptron = NonLinearPerceptron(dim, beta, learning_rate, epoch_limit, eps)
 
-    linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
-    non_linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, True)
+    # (epoch, train_errors, test_errors)
+    linear_train_output = linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
+    non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set,
+                                                          True)
 
-    correct_predictions = 0
+    # (result, test_mse)
+    linear_test_output = linear_perceptron.predict(test_set, test_expected_set, scale=False)
+    non_linear_test_output = non_linear_perceptron.predict(test_set, test_expected_set, scale=True)
 
-    print("Expected         | Expected_Scaled    | Result            | Delta")
-    print("------------------------------------------------------------------")
-    for i, perceptron in enumerate([linear_perceptron, non_linear_perceptron]):
-        epochs, train_errors, test_errors = perceptron.train(train_set, train_expected_set, test_set,
-                                                             test_expected_set, False)
-        result = []
-        test_mse = None
-        if i == 0:
-            result, test_mse = perceptron.predict(test_set, test_expected_set)
-        elif i == 1:
-            result, test_mse = perceptron.predict(test_set, test_expected_set)
+    result_denormalized, test_mse = [
+        non_linear_perceptron.denormalize_value(y, min(non_linear_test_output[0]), max(non_linear_test_output[0])) for y
+        in non_linear_test_output[0]], non_linear_test_output[1]
+    non_linear_test_output = (result_denormalized, test_mse)
 
-        for j in range(len(result)):
-            expected_str = f'{test_expected_set[i]}'.ljust(16)
+    return {
+        'train': {
+            'linear': {
+                'epoch': linear_train_output[0],
+                'train_errors': linear_train_output[1],
+                'test_errors': linear_train_output[2]
+            },
+            'non_linear': {
+                'epoch': non_linear_train_output[0],
+                'train_errors': non_linear_train_output[1],
+                'test_errors': non_linear_train_output[2]
+            }
+        },
+        'test': {
+            'linear': {
+                'result': linear_test_output[0],
+                'test_mse': linear_test_output[1]
+            },
+            'non_linear': {
+                'result': non_linear_test_output[0],
+                'test_mse': non_linear_test_output[1]
+            }
+        }
+    }
 
-            expected_scaled = perceptron.normalize_value(test_expected_set[i], max(test_expected_set), min(test_expected_set))
 
-            expected_scaled_str = f'{expected_scaled:.3f}'.ljust(18)
-            result_str = f'{result[i]:.3f}'.ljust(17)
-            delta_str = f'{abs(result[i] - expected_scaled):.3f}'.ljust(15)
-            print(f'{expected_str} | {expected_scaled_str} | {result_str} | {delta_str}')
+def plot_learning_curve(df, data_set, title='Learning Curve'):
+    train_percentage = df['train_percentages'].unique()
+    train_sizes = [data_set * percentage for percentage in train_percentage]
 
-            if abs(result[i] - expected_scaled) <= eps:
-                correct_predictions += 1
+    train_scores = df['train']['linear']['train_errors']
+    test_scores = df['test']['linear']['test_errors']
 
-        print(f'Correct predictions: {correct_predictions} out of {len(result)}')
-        print(f'Training Error: {train_errors[len(train_errors) - 1]}')
-        print(f'Testing Error: {test_mse}')
+    plt.figure()
+    plt.plot(train_sizes, np.mean(train_scores, axis=1), label='Train Error')
+    plt.plot(train_sizes, np.mean(test_scores, axis=1), label='Test Error')
+
+    plt.title(title)
+    plt.xlabel('Training Size')
+    plt.ylabel('MSE')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 if __name__ == '__main__':
-    start()
+    with open('ejercicio2/config.json', 'r') as f:
+        config = json.load(f)
+
+    # learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+
+    # show_output(linear_train_output[1], linear_test_output[0], linear_test_output[1], test_expected_set, eps, None)
+    # show_output(non_linear_train_output[1], non_linear_test_output[0], non_linear_test_output[1], test_expected_set, eps, ...)
+
+    df = generate_data_frame(config)
+    plot_learning_curve()
