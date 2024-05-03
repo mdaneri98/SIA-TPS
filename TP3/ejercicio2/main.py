@@ -87,7 +87,7 @@ def generate_data_frame(config):
     Generates the data frame based on the different learning_rates and epochs, for both perceptrons.
     """
     repeats = 10
-    result_list = []
+    train_list = []
     config_aux = config.copy()
 
     for run in range(1, repeats + 1):
@@ -99,7 +99,7 @@ def generate_data_frame(config):
 
                 train_lineal_results = results['train']['linear']
                 for i in range(train_lineal_results['epoch']):
-                    result_list.append({
+                    train_list.append({
                         "perceptron_type": 'Lineal',
                         "test_percentage": test_percentage,
                         "learning_rate": learning_rate,
@@ -109,15 +109,14 @@ def generate_data_frame(config):
 
                 train_non_lineal_results = results['train']['non_linear']
                 for i in range(train_non_lineal_results['epoch']):
-                    result_list.append({
+                    train_list.append({
                         "perceptron_type": 'No lineal',
                         "test_percentage": test_percentage,
                         "learning_rate": learning_rate,
                         "mse": train_non_lineal_results['train_errors'][i],
                         "epoch": i + 1,
                     })
-
-    return pd.DataFrame(result_list)
+    return pd.DataFrame(train_list)
 
 
 def start(config):
@@ -144,6 +143,7 @@ def start(config):
     non_linear_test_output = (result_denormalized, test_mse)
 
     return {
+        'eps': eps,
         'train': {
             'linear': {
                 'epoch': linear_train_output[0],
@@ -157,6 +157,8 @@ def start(config):
             }
         },
         'test': {
+            'x_values': test_set,
+            'y_values': test_expected_set,
             'linear': {
                 'result': linear_test_output[0],
                 'test_mse': linear_test_output[1]
@@ -169,22 +171,75 @@ def start(config):
     }
 
 
-def plot_learning_curve(df, data_set, title='Learning Curve'):
-    train_percentage = df['train_percentages'].unique()
-    train_sizes = [data_set * percentage for percentage in train_percentage]
+def calculate_accuracy(y_true, y_pred, epsilon):
+    """Calcula el accuracy como la proporción de predicciones correctas."""
+    correct_predictions = np.sum(np.abs(y_true - y_pred) <= epsilon)
+    total_predictions = len(y_true)
+    return correct_predictions / total_predictions
 
-    train_scores = df['train']['linear']['train_errors']
-    test_scores = df['test']['linear']['test_errors']
 
-    plt.figure()
-    plt.plot(train_sizes, np.mean(train_scores, axis=1), label='Train Error')
-    plt.plot(train_sizes, np.mean(test_scores, axis=1), label='Test Error')
+# Función para normalizar los datos de MSE
+def normalize(data):
+    return (data - data.min()) / (data.max() - data.min())
 
-    plt.title(title)
-    plt.xlabel('Training Size')
-    plt.ylabel('MSE')
-    plt.legend()
-    plt.grid(True)
+
+def plot_mse_curves(df, learning_rate=0.0001):
+    df = df[df['learning_rate'] == learning_rate]
+    df = df[df['test_percentage'] == 0.2]
+
+    # Agrupar por 'perceptron_type' y 'epoch', luego calcular la media de 'mse'
+    stats = df.groupby(['perceptron_type', 'epoch'])['mse'].agg(['mean', 'std']).reset_index()
+    stats['mse_normalized'] = stats.groupby('perceptron_type')['mean'].transform(normalize)
+    # stats['std_normalized'] = stats.groupby('perceptron_type')['std'].transform(normalize)
+
+    # Crear un gráfico para cada tipo de perceptrón
+    fig, ax = plt.subplots(figsize=(10, 5))  # Tamaño del gráfico
+
+    # Separar los datos por tipo de perceptrón y graficar
+    for label, group_df in stats.groupby('perceptron_type'):
+        # group_df.sort_values('epoch', inplace=True)  # Asegurarse de que los datos están ordenados por época
+        ax.plot(group_df['epoch'], group_df['mse_normalized'], label=label, marker='o')
+
+        # ax.errorbar(group_df['epoch'], group_df['mse_normalized'], yerr=group_df['std_normalized'], label=label, marker='o', fmt='-o', capsize=5)
+
+    # Añadir título y etiquetas
+    ax.set_title('MSE Medio por Época para cada Tipo de Perceptrón con learning_rate = 0.0001 y 20% de test')
+    ax.set_xlabel('Época')
+    ax.set_ylabel('MSE Medio')
+    ax.legend(title='Tipo de Perceptrón')  # Añadir leyenda con título
+
+    # Mostrar el gráfico
+    plt.show()
+
+
+def plot_accuracies(cofig):
+    test_results = start(config)['test']
+    eps = test_results['eps']
+    epochs = test_results['epoch']
+
+    x_values = test_results['x_values']
+    y_values = test_results['y_values']
+
+    linear_results = test_results['linear']['result']
+    non_linear_results = test_results['non_linear']['result']
+
+    total_predictions = len(x_values)
+
+    correct_predictions = [(y_value - obtained) < eps for y_value, obtained in zip(y_values, linear_results)]
+    print(correct_predictions)
+
+    fig, ax = plt.subplots()
+
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Evolution of Results\' Accuracy by Generation')
+
+    generations = np.array(range(len(accuracies)))
+
+    ax.set_xlim(0, len(generations))
+    ax.set_ylim(0, np.amax(accuracies))
+
+    ax.plot(generations, accuracies, color='b')
     plt.show()
 
 
@@ -198,4 +253,4 @@ if __name__ == '__main__':
     # show_output(non_linear_train_output[1], non_linear_test_output[0], non_linear_test_output[1], test_expected_set, eps, ...)
 
     df = generate_data_frame(config)
-    plot_learning_curve()
+    plot_mse_curves(df)
