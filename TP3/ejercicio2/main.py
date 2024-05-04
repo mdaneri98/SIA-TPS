@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import json
+import random
 
 
 def get_config_params(config):
@@ -87,7 +88,7 @@ def generate_data_frame(config):
     Generates the data frame based on the different learning_rates and epochs, for both perceptrons.
     """
     repeats = 10
-    result_list = []
+    train_list = []
     config_aux = config.copy()
 
     for run in range(1, repeats + 1):
@@ -97,27 +98,32 @@ def generate_data_frame(config):
                 config_aux['learning_rate'] = learning_rate
                 results = start(config_aux)
 
+                eps_used = results['eps']
+                x_count = len(results['train']['x_values'])
                 train_lineal_results = results['train']['linear']
                 for i in range(train_lineal_results['epoch']):
-                    result_list.append({
+                    train_list.append({
                         "perceptron_type": 'Lineal',
                         "test_percentage": test_percentage,
                         "learning_rate": learning_rate,
-                        "mse": train_lineal_results['train_errors'][i],
+                        "mse": train_lineal_results['errors'][i],
+                        "x_count": x_count,
+                        "eps": eps_used,
                         "epoch": i + 1,
                     })
 
                 train_non_lineal_results = results['train']['non_linear']
                 for i in range(train_non_lineal_results['epoch']):
-                    result_list.append({
+                    train_list.append({
                         "perceptron_type": 'No lineal',
                         "test_percentage": test_percentage,
                         "learning_rate": learning_rate,
-                        "mse": train_non_lineal_results['train_errors'][i],
+                        "mse": train_non_lineal_results['errors'][i],
+                        "eps": eps_used,
+                        "x_count": x_count,
                         "epoch": i + 1,
                     })
-
-    return pd.DataFrame(result_list)
+    return pd.DataFrame(train_list)
 
 
 def start(config):
@@ -129,7 +135,7 @@ def start(config):
     linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
     non_linear_perceptron = NonLinearPerceptron(dim, beta, learning_rate, epoch_limit, eps)
 
-    # (epoch, train_errors, test_errors)
+    # (epoch: int, w_min:list[floats], w_intermediate: list[list[floats]], errors: [float])
     linear_train_output = linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
     non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set,
                                                           True)
@@ -144,19 +150,29 @@ def start(config):
     non_linear_test_output = (result_denormalized, test_mse)
 
     return {
+        'linear_perceptron': linear_perceptron,
+        'non_linear_perceptron': non_linear_perceptron,
+        'epochs_limit': epoch_limit,
+        'eps': eps,
         'train': {
+            'x_values': train_set,
+            'y_values': train_expected_set,
             'linear': {
                 'epoch': linear_train_output[0],
-                'train_errors': linear_train_output[1],
-                'test_errors': linear_train_output[2]
+                'w_min': linear_train_output[1],
+                'w_intermediates': linear_train_output[2],
+                'errors': linear_train_output[3]
             },
             'non_linear': {
                 'epoch': non_linear_train_output[0],
-                'train_errors': non_linear_train_output[1],
-                'test_errors': non_linear_train_output[2]
+                'w_min': non_linear_train_output[1],
+                'w_intermediates': non_linear_train_output[2],
+                'errors': non_linear_train_output[3]
             }
         },
         'test': {
+            'x_values': test_set,
+            'y_values': test_expected_set,
             'linear': {
                 'result': linear_test_output[0],
                 'test_mse': linear_test_output[1]
@@ -169,24 +185,157 @@ def start(config):
     }
 
 
-def plot_learning_curve(df, data_set, title='Learning Curve'):
-    train_percentage = df['train_percentages'].unique()
-    train_sizes = [data_set * percentage for percentage in train_percentage]
+def calculate_accuracy(y_true, y_pred, epsilon):
+    """Calcula el accuracy como la proporción de predicciones correctas."""
+    correct_predictions = np.sum(np.abs(y_true - y_pred) <= epsilon)
+    total_predictions = len(y_true)
+    return correct_predictions / total_predictions
 
-    train_scores = df['train']['linear']['train_errors']
-    test_scores = df['test']['linear']['test_errors']
 
-    plt.figure()
-    plt.plot(train_sizes, np.mean(train_scores, axis=1), label='Train Error')
-    plt.plot(train_sizes, np.mean(test_scores, axis=1), label='Test Error')
+# Función para normalizar los datos de MSE
+def normalize(data):
+    return (data - data.min()) / (data.max() - data.min())
 
-    plt.title(title)
-    plt.xlabel('Training Size')
-    plt.ylabel('MSE')
-    plt.legend()
-    plt.grid(True)
+
+def plot_mse_curves(config, df):
+    learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+
+    df = df[df['learning_rate'] == learning_rate]
+    df = df[df['test_percentage'] == test_percentage]
+
+    # Agrupar por 'perceptron_type' y 'epoch', luego calcular la media de 'mse'
+    stats = df.groupby(['perceptron_type', 'epoch'])['mse'].agg(['mean', 'std']).reset_index()
+    stats['mse_normalized'] = stats.groupby('perceptron_type')['mean'].transform(normalize)
+    # stats['std_normalized'] = stats.groupby('perceptron_type')['std'].transform(normalize)
+
+    # Crear un gráfico para cada tipo de perceptrón
+    fig, ax = plt.subplots(figsize=(10, 5))  # Tamaño del gráfico
+
+    # Separar los datos por tipo de perceptrón y graficar
+    for label, group_df in stats.groupby('perceptron_type'):
+        # group_df.sort_values('epoch', inplace=True)  # Asegurarse de que los datos están ordenados por época
+        ax.plot(group_df['epoch'], group_df['mse_normalized'], label=label, marker='o')
+
+        # ax.errorbar(group_df['epoch'], group_df['mse_normalized'], yerr=group_df['std_normalized'], label=label, marker='o', fmt='-o', capsize=5)
+
+    # Añadir título y etiquetas
+    ax.set_title(f'MSE Medio por Época para cada Tipo de Perceptrón con learning_rate = {learning_rate} y {test_percentage} de test')
+    ax.set_xlabel('Época')
+    ax.set_ylabel('MSE Medio')
+    ax.legend(title='Tipo de Perceptrón')  # Añadir leyenda con título
+
+    # Mostrar el gráfico
     plt.show()
 
+
+def cross_validate_perceptron(lineal: bool, k=5, learning_rate=0.01, epoch_limit=300, eps=0.01):
+    # learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+    data = pd.read_csv('ejercicio2/datos.csv')
+
+    # Convertir a listas
+    x_values = data[['x1', 'x2', 'x3']].values.tolist()
+    y_values = data['y'].values.tolist()
+
+
+    n = len(x_values)
+    indices = list(range(n))
+    random.shuffle(indices)  # Barajar los índices
+
+    fold_size = n // k
+    accuracies = []
+
+    for i in range(k):
+        # Dividir los índices en k pliegues
+        test_indices = indices[i * fold_size:(i + 1) * fold_size]
+        train_indices = indices[:i * fold_size] + indices[(i + 1) * fold_size:]
+
+        # Obtener conjuntos de entrenamiento y prueba
+        x_train = [x_values[j] for j in train_indices]
+        y_train = [y_values[j] for j in train_indices]
+        x_test = [x_values[j] for j in test_indices]
+        y_test = [y_values[j] for j in test_indices]
+
+        # Inicializar y entrenar el perceptrón no lineal
+        if lineal:
+            perceptron = LinearPerceptron(dim=len(x_train[0]), learning_rate=learning_rate,
+                                             limit=epoch_limit,
+                                             eps=eps)
+            perceptron.train(x_train, y_train, x_test, y_test, scale=False)
+        else:
+            perceptron = NonLinearPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate, limit=epoch_limit,
+                                         eps=eps)
+            perceptron.train(x_train, y_train, x_test, y_test, scale=False)
+
+        # Calcular la precisión en el conjunto de prueba
+        predictions, _ = perceptron.predict(x_test, y_test, scale=False)
+        accuracy = np.mean([np.abs(y - pred) < perceptron.eps for y, pred in zip(y_test, predictions)])
+        accuracies.append(accuracy)
+
+    return np.mean(accuracies), np.std(accuracies)
+
+
+def plot_accuracy(config):
+    results = start(config)
+
+    linear_perceptron = results['linear_perceptron']
+    non_linear_perceptron = results['non_linear_perceptron']
+
+    x_values = results['train']['x_values']
+    y_values = results['train']['y_values']
+
+    linear_accuracy = linear_perceptron.accuracy_per_epoch(x_values, y_values, False)
+    non_linear_accuracy = non_linear_perceptron.accuracy_per_epoch(x_values, y_values, True)
+
+    # Crear subplots con dos gráficos uno al lado del otro
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 5), sharey=True)
+
+    # Graficar accuracy para el perceptrón lineal
+    epochs = list(range(1, len(linear_accuracy) + 1))
+    axes[0].plot(epochs, linear_accuracy, label='Linear Perceptron Accuracy', marker='o')
+    axes[0].set_xlabel('Epoch')
+    axes[0].set_ylabel('Accuracy')
+    axes[0].set_title('Linear Perceptron')
+    axes[0].legend()
+    axes[0].grid(True)
+
+    # Graficar accuracy para el perceptrón no lineal
+    epochs = list(range(1, len(non_linear_accuracy) + 1))
+    axes[1].plot(epochs, non_linear_accuracy, label='Non Linear Perceptron Accuracy', marker='o')
+    axes[1].set_xlabel('Epoch')
+    axes[1].set_title('Non Linear Perceptron')
+    axes[1].legend()
+    axes[1].grid(True)
+
+    # Mostrar los gráficos
+    plt.tight_layout()
+    plt.show()
+
+def calculate_best_combination():
+    learning_rates = [0.1, 0.01, 0.001, 0.0001]
+    epoch_limits = [100, 200, 300]
+
+    best_combination = None
+    best_accuracy = 0
+    results = []
+    for _ in range(100):
+        internal = []
+        for learning_rate in learning_rates:
+            for epoch_limit in epoch_limits:
+                for k in range(2, 10):
+                    mean_accuracy, _ = cross_validate_perceptron(True, k, learning_rate, epoch_limit, 0.5)
+                    internal.append((mean_accuracy, learning_rate, epoch_limit, k))
+
+                    # Check if this is the best so far
+                    if mean_accuracy > best_accuracy:
+                        best_accuracy = mean_accuracy
+                        best_combination = (learning_rate, epoch_limit, k)
+
+        # Calculate the average accuracy for this iteration
+        avg_accuracy = sum([x[0] for x in internal]) / len(internal)
+        results.append(avg_accuracy)
+
+    print(f"Best combination: {best_combination} with accuracy: {best_accuracy:.2f}")
+    print(f"Results: {results}")
 
 if __name__ == '__main__':
     with open('ejercicio2/config.json', 'r') as f:
@@ -197,5 +346,15 @@ if __name__ == '__main__':
     # show_output(linear_train_output[1], linear_test_output[0], linear_test_output[1], test_expected_set, eps, None)
     # show_output(non_linear_train_output[1], non_linear_test_output[0], non_linear_test_output[1], test_expected_set, eps, ...)
 
+
+    # calculate_best_combination()
+
+    plot_accuracy(config)
+
     df = generate_data_frame(config)
-    plot_learning_curve()
+    plot_mse_curves(config, df)
+
+
+
+
+

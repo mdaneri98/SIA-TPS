@@ -18,6 +18,7 @@ class SimplePerceptron(ABC):
 
         self.eps = eps
         self.w = self.initialize_weights(dim + 1)  # Contamos el w0.
+        self.w_intermediate = [self.w]
 
     def initialize_weights(self, n):
         return np.random.rand(n)
@@ -59,26 +60,24 @@ class SimplePerceptron(ABC):
         return ((y_norm - self.activation_min) / (self.activation_max - self.activation_min)) * (
                 new_max - new_min) + new_min
 
-    def train(self, x_train_set: list[list[float]], expected_train_values: list[float], x_test_set: list[list[float]],
+    def train(self, x_set: list[list[float]], expected_values: list[float], x_test_set: list[list[float]],
               expected_test_values: list[float], scale: bool = False):
         min_error = sys.maxsize
         epoch = 0
 
         if scale:
-            expected_train_values = [self.normalize_value(y, min(expected_train_values), max(expected_train_values)) for
-                                     y in
-                                     expected_train_values]
+            expected_values = [self.normalize_value(y, min(expected_values), max(expected_values)) for
+                               y in expected_values]
             expected_test_values = [self.normalize_value(y, min(expected_test_values), max(expected_test_values)) for
-                                    y in
-                                    expected_test_values]
+                               y in expected_test_values]
 
-        train_errors = []
-        test_errors = []
+        errors = []
+        test_values = []
 
         while min_error > self.eps and epoch < self.limit:
-            mu = np.random.randint(len(x_train_set))
-            x_mu = x_train_set[mu]
-            expected_mu = expected_train_values[mu]
+            mu = np.random.randint(len(x_set))
+            x_mu = x_set[mu]
+            expected_mu = expected_values[mu]
 
             h_mu = self.compute_excitement(x_mu)
             o_mu = self.activation_function(h_mu)
@@ -86,19 +85,18 @@ class SimplePerceptron(ABC):
             delta_w = self.delta_weights(h_mu, expected_mu, o_mu, x_mu)
             self.w = self.w + delta_w
 
-            # Computamos error de train set con la nueva w
-            error = self.compute_error(x_train_set, expected_train_values)
-            train_errors.append(error)
+            self.w_intermediate.append(self.w)
 
-            # Computamos error de test set con la nueva w
-            test_errors.append(self.compute_error(x_test_set, expected_test_values))
+            # Computamos error de train set con la nueva w
+            error = self.compute_error(x_set, expected_values)
+            errors.append(error)
 
             if error < min_error:
                 min_error = error
 
             epoch += 1
 
-        return epoch, train_errors, test_errors
+        return epoch, self.w, self.w_intermediate, errors
 
     def predict(self, x_values: list[list[float]], expected_values: list[float], scale: bool = False) -> tuple[
         list[float], float]:
@@ -115,6 +113,25 @@ class SimplePerceptron(ABC):
         test_mse = self.compute_error(x_values, expected_values)
 
         return result, test_mse
+
+    def accuracy_per_epoch(self, x_values, y_values, scale):
+        result = []
+        total_predictions = len(y_values)
+
+        for w in self.w_intermediate:
+            correct_predictions = 0
+            self.w = w  # Actualizar el peso del perceptrón para esta época
+
+            predictions, mse = self.predict(x_values, y_values, scale)
+
+            for i in range(len(predictions)):
+                if np.abs(y_values[i] - predictions[i]) <= self.eps:
+                    correct_predictions += 1
+
+            accuracy = correct_predictions / total_predictions
+            result.append(accuracy)
+
+        return result
 
 
 class LinearPerceptron(SimplePerceptron):
@@ -136,4 +153,3 @@ class NonLinearPerceptron(SimplePerceptron):
 
     def activation_derivative(self, x: float) -> float:
         return self.beta * (1 - (self.activation_function(x) ** 2))
-
