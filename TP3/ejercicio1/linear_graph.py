@@ -77,3 +77,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+'''En el caso de las funciones lógicas AND y XOR, el perceptrón simple de activación
+ escalón puede resolver el problema de la función AND, ya que los datos son linealmente separables. 
+ Sin embargo, el perceptrón simple no puede resolver el problema de la función XOR, ya que los datos 
+ no son linealmente separables. Esto se debe a que la función XOR no puede ser modelada por una única 
+ línea recta en el espacio de entrada bidimensional.
+
+En resumen, el perceptrón simple de activación escalón puede resolver problemas
+ en los que los datos son linealmente separables, pero no puede resolver problemas donde los
+   datos no son linealmente separables, como en el caso de la función XOR.'''
