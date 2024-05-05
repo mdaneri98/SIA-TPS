@@ -68,11 +68,8 @@ class SimplePerceptron(ABC):
         if scale:
             expected_values = [self.normalize_value(y, min(expected_values), max(expected_values)) for
                                y in expected_values]
-            expected_test_values = [self.normalize_value(y, min(expected_test_values), max(expected_test_values)) for
-                               y in expected_test_values]
 
         errors = []
-        test_values = []
 
         while min_error > self.eps and epoch < self.limit:
             mu = np.random.randint(len(x_set))
@@ -93,6 +90,9 @@ class SimplePerceptron(ABC):
 
             if error < min_error:
                 min_error = error
+            else:
+                self.w_intermediate.pop()
+                self.w = self.w_intermediate[-1]
 
             epoch += 1
 
