@@ -10,8 +10,11 @@ class NeuralNetwork:
         self.learning_rate = learning_rate
         self.eps = eps
 
+        # Retorna una matriz 'dim'X'hidden_size'
         self.weights_input_hidden = np.random.randn(dim, hidden_size)
         self.bias = np.random.randn(hidden_size)
+
+        # Retorna una matriz 'hidden_size'X'output_size'
         self.weights_hidden_output = np.random.randn(hidden_size, output_size)
         self.bias_output = np.random.randn(output_size)
         self.hidden_activation = None
@@ -24,10 +27,9 @@ class NeuralNetwork:
 
     def forward(self, x):
         # Propagación hacia adelante
-        # self.hidden_activation = self.sigmoid(np.dot(x, self.weights_input_hidden) + self.bias)
-        # self.output = self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
-        # return self.output
-        return np.dot(x, self.weights_input_hidden) + self.bias
+        self.hidden_activation = self.sigmoid(np.dot(x, self.weights_input_hidden) + self.bias)
+        return self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
+
 
     def backward(self, x, y, output):
         # Retropropagación del error
