@@ -95,6 +95,7 @@ class SimplePerceptron(ABC):
                 self.w = self.w_intermediate[-1]
 
             epoch += 1
+        
 
         return epoch, self.w, self.w_intermediate, errors
 
@@ -153,3 +154,15 @@ class NonLinearPerceptron(SimplePerceptron):
 
     def activation_derivative(self, x: float) -> float:
         return self.beta * (1 - (self.activation_function(x) ** 2))
+    
+class LogPerceptron(SimplePerceptron):
+    def __init__(self, dim: int, beta: float, learning_rate: float, limit: int, eps: float):
+        super().__init__(dim, learning_rate, limit, eps, -1, 1)
+        self.beta = beta
+
+    def activation_function(self, x: float) -> float:
+        return 1/(1+math.exp(-2*self.beta*x))
+
+
+    def activation_derivative(self, x: float) -> float:
+        return 2*self.beta *self.activation_function(x)*(1-self.activation_function(x))

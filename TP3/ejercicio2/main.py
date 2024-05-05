@@ -1,4 +1,4 @@
-from perceptrons.simple_perceptron import LinearPerceptron, NonLinearPerceptron
+from perceptrons.simple_perceptron import LinearPerceptron, NonLinearPerceptron,LogPerceptron
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -90,6 +90,27 @@ def graph_mse_per_epoch(config):
     plt.legend()
     plt.grid(True)
     plt.show()
+
+    # Crear figura para el gráfico de perceptrones no lineales
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por época - Perceptrón log')
+    plt.xlabel('Época')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
+    for learning_rate in [0.01, 0.001, 0.0001]:
+        log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        log_output = log_perceptron.train(train_set, train_expected_set, test_set,
+                                                              test_expected_set, True)
+        plt.plot(range(1, log_output[0] + 1), log_output[3], label=f'LR={learning_rate}')
+
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+
+
 
 
 
@@ -198,6 +219,26 @@ def graph_mse_per_train_percentage(config):
     plt.grid(True)
     plt.show()
 
+    log_errors =[]
+    for i, test_percentage in enumerate(test_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+        dim = len(train_set[0])
+
+        log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        log_train_output = log_perceptron.train(train_set, train_expected_set, test_set,
+                                                              test_expected_set, True)
+        log_errors.append(log_train_output[3][-1])  # Obtener el último error de la lista
+
+    # Crear gráfico de barras para perceptrones no lineales
+    plt.bar(index + bar_width, log_errors, bar_width, label='Perceptrón Log')
+
+    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in test_percentages])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    
+
 
 
 if __name__ == '__main__':
@@ -210,7 +251,7 @@ if __name__ == '__main__':
     graph_mse_per_epoch(config)
 
 
-    #graph_mse_per_epoch(config)
+   
 
 
 
