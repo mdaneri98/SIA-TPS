@@ -143,7 +143,7 @@ class LinearPerceptron(SimplePerceptron):
         return 1
 
 
-class NonLinearPerceptron(SimplePerceptron):
+class HypPerceptron(SimplePerceptron):
 
     def __init__(self, dim: int, beta: float, learning_rate: float, limit: int, eps: float):
         super().__init__(dim, learning_rate, limit, eps, -1, 1)
