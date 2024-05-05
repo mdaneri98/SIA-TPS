@@ -55,12 +55,17 @@ class NeuralNetwork:
         return d_weights_hidden_output, d_bias_output
 
     def train(self, X, y, epochs):
+        errors = []
         for epoch in range(epochs):
+            total_error = 0
             for x, target in zip(X, y):
                 x = np.array([x])  # Convertir a formato de fila
                 target = np.array([target])  # Convertir a formato de fila
                 output = self.forward(x)
+                total_error += np.sum((target - output) ** 2)
                 self.backward(x, target, output)
+            errors.append(total_error / len(X))
+        return errors
 
     def predict(self, X):
         predictions = []
