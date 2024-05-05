@@ -237,6 +237,49 @@ def graph_mse_per_train_percentage(config):
     plt.grid(True)
     plt.show()
 
+def graph_mse_per_beta(config):
+    learning_rate, test_percentage, epoch_limit, _, eps = get_config_params(config)
+
+    train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    dim = len(train_set[0])
+    
+
+    # Crear figura para el gráfico de perceptrones no lineales
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por época para varias beta - Perceptrón Hyperbolic')
+    plt.xlabel('Época')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
+    for beta in [0.25, 0.50, 0.75,1]:
+        non_linear_perceptron = NonLinearPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set,
+                                                              test_expected_set, True)
+        plt.plot(range(1, non_linear_train_output[0] + 1), non_linear_train_output[3], label=f'LR={beta}')
+
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Crear figura para el gráfico de perceptrones no lineales
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por época - Perceptrón log')
+    plt.xlabel('Época')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
+    for beta in [0.25, 0.50, 0.75,1]:
+        log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        log_output = log_perceptron.train(train_set, train_expected_set, test_set,
+                                                              test_expected_set, True)
+        plt.plot(range(1, log_output[0] + 1), log_output[3], label=f'LR={beta}')
+
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+
     
 
 
@@ -247,6 +290,7 @@ if __name__ == '__main__':
 
 
     graph_mse_per_train_percentage(config)
+    graph_mse_per_beta(config)
 
     graph_mse_per_epoch(config)
 
