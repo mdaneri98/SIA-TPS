@@ -8,21 +8,21 @@ import random
 
 def get_config_params(config):
     learning_rate = config["learning_rate"]
-    test_percentage = config["test_percentage"]
+    train_percentage = config["train_percentage"]
     epoch_limit = config["max_epochs"]
     beta = config["beta"]
     eps = config["epsilon"]
 
-    return learning_rate, test_percentage, epoch_limit, beta, eps
+    return learning_rate, train_percentage, epoch_limit, beta, eps
 
 
-def split_data(data, test_ratio):
+def split_data(data, train_ratio):
     # Asumiendo que esta función baraja y divide correctamente los datos
     np.random.seed(42)  # Para reproducibilidad en el barajado
     shuffled_indices = np.random.permutation(len(data))
-    test_size = int(len(data) * test_ratio)
-    test_indices = shuffled_indices[:test_size]
-    train_indices = shuffled_indices[test_size:]
+    train_size = int(len(data) * train_ratio)
+    train_indices = shuffled_indices[:train_size]
+    test_indices = shuffled_indices[train_size:]
     return data.iloc[train_indices], data.iloc[test_indices]
 
 
@@ -53,9 +53,9 @@ def initialize_data(test_ratio):
 
 
 def graph_mse_per_epoch(config):
-    _, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+    _, train_percentage, epoch_limit, beta, eps = get_config_params(config)
 
-    train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
     dim = len(train_set[0])
 
     # Crear figura para el gráfico de perceptrones lineales
@@ -115,7 +115,7 @@ def graph_mse_per_epoch(config):
 
 
 def cross_validate_perceptron(lineal: bool, k=5, learning_rate=0.01, epoch_limit=300, eps=0.01):
-    # learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
+    # learning_rate, train_percentage, epoch_limit, beta, eps = get_config_params(config)
     data = pd.read_csv('./datos.csv')
 
     # Convertir a listas
@@ -159,6 +159,83 @@ def cross_validate_perceptron(lineal: bool, k=5, learning_rate=0.01, epoch_limit
 
     return np.mean(accuracies), np.std(accuracies)
 
+def graph_mse_test_per_train(config):
+    learning_rate, _, epoch_limit, beta, eps = get_config_params(config)
+    # Crear figura para el gráfico de perceptrones lineales
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por porcentaje de entrenamiento - Perceptrón Lineal')
+    plt.xlabel('Porcentaje de entrenamiento')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    linear_errors = []
+    train_percentages = [0.2, 0.4, 0.6, 0.8]
+    bar_width = 0.35  # Ancho de las barras
+    index = np.arange(len(train_percentages))  # Índices para las barras
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
+        dim = len(train_set[0])
+
+        linear_perceptron = LinearPerceptron(dim,learning_rate, epoch_limit, eps)
+        linear_train_output = linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
+        linear_test_output = linear_perceptron.predict(test_set,test_expected_set,False)
+        linear_errors.append(linear_test_output[1])  # Obtener el último error de la lista
+
+    plt.bar(index, linear_errors, bar_width, label='Perceptrón Lineal')
+
+    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por porcentaje de entrenamiento - Perceptrón Lineal')
+    plt.xlabel('Porcentaje de entrenamiento')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    non_linear_errors = []
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
+        dim = len(train_set[0])
+
+        non_linear_perceptron = NonLinearPerceptron(dim, beta,learning_rate, epoch_limit, eps)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, True)
+        non_linear_test_output = non_linear_perceptron.predict(test_set,test_expected_set,True)
+        non_linear_errors.append(non_linear_test_output[1])  # Obtener el último error de la lista
+
+    plt.bar(index, non_linear_errors, bar_width, label='Perceptrón non Lineal')
+
+    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    plt.figure(figsize=(10, 5))
+    plt.title('Error de entrenamiento por porcentaje de entrenamiento - Perceptrón Lineal')
+    plt.xlabel('Porcentaje de entrenamiento')
+    plt.ylabel('Error cuadrático medio - SME')
+
+    beta_errors = []
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
+        dim = len(train_set[0])
+
+        beta_perceptron = LogPerceptron(dim, beta,learning_rate, epoch_limit, eps)
+        beta_train_output = beta_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, True)
+        beta_test_output = beta_perceptron.predict(test_set,test_expected_set,True)
+        beta_errors.append(beta_test_output[1])  # Obtener el último error de la lista
+
+    plt.bar(index, beta_errors, bar_width, label='Perceptrón non Lineal')
+
+    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+
+
+
 
 def graph_mse_per_train_percentage(config):
     learning_rate, _, epoch_limit, beta, eps = get_config_params(config)
@@ -173,11 +250,11 @@ def graph_mse_per_train_percentage(config):
     linear_errors = []
 
     # Iterar sobre cada porcentaje de entrenamiento para perceptrón lineal
-    test_percentages = [0.2, 0.4, 0.6, 0.8]
+    train_percentages = [0.2, 0.4, 0.6, 0.8]
     bar_width = 0.35  # Ancho de las barras
-    index = np.arange(len(test_percentages))  # Índices para las barras
-    for i, test_percentage in enumerate(test_percentages):
-        train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    index = np.arange(len(train_percentages))  # Índices para las barras
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
 
         linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
@@ -187,7 +264,7 @@ def graph_mse_per_train_percentage(config):
     # Crear gráfico de barras para perceptrones lineales
     plt.bar(index, linear_errors, bar_width, label='Perceptrón Lineal')
 
-    plt.xticks(index, [f'{percent*100}%' for percent in test_percentages])
+    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -202,8 +279,8 @@ def graph_mse_per_train_percentage(config):
     non_linear_errors = []
 
     # Iterar sobre cada porcentaje de entrenamiento para perceptrón no lineal
-    for i, test_percentage in enumerate(test_percentages):
-        train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
 
         non_linear_perceptron = NonLinearPerceptron(dim, beta, learning_rate, epoch_limit, eps)
@@ -214,14 +291,14 @@ def graph_mse_per_train_percentage(config):
     # Crear gráfico de barras para perceptrones no lineales
     plt.bar(index + bar_width, non_linear_errors, bar_width, label='Perceptrón No Lineal')
 
-    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in test_percentages])
+    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in train_percentages])
     plt.legend()
     plt.grid(True)
     plt.show()
 
     log_errors =[]
-    for i, test_percentage in enumerate(test_percentages):
-        train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    for i, train_percentage in enumerate(train_percentages):
+        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
 
         log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
@@ -232,15 +309,15 @@ def graph_mse_per_train_percentage(config):
     # Crear gráfico de barras para perceptrones no lineales
     plt.bar(index + bar_width, log_errors, bar_width, label='Perceptrón Log')
 
-    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in test_percentages])
+    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in train_percentages])
     plt.legend()
     plt.grid(True)
     plt.show()
 
 def graph_mse_per_beta(config):
-    learning_rate, test_percentage, epoch_limit, _, eps = get_config_params(config)
+    learning_rate, train_percentage, epoch_limit, _, eps = get_config_params(config)
 
-    train_set, train_expected_set, test_set, test_expected_set = initialize_data(test_percentage)
+    train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
     dim = len(train_set[0])
     
 
@@ -280,8 +357,6 @@ def graph_mse_per_beta(config):
 
 
 
-    
-
 
 
 if __name__ == '__main__':
@@ -291,8 +366,8 @@ if __name__ == '__main__':
 
     graph_mse_per_train_percentage(config)
     graph_mse_per_beta(config)
-
     graph_mse_per_epoch(config)
+    graph_mse_test_per_train(config)
 
 
    
