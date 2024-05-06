@@ -31,21 +31,21 @@ class SimplePerceptron(ABC):
     def activation_derivative(self, x: float) -> float:
         pass
 
-    def compute_error(self, x_values: list[list[float]], expected_values: list[float]):
+    def compute_error(self, w: list[float], x_values: list[list[float]], expected_values: list[float]):
         # expected_values ya debe estar normalizado.
-        obtained_values = self.compute_for_values(x_values)  # Valores obtenidos por el perceptrón.
+        obtained_values = self.compute_for_values(w, x_values)  # Valores obtenidos por el perceptrón.
 
         total_error = 0
         for mu in range(0, len(expected_values)):
             total_error += (expected_values[mu] - obtained_values[mu]) ** 2
         return total_error / 2
 
-    def compute_for_values(self, x_values: list[list[float]]):
-        return [self.activation_function(self.compute_excitement(x)) for x in x_values]
+    def compute_for_values(self, w: list[float], x_values: list[list[float]]):
+        return [self.activation_function(self.compute_excitement(w, x)) for x in x_values]
 
-    def compute_excitement(self, x: list[float]) -> float:
+    def compute_excitement(self, w: list[float], x: list[float]) -> float:
         extended_x = np.array([1] + x)
-        return np.dot(extended_x, self.w)
+        return np.dot(extended_x, w)
 
     def delta_weights(self, excitement, expected, obtained, x_mu):
         x_mu = np.array([1] + x_mu)
@@ -75,28 +75,22 @@ class SimplePerceptron(ABC):
             x_mu = x_set[mu]
             expected_mu = expected_values[mu]
 
-            h_mu = self.compute_excitement(x_mu)
+            h_mu = self.compute_excitement(self.w, x_mu)
             o_mu = self.activation_function(h_mu)
 
             delta_w = self.delta_weights(h_mu, expected_mu, o_mu, x_mu)
-            self.w = self.w + delta_w
-
-            self.w_intermediate.append(self.w)
+            w = self.w + delta_w
 
             # Computamos error de train set con la nueva w
-            error = self.compute_error(x_set, expected_values)
+            error = self.compute_error(w, x_set, expected_values)
             errors.append(error)
 
             if error < min_error:
                 min_error = error
-            else:
-                self.w_intermediate.pop()
-                self.w = self.w_intermediate[-1]
-                errors.pop()
+                self.w = w
+                self.w_intermediate.append(w)
 
             epoch += 1
-            
-        
 
         return epoch, self.w, self.w_intermediate, errors
 
@@ -108,11 +102,11 @@ class SimplePerceptron(ABC):
 
         result = []
         for x_mu in x_values:
-            h_mu = self.compute_excitement(x_mu)
+            h_mu = self.compute_excitement(self.w, x_mu)
             o_mu = self.activation_function(h_mu)
             result.append(o_mu)
 
-        test_mse = self.compute_error(x_values, expected_values)
+        test_mse = self.compute_error(self.w, x_values, expected_values)
 
         return result, test_mse
 
