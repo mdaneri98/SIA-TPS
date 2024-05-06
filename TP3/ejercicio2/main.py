@@ -83,8 +83,7 @@ def graph_mse_per_learning_rate(config):
     # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
     for learning_rate in [0.01, 0.001, 0.0001]:
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set,
-                                                              test_expected_set, True)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
         plt.plot(range(1, non_linear_train_output[0] + 1), non_linear_train_output[3], label=f'LR={learning_rate}')
 
     plt.legend()
@@ -111,54 +110,6 @@ def graph_mse_per_learning_rate(config):
 
 
 
-
-
-
-def cross_validate_perceptron(lineal: bool, k=5, learning_rate=0.01, epoch_limit=300, eps=0.01):
-    # learning_rate, train_percentage, epoch_limit, beta, eps = get_config_params(config)
-    data = pd.read_csv('./datos.csv')
-
-    # Convertir a listas
-    x_values = data[['x1', 'x2', 'x3']].values.tolist()
-    y_values = data['y'].values.tolist()
-
-
-    n = len(x_values)
-    indices = list(range(n))
-    random.shuffle(indices)  # Barajar los índices
-
-    fold_size = n // k
-    accuracies = []
-
-    for i in range(k):
-        # Dividir los índices en k pliegues
-        test_indices = indices[i * fold_size:(i + 1) * fold_size]
-        train_indices = indices[:i * fold_size] + indices[(i + 1) * fold_size:]
-
-        # Obtener conjuntos de entrenamiento y prueba
-        x_train = [x_values[j] for j in train_indices]
-        y_train = [y_values[j] for j in train_indices]
-        x_test = [x_values[j] for j in test_indices]
-        y_test = [y_values[j] for j in test_indices]
-
-        # Inicializar y entrenar el perceptrón no lineal
-        if lineal:
-            perceptron = LinearPerceptron(dim=len(x_train[0]), learning_rate=learning_rate,
-                                             limit=epoch_limit,
-                                             eps=eps)
-            perceptron.train(x_train, y_train, x_test, y_test, scale=False)
-        else:
-            perceptron = HypPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate, limit=epoch_limit,
-                                         eps=eps)
-            perceptron.train(x_train, y_train, x_test, y_test, scale=False)
-
-        # Calcular la precisión en el conjunto de prueba
-        predictions, _ = perceptron.predict(x_test, y_test, scale=False)
-        accuracy = np.mean([np.abs(y - pred) < perceptron.eps for y, pred in zip(y_test, predictions)])
-        accuracies.append(accuracy)
-
-    return np.mean(accuracies), np.std(accuracies)
-
 def graph_mse_test_per_train(config):
     learning_rate, _, epoch_limit, beta, eps = get_config_params(config)
     # Crear figura para el gráfico de perceptrones lineales
@@ -173,10 +124,11 @@ def graph_mse_test_per_train(config):
     index = np.arange(len(train_percentages))  # Índices para las barras
     for i, train_percentage in enumerate(train_percentages):
         train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
+        
         dim = len(train_set[0])
 
         linear_perceptron = LinearPerceptron(dim,learning_rate, epoch_limit, eps)
-        linear_train_output = linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
+        linear_train_output = linear_perceptron.train(train_set, train_expected_set, False)
         linear_test_output = linear_perceptron.predict(test_set,test_expected_set,False)
         linear_errors.append(linear_test_output[1])  # Obtener el último error de la lista
 
@@ -199,7 +151,7 @@ def graph_mse_test_per_train(config):
         dim = len(train_set[0])
 
         non_linear_perceptron = HypPerceptron(dim, beta,learning_rate, epoch_limit, eps)
-        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, True)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
         non_linear_test_output = non_linear_perceptron.predict(test_set,test_expected_set,True)
         non_linear_errors.append(non_linear_test_output[1])  # Obtener el último error de la lista
 
@@ -221,7 +173,7 @@ def graph_mse_test_per_train(config):
         dim = len(train_set[0])
 
         beta_perceptron = LogPerceptron(dim, beta,learning_rate, epoch_limit, eps)
-        beta_train_output = beta_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, True)
+        beta_train_output = beta_perceptron.train(train_set, train_expected_set, True)
         beta_test_output = beta_perceptron.predict(test_set,test_expected_set,True)
         beta_errors.append(beta_test_output[1])  # Obtener el último error de la lista
 
@@ -256,7 +208,7 @@ def graph_mse_per_train_percentage(config):
         dim = len(train_set[0])
 
         linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
-        linear_train_output = linear_perceptron.train(train_set, train_expected_set, test_set, test_expected_set, False)
+        linear_train_output = linear_perceptron.train(train_set, train_expected_set,  False)
         linear_errors.append(linear_train_output[3][-1])  # Obtener el último error de la lista
     # Crear gráfico de barras para perceptrones lineales
     plt.bar(index, linear_errors, bar_width, label='Perceptrón Lineal')
@@ -278,12 +230,11 @@ def graph_mse_per_train_percentage(config):
         train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set,
-                                                              test_expected_set, True)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
         non_linear_errors.append(non_linear_train_output[3][-1])  # Obtener el último error de la lista
 
     # Crear gráfico de barras para perceptrones no lineales
-    plt.bar(index, linear_errors, bar_width, label='Perceptrón Hiperbolic')
+    plt.bar(index, non_linear_errors, bar_width, label='Perceptrón Hiperbolic')
     plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
     plt.legend()
     plt.grid(True)
@@ -300,8 +251,7 @@ def graph_mse_per_train_percentage(config):
         dim = len(train_set[0])
 
         log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        log_train_output = log_perceptron.train(train_set, train_expected_set, test_set,
-                                                              test_expected_set, True)
+        log_train_output = log_perceptron.train(train_set, train_expected_set, True)
         log_errors.append(log_train_output[3][-1])  # Obtener el último error de la lista
 
     # Crear gráfico de barras para perceptrones no lineales
@@ -329,8 +279,7 @@ def graph_mse_per_beta(config):
     # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
     for beta in [0.25, 0.50, 0.75,1]:
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, test_set,
-                                                              test_expected_set, True)
+        non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
         plt.plot(range(1, non_linear_train_output[0] + 1), non_linear_train_output[3], label=f'beta={beta}')
 
     plt.legend()
@@ -346,8 +295,7 @@ def graph_mse_per_beta(config):
     # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
     for beta in [0.25, 0.50, 0.75,1]:
         log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        log_output = log_perceptron.train(train_set, train_expected_set, test_set,
-                                                              test_expected_set, True)
+        log_output = log_perceptron.train(train_set, train_expected_set, True)
         plt.plot(range(1, log_output[0] + 1), log_output[3], label=f'beta={beta}')
 
     plt.legend()
@@ -363,7 +311,7 @@ if __name__ == '__main__':
         config = json.load(f)
 
 
-    #graph_mse_per_train_percentage(config)
+    graph_mse_per_train_percentage(config)
     #graph_mse_per_beta(config)
     #graph_mse_per_learning_rate(config)
     graph_mse_test_per_train(config)

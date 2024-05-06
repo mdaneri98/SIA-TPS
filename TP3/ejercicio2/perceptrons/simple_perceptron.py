@@ -60,8 +60,7 @@ class SimplePerceptron(ABC):
         return ((y_norm - self.activation_min) / (self.activation_max - self.activation_min)) * (
                 new_max - new_min) + new_min
 
-    def train(self, x_set: list[list[float]], expected_values: list[float], x_test_set: list[list[float]],
-              expected_test_values: list[float], scale: bool = False):
+    def train(self, x_set: list[list[float]], expected_values: list[float], scale: bool = False):
         min_error = sys.maxsize
         epoch = 0
 
@@ -93,8 +92,10 @@ class SimplePerceptron(ABC):
             else:
                 self.w_intermediate.pop()
                 self.w = self.w_intermediate[-1]
+                errors.pop()
 
             epoch += 1
+            
         
 
         return epoch, self.w, self.w_intermediate, errors
@@ -157,7 +158,7 @@ class HypPerceptron(SimplePerceptron):
     
 class LogPerceptron(SimplePerceptron):
     def __init__(self, dim: int, beta: float, learning_rate: float, limit: int, eps: float):
-        super().__init__(dim, learning_rate, limit, eps, -1, 1)
+        super().__init__(dim, learning_rate, limit, eps, 0, 1)
         self.beta = beta
 
     def activation_function(self, x: float) -> float:
