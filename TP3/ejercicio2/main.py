@@ -303,6 +303,92 @@ def graph_mse_per_beta(config):
     plt.show()
 
 
+def cross_validate_perceptron(perceptron_type: int = 0, k=5, learning_rate=0.01, epoch_limit=300, eps=0.01):
+    data = pd.read_csv('./datos.csv')
+
+    # Convertir a listas
+    x_values = data[['x1', 'x2', 'x3']].values.tolist()
+    y_values = data['y'].values.tolist()
+
+    n = len(x_values)
+    indices = list(range(n))
+    random.shuffle(indices)  # Barajar los índices
+
+    fold_size = n // k
+    train_accuracies = []
+    test_accuracies = []
+
+    for i in range(k):
+        # Dividir los índices en k pliegues
+        test_indices = indices[i * fold_size:(i + 1) * fold_size]
+        train_indices = indices[:i * fold_size] + indices[(i + 1) * fold_size:]
+
+        # Obtener conjuntos de entrenamiento y prueba
+        x_train = [x_values[j] for j in train_indices]
+        y_train = [y_values[j] for j in train_indices]
+        x_test = [x_values[j] for j in test_indices]
+        y_test = [y_values[j] for j in test_indices]
+
+        scale = not (perceptron_type == 0)
+
+        # Inicializar y entrenar el perceptrón no lineal
+        if perceptron_type == 0:
+            perceptron = LinearPerceptron(dim=len(x_train[0]), learning_rate=learning_rate,
+                                          limit=epoch_limit, eps=eps)
+            _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
+        elif perceptron_type == 1:
+            perceptron = HypPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
+                                       limit=epoch_limit, eps=eps)
+            _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
+        else:
+            perceptron = LogPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
+                                       limit=epoch_limit, eps=eps)
+            _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
+
+        # Calcular la precisión en el conjunto de entrenamiento
+        if scale:
+            y_train = [perceptron.normalize_value(y, min(y_train), max(y_train)) for y in y_train]
+            y_test = [perceptron.normalize_value(y, min(y_test), max(y_test)) for y in y_test]
+
+        train_predictions, _ = perceptron.predict(x_train, y_train, scale=scale)
+        train_accuracy = np.mean([np.abs(y - pred) < perceptron.eps for y, pred in zip(y_train, train_predictions)])
+        train_accuracies.append(train_accuracy)
+
+        # Calcular la precisión en el conjunto de prueba
+        test_predictions, _ = perceptron.predict(x_test, y_test, scale=scale)
+        test_accuracy = np.mean([np.abs(y - pred) < perceptron.eps for y, pred in zip(y_test, test_predictions)])
+        test_accuracies.append(test_accuracy)
+
+    return train_accuracies, test_accuracies
+
+
+def plot_accuracies(perceptron_type: int, train_accuracies, test_accuracies):
+    x = np.arange(len(train_accuracies))
+    width = 0.35
+
+    fig, ax = plt.subplots()
+    ax.bar(x - width / 2, train_accuracies, width, label='Precisión de train')
+    ax.bar(x + width / 2, test_accuracies, width, label='Precisión de test')
+
+    ax.set_xlabel('Número de partición elegida para training set')
+    ax.set_ylabel('Precisión')
+
+    if perceptron_type == 0:
+        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nLineal')
+    elif perceptron_type == 1:
+        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nHyperbólica')
+    else:
+        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nLogística')
+
+    ax.set_xticks(x)
+    ax.legend()
+
+    plt.show()
+
+
+
+
+
 
 
 
@@ -310,13 +396,18 @@ if __name__ == '__main__':
     with open('./config.json', 'r') as f:
         config = json.load(f)
 
-
+    for i in range(3):
+        # 3, 4, 6, 7, 8
+        train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=2, k=6, learning_rate=0.01, epoch_limit=600,
+                                                                  eps=0.1)
+        plot_accuracies(i, train_accuracies, test_accuracies)
+    '''
     graph_mse_per_learning_rate(config)
 
     graph_mse_per_train_percentage(config)
     graph_mse_per_beta(config)
     graph_mse_test_per_train(config)
-
+'''
 
    
 

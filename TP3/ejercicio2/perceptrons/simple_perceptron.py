@@ -108,6 +108,7 @@ class SimplePerceptron(ABC):
 
         test_mse = self.compute_error(self.w, x_values, expected_values)
 
+
         return result, test_mse
 
     def accuracy_per_epoch(self, x_values, y_values, scale):

@@ -32,10 +32,9 @@ def accuracy_for_model(model, x_test, y_test, eps):
 
 def accuracy_for_with_std(model_params, data, labels, training_percentage, num_trials=100):
     accuracies = []
-    optimizer = AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8)
     X_train, X_test, y_train, y_test = split_data(data, labels, training_percentage)
     for _ in range(num_trials):
-        dim, hidden_size, output_size, learning_rate, epochs, eps = model_params
+        dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer = model_params
         model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, epochs, optimizer)
         model.train(X_train, y_train, epochs)
         acc = accuracy_for_model(model, data, labels, eps)
@@ -56,9 +55,11 @@ eps = 0.1
 epochs = 1000
 training_percentages = [0.2, 0.4, 0.6, 0.8]
 
+# Optimizador ADAM
+optimizer = AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=0.1)
 accuracies_with_std = []
 for pct in training_percentages:
-    model_params = (dim, hidden_size, output_size, learning_rate, epochs, eps)
+    model_params = (dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer)
     accuracy = accuracy_for_with_std(model_params, matrices, expected_output, pct)
     accuracies_with_std.append(accuracy)
 
@@ -68,7 +69,29 @@ std_devs = [acc[1] for acc in accuracies_with_std]
 
 # Crear gráfico de barras con barras de error
 plt.bar(training_percentages, means, yerr=std_devs, capsize=5, width=0.1, align='center')
-plt.xlabel("Porcentaje de Entrenamiento")
+plt.xlabel("Porcentaje de Entrenamiento con optimizador ADAM.")
+plt.ylabel("Precisión")
+plt.title("Precisión vs Porcentaje de Entrenamiento")
+plt.grid(axis='y')
+plt.show()
+
+
+
+# Optimizador Gradiente descendente
+optimizer = GradientDescentOptimizer(learning_rate=0.001)
+accuracies_with_std = []
+for pct in training_percentages:
+    model_params = (dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer)
+    accuracy = accuracy_for_with_std(model_params, matrices, expected_output, pct)
+    accuracies_with_std.append(accuracy)
+
+
+means = [acc[0] for acc in accuracies_with_std]
+std_devs = [acc[1] for acc in accuracies_with_std]
+
+# Crear gráfico de barras con barras de error
+plt.bar(training_percentages, means, yerr=std_devs, capsize=5, width=0.1, align='center')
+plt.xlabel("Porcentaje de Entrenamiento con optimizador Gradiente descendente.")
 plt.ylabel("Precisión")
 plt.title("Precisión vs Porcentaje de Entrenamiento")
 plt.grid(axis='y')
