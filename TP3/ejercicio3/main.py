@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from perceptron_multicapa import NeuralNetwork
+from Optimazer import *
+
 
 # Paso 1: Instancia la red neuronal
 dim = 2  # Tamaño de entrada (dos características)
@@ -11,7 +13,8 @@ learning_rate = 0.1  # Tasa de aprendizaje
 eps = 0.1  # Término de regularización
 
 # Instancia de la red neuronal
-model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, eps)
+optimizer = GradientDescentOptimizer(learning_rate=0.01)
+model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, eps, optimizer)
 
 # Paso 2: Datos de entrada y esperados.
 X = np.array([

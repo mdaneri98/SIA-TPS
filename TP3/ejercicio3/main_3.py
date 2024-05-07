@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from perceptron_multicapa import NeuralNetwork
-
+from Optimazer import *
 
 def split_data(data, labels, train_ratio):
     indices = np.arange(len(data))
@@ -32,10 +32,11 @@ def accuracy_for_model(model, x_test, y_test, eps):
 
 def accuracy_for_with_std(model_params, data, labels, training_percentage, num_trials=100):
     accuracies = []
+    optimizer = AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8)
     X_train, X_test, y_train, y_test = split_data(data, labels, training_percentage)
     for _ in range(num_trials):
         dim, hidden_size, output_size, learning_rate, epochs, eps = model_params
-        model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, epochs)
+        model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, epochs, optimizer)
         model.train(X_train, y_train, epochs)
         acc = accuracy_for_model(model, data, labels, eps)
         accuracies.append(acc)
