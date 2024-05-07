@@ -26,6 +26,8 @@ class AdamOptimizer(Optimizer):
 
     def update(self, weights, gradients):
         self.t += 1
+        self.m = np.zeros_like(gradients)
+        self.v = np.zeros_like(gradients)
         self.m = self.beta1 * self.m + (1 - self.beta1) * gradients
         self.v = self.beta2 * self.v + (1 - self.beta2) * gradients ** 2
 
