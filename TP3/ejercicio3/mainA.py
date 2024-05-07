@@ -2,31 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from perceptron_multicapa import NeuralNetwork
-
-
-def get_data(ej):
-    with open('./TP3-ej3-digitos.txt', 'r') as file:
-        lines = file.readlines()
-
-    input_data = []
-    expected_data = []
-    if (ej == 2):
-        for i in range(10):
-            aux = []
-            for j in range(7):
-                binary_digits = list(map(int, lines[7*i+j].strip().split()))
-                aux.append(binary_digits)
-            input_data.append(aux)
-            expected_data.append(i % 2)
-    if (ej == 3):
-        for i in range(10):
-            aux = []
-            for j in range(7):
-                binary_digits = list(map(int, lines[7*i+j].strip().split()))
-                aux.append(binary_digits)
-            input_data.append(aux)
-            expected_data.append(i)
-    return input_data, expected_data
+from Optimazer import *
 
 
 # Paso 1: Instancia la red neuronal
@@ -37,7 +13,8 @@ learning_rate = 0.1  # Tasa de aprendizaje
 eps = 0.1  # Término de regularización
 
 # Instancia de la red neuronal
-model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, eps)
+optimizer = GradientDescentOptimizer(learning_rate=0.01)
+model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, eps, optimizer)
 
 # Paso 2: Datos de entrada y esperados.
 X = np.array([
@@ -57,7 +34,8 @@ predictions = model.predict(X)
 # Imprime las predicciones
 print("Predicciones:")
 for i in range(len(X)):
-    print(f"Entrada: {X[i]}, Salida Esperada: {y[i]}, Salida Predicha: {predictions[i]} | {'Verdadero' if predictions[i] > 0.5 else 'Falso'}")
+    print(f"Entrada: {X[i]}, Salida Esperada: {y[i]}, Salida Predicha: {predictions[i]}")
+
 
 
 def superficie_de_decision():
@@ -76,11 +54,10 @@ def superficie_de_decision():
 
     # Graficar los puntos de entrada
     plt.scatter(X[:, 0], X[:, 1], c=y, edgecolors='k', marker='o', cmap=plt.cm.Paired)
-    plt.xlabel('Valor primer proposición')
-    plt.ylabel('Valor segunda proposición')
+    plt.xlabel('Característica 1')
+    plt.ylabel('Característica 2')
     plt.title('Superficie de Decisión de la Red Neuronal')
     plt.show()
-
 
 def convergencia_de_error():
     # Paso 3: Entrena la red neuronal y devuelve los errores

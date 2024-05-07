@@ -303,89 +303,7 @@ def graph_mse_per_beta(config):
     plt.show()
 
 
-def cross_validate_perceptron(type: int = 0, k=3, learning_rate=0.01, epoch_limit=1000, eps=0.5):
-    # learning_rate, test_percentage, epoch_limit, beta, eps = get_config_params(config)
-    data = pd.read_csv('./datos.csv')
 
-    # Convertir a listas
-    x_values = data[['x1', 'x2', 'x3']].values.tolist()
-    y_values = data['y'].values.tolist()
-
-    n = len(x_values)
-    indices = list(range(n))
-    random.shuffle(indices)  # Barajar los índices
-
-    fold_size = n // k
-    accuracies = []
-
-    max_accuracy = None
-    train_best_accuracy = None
-    for i in range(k):
-        # Dividir los índices en k pliegues
-        test_indices = indices[i * fold_size:(i + 1) * fold_size]
-        train_indices = indices[:i * fold_size] + indices[(i + 1) * fold_size:]
-
-        # Obtener conjuntos de entrenamiento y prueba
-        x_train = [x_values[j] for j in train_indices]
-        y_train = [y_values[j] for j in train_indices]
-        x_test = [x_values[j] for j in test_indices]
-        y_test = [y_values[j] for j in test_indices]
-
-        # Inicializar y entrenar el perceptrón no lineal
-        if type == 0:
-            perceptron = LinearPerceptron(dim=len(x_train[0]), learning_rate=learning_rate,
-                                        limit=epoch_limit,
-                                        eps=eps)
-            perceptron.train(x_train, y_train, scale=False)
-            predictions, _ = perceptron.predict(x_test, y_test, scale=False)
-        elif type == 1:
-            perceptron = HypPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
-                                       limit=epoch_limit,
-                                        eps=eps)
-            perceptron.train(x_train, y_train, scale=True)
-            predictions, _ = perceptron.predict(x_test, y_test, scale=True)
-        else:
-            perceptron = LogPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
-                                       limit=epoch_limit,
-                                       eps=eps)
-            perceptron.train(x_train, y_train, scale=True)
-            predictions, _ = perceptron.predict(x_test, y_test, scale=True)
-
-        accuracy = np.mean([np.abs(y - pred) < eps for y, pred in zip(y_test, predictions)])
-        accuracies.append(accuracy)
-
-    return np.mean(accuracies), np.std(accuracies)
-
-def run_cross_validation_multiple_times(n_iterations=10):
-    results = []
-
-    for perceptron_type in range(3):
-        accuracies = []
-
-        for _ in range(n_iterations):
-            accuracy, std_dev = cross_validate_perceptron(type=perceptron_type, k=3, learning_rate=0.01, epoch_limit=150, eps=0.1)
-            accuracies.append(accuracy)
-
-        mean_accuracy = np.mean(accuracies)
-        std_dev_accuracy = np.std(accuracies)
-        results.append((mean_accuracy, std_dev_accuracy))
-
-    return results
-
-def graph_cross_validation():
-    # Ejecutar validación cruzada
-    results = run_cross_validation_multiple_times()
-
-    # Extraer medias y desviaciones estándar
-    means = [result[0] for result in results]
-    std_devs = [result[1] for result in results]
-    labels = ['Linear', 'Hyperbolic', 'Logarithmic']
-
-    # Crear gráfico de barras de error
-    plt.bar(labels, means, yerr=std_devs, capsize=5)
-    plt.ylabel('Accuracy')
-    plt.title('Cross-Validation Accuracy for Different Perceptron Types')
-    plt.show()
 
 
 if __name__ == '__main__':
@@ -399,7 +317,8 @@ if __name__ == '__main__':
     graph_mse_per_beta(config)
     graph_mse_test_per_train(config)
 
-    graph_cross_validation()
+
+   
 
 
 

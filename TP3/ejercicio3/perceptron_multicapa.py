@@ -3,12 +3,13 @@ import numpy as np
 
 class NeuralNetwork:
     # hidden : número de capas ocultas
-    def __init__(self, dim, hidden_size, output_size, learning_rate, eps):
+    def __init__(self, dim, hidden_size, output_size, learning_rate, eps, optimizer):
         self.input_size = dim
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.learning_rate = learning_rate
         self.eps = eps
+        self.optimizer = optimizer
 
         # Retorna una matriz 'dim'X'hidden_size'
         self.weights_input_hidden = np.random.randn(dim, hidden_size)
@@ -44,14 +45,17 @@ class NeuralNetwork:
         d_weights_input_hidden = x.T.dot(hidden_delta)
         d_bias = np.sum(hidden_delta)
 
-        # Actualizar los pesos y sesgos
-        self.weights_hidden_output += self.learning_rate * d_weights_hidden_output
-        self.bias_output += self.learning_rate * d_bias_output
-        self.weights_input_hidden += self.learning_rate * d_weights_input_hidden
-        self.bias += self.learning_rate * d_bias
+        # Obtener los gradientes de los pesos y sesgos
+        gradients = (d_weights_hidden_output, d_bias_output, d_weights_input_hidden, d_bias)
+
+        # Actualizar los pesos y sesgos utilizando el optimizador
+        self.weights_hidden_output = self.optimizer.update(self.weights_hidden_output, d_weights_hidden_output)
+        self.bias_output = self.optimizer.update(self.bias_output, d_bias_output)
+        self.weights_input_hidden = self.optimizer.update(self.weights_input_hidden, d_weights_input_hidden)
+        self.bias = self.optimizer.update(self.bias, d_bias)
 
         # Retornar los gradientes de los pesos y sesgos
-        return d_weights_hidden_output, d_bias_output
+        return gradients, d_weights_hidden_output, d_bias_output
 
     def train(self, X, y, epochs):
         errors = []
