@@ -9,7 +9,7 @@ class NeuralNetwork:
         self.output_size = output_size
         self.learning_rate = learning_rate
         self.eps = eps
-        self.optimizer = optimizer  # Guardar el optimizador
+        self.optimizer = optimizer
 
         # Retorna una matriz 'dim'X'hidden_size'
         self.weights_input_hidden = np.random.randn(dim, hidden_size)
@@ -27,9 +27,9 @@ class NeuralNetwork:
         return x * (1 - x)
 
     def forward(self, x):
-        # Propagación hacia adelante
         self.hidden_activation = self.sigmoid(np.dot(x, self.weights_input_hidden) + self.bias)
-        return self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
+        output = self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
+        return output
 
     def backward(self, x, y, output):
         # Retropropagación del error
@@ -55,7 +55,7 @@ class NeuralNetwork:
         self.bias = self.optimizer.update(self.bias, d_bias)
 
         # Retornar los gradientes de los pesos y sesgos
-        return gradients
+        return gradients, d_weights_hidden_output, d_bias_output
 
     def train(self, X, y, epochs):
         errors = []
