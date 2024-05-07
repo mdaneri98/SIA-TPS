@@ -44,10 +44,8 @@ def add_noise(data, noise_level):
     return np.array(noisy_data)
 
 def graph_confusion_matrix(predictions, y_test, labels=None):
-    # Convertir las predicciones a etiquetas
+    # Convertir las predicciones a etiquetas discretas
     predicted_labels = [np.argmax(prediction) for prediction in predictions]
-
-    print(predicted_labels)
 
     # Construir la matriz de confusión
     cm = confusion_matrix(y_test, predicted_labels, labels=labels)
@@ -61,14 +59,12 @@ def graph_confusion_matrix(predictions, y_test, labels=None):
     plt.show()
 
 
-
 # Cargar los datos de los dígitos
 matrices = [np.array(matrix).flatten() for matrix in read_data("TP3-ej3-digitos.txt")]
 expected_output = np.array([i for i in range(len(matrices))])
 
-
 # Dividir los datos en conjunto de entrenamiento y conjunto de prueba (80% entrenamiento, 20% prueba)
-x_data, y_data, _, _ = split_data(matrices, expected_output, 0.8)
+x_data, _, y_data, _ = split_data(matrices, expected_output, 1)
 
 # Crear instancia de la red neuronal para clasificación de dígitos (10 neuronas de salida)
 model = NeuralNetwork(dim=len(x_data[0]), hidden_size=10, output_size=10, learning_rate=0.01, eps=0.1, optimizer=GradientDescentOptimizer(0.01))
@@ -80,25 +76,8 @@ model.train(x_data, y_data, epochs)
 # Evaluar el rendimiento de la red neuronal en el conjunto de prueba
 predictions = model.predict(x_data)
 
-# Graficar la matriz de confusión
-graph_confusion_matrix(predictions, y_data, labels=range(10))
+min_val, max_val = 0, 9
+normalized_predictions = [(y - min_val) / (max_val - min_val) for y in predictions]
 
-# # Función para visualizar una imagen del dígito con su etiqueta
-# def visualize_digit(image, label):
-#     plt.imshow(image.reshape(5, 5), cmap='gray')
-#     plt.title(f'Etiqueta: {label}')
-#     plt.axis('off')
-#     plt.show()
-#
-# # Visualizar algunos ejemplos de imágenes de dígitos y sus etiquetas
-# num_examples = 5
-# random_indices = np.random.choice(len(test_data), size=num_examples, replace=False)
-# for index in random_indices:
-#     visualize_digit(test_data[index, :-1], int(test_data[index, -1]))
-#
-# # Graficar la convergencia del error durante el entrenamiento
-# plt.plot(range(epochs), errors)
-# plt.xlabel('Épocas')
-# plt.ylabel('Error Medio Cuadrado')
-# plt.title('Convergencia del Error durante el Entrenamiento')
-# plt.show()
+# Normalizar y graficar la matriz de confusión
+graph_confusion_matrix(normalized_predictions, y_data, labels=range(10))
