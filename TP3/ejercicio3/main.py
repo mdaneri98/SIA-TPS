@@ -3,6 +3,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 from perceptron_multicapa import NeuralNetwork
 
+
+def get_data(ej):
+    with open('./TP3-ej3-digitos.txt', 'r') as file:
+        lines = file.readlines()
+
+    input_data = []
+    expected_data = []
+    if (ej == 2):
+        for i in range(10):
+            aux = []
+            for j in range(7):
+                binary_digits = list(map(int, lines[7*i+j].strip().split()))
+                aux.append(binary_digits)
+            input_data.append(aux)
+            expected_data.append(i % 2)
+    if (ej == 3):
+        for i in range(10):
+            aux = []
+            for j in range(7):
+                binary_digits = list(map(int, lines[7*i+j].strip().split()))
+                aux.append(binary_digits)
+            input_data.append(aux)
+            expected_data.append(i)
+    return input_data, expected_data
+
+
 # Paso 1: Instancia la red neuronal
 dim = 2  # Tamaño de entrada (dos características)
 hidden_size = 4  # Tamaño de la capa oculta
@@ -31,8 +57,7 @@ predictions = model.predict(X)
 # Imprime las predicciones
 print("Predicciones:")
 for i in range(len(X)):
-    print(f"Entrada: {X[i]}, Salida Esperada: {y[i]}, Salida Predicha: {predictions[i]}")
-
+    print(f"Entrada: {X[i]}, Salida Esperada: {y[i]}, Salida Predicha: {predictions[i]} | {'Verdadero' if predictions[i] > 0.5 else 'Falso'}")
 
 
 def superficie_de_decision():
@@ -51,10 +76,11 @@ def superficie_de_decision():
 
     # Graficar los puntos de entrada
     plt.scatter(X[:, 0], X[:, 1], c=y, edgecolors='k', marker='o', cmap=plt.cm.Paired)
-    plt.xlabel('Característica 1')
-    plt.ylabel('Característica 2')
+    plt.xlabel('Valor primer proposición')
+    plt.ylabel('Valor segunda proposición')
     plt.title('Superficie de Decisión de la Red Neuronal')
     plt.show()
+
 
 def convergencia_de_error():
     # Paso 3: Entrena la red neuronal y devuelve los errores

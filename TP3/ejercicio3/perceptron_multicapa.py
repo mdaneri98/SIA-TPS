@@ -26,10 +26,9 @@ class NeuralNetwork:
         return x * (1 - x)
 
     def forward(self, x):
-        # Propagación hacia adelante
         self.hidden_activation = self.sigmoid(np.dot(x, self.weights_input_hidden) + self.bias)
-        return self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
-
+        output = self.sigmoid(np.dot(self.hidden_activation, self.weights_hidden_output) + self.bias_output)
+        return output
 
     def backward(self, x, y, output):
         # Retropropagación del error
@@ -46,10 +45,10 @@ class NeuralNetwork:
         d_bias = np.sum(hidden_delta)
 
         # Actualizar los pesos y sesgos
-        self.weights_hidden_output += d_weights_hidden_output * self.learning_rate
-        self.bias_output += d_bias_output * self.learning_rate
-        self.weights_input_hidden += d_weights_input_hidden * self.learning_rate
-        self.bias += d_bias * self.learning_rate
+        self.weights_hidden_output += self.learning_rate * d_weights_hidden_output
+        self.bias_output += self.learning_rate * d_bias_output
+        self.weights_input_hidden += self.learning_rate * d_weights_input_hidden
+        self.bias += self.learning_rate * d_bias
 
         # Retornar los gradientes de los pesos y sesgos
         return d_weights_hidden_output, d_bias_output
