@@ -52,6 +52,15 @@ def initialize_data(test_ratio):
     return train_features, train_labels, test_features, test_labels
 
 
+def normalize_01(y_values):
+    """
+    Normalize an array of values to a range between 0 and 1.
+    """
+    min_val = np.min(y_values)
+    max_val = np.max(y_values)
+    return (y_values - min_val) / (max_val - min_val)
+
+
 def graph_mse_per_learning_rate(config):
     _, train_percentage, epoch_limit, beta, eps = get_config_params(config)
 
@@ -68,7 +77,8 @@ def graph_mse_per_learning_rate(config):
     for learning_rate in [0.01, 0.001, 0.0001]:
         linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
         linear_train_output = linear_perceptron.train(train_set, train_expected_set, False)
-        plt.plot(range(1, linear_train_output[0] + 1), linear_train_output[3], label=f'LR={learning_rate}')
+        y_values = normalize_01(linear_train_output[3])
+        plt.plot(range(1, linear_train_output[0] + 1), y_values, label=f'LR={learning_rate}')
 
 
     plt.legend()
@@ -85,7 +95,8 @@ def graph_mse_per_learning_rate(config):
     for learning_rate in [0.01, 0.001, 0.0001]:
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
         non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
-        plt.plot(range(1, non_linear_train_output[0] + 1), non_linear_train_output[3], label=f'LR={learning_rate}')
+        y_values = normalize_01(non_linear_train_output[3])
+        plt.plot(range(1, non_linear_train_output[0] + 1), y_values, label=f'LR={learning_rate}')
 
     plt.legend()
     plt.grid(True)
@@ -101,7 +112,8 @@ def graph_mse_per_learning_rate(config):
     for learning_rate in [0.01, 0.001, 0.0001]:
         log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
         log_output = log_perceptron.train(train_set, train_expected_set, True)
-        plt.plot(range(1, log_output[0] + 1), log_output[3], label=f'LR={learning_rate}')
+        y_values = normalize_01(log_output[3])
+        plt.plot(range(1, log_output[0] + 1), y_values, label=f'LR={learning_rate}')
 
     plt.legend()
     plt.grid(True)
@@ -395,7 +407,7 @@ def plot_accuracies(perceptron_type: int, train_accuracies, test_accuracies):
 if __name__ == '__main__':
     with open('./config.json', 'r') as f:
         config = json.load(f)
-
+    '''
     for i in range(3):
         # 3, 4, 6, 7, 8
         train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=2, k=6, learning_rate=0.01, epoch_limit=600,
@@ -407,7 +419,7 @@ if __name__ == '__main__':
     graph_mse_per_train_percentage(config)
     graph_mse_per_beta(config)
     graph_mse_test_per_train(config)
-'''
+
 
    
 
