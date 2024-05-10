@@ -38,7 +38,7 @@ class SimplePerceptron(ABC):
         total_error = 0
         for mu in range(0, len(expected_values)):
             total_error += (expected_values[mu] - obtained_values[mu]) ** 2
-        return total_error / 2
+        return total_error / len(x_values)
 
     def compute_for_values(self, w: list[float], x_values: list[list[float]]):
         return [self.activation_function(self.compute_excitement(w, x)) for x in x_values]
