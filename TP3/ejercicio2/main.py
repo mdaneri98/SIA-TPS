@@ -52,6 +52,7 @@ def initialize_data(test_ratio):
     return train_features, train_labels, test_features, test_labels
 
 
+
 def normalize_01(y_values):
     """
     Normalize an array of values to a range between 0 and 1.
@@ -136,13 +137,12 @@ def graph_mse_test_per_train(config):
     index = np.arange(len(train_percentages))  # Índices para las barras
     for i, train_percentage in enumerate(train_percentages):
         train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
-        
         dim = len(train_set[0])
 
         linear_perceptron = LinearPerceptron(dim,learning_rate, epoch_limit, eps)
-        linear_train_output = linear_perceptron.train(train_set, train_expected_set, False)
-        linear_test_output = linear_perceptron.predict(test_set,test_expected_set,False)
-        linear_errors.append(linear_test_output[1])  # Obtener el último error de la lista
+        linear_test_output = linear_perceptron.predict(test_set, test_expected_set,False)
+        normalized = normalize_01(linear_test_output[1])
+        linear_errors.append(normalized)  # Obtener el último error de la lista
 
     plt.bar(index, linear_errors, bar_width, label='Perceptrón Lineal')
 
@@ -162,10 +162,11 @@ def graph_mse_test_per_train(config):
         train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
 
-        non_linear_perceptron = HypPerceptron(dim, beta,learning_rate, epoch_limit, eps)
+        non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
         non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
-        non_linear_test_output = non_linear_perceptron.predict(test_set,test_expected_set,True)
-        non_linear_errors.append(non_linear_test_output[1])  # Obtener el último error de la lista
+        non_linear_test_output = non_linear_perceptron.predict(test_set, test_expected_set,True)
+        normalized = normalize_01(non_linear_test_output[1])
+        non_linear_errors.append(normalized[1])  # Obtener el último error de la lista
 
     plt.bar(index, non_linear_errors, bar_width, label='Perceptrón Hiperbolic')
 
@@ -187,7 +188,8 @@ def graph_mse_test_per_train(config):
         beta_perceptron = LogPerceptron(dim, beta,learning_rate, epoch_limit, eps)
         beta_train_output = beta_perceptron.train(train_set, train_expected_set, True)
         beta_test_output = beta_perceptron.predict(test_set,test_expected_set,True)
-        beta_errors.append(beta_test_output[1])  # Obtener el último error de la lista
+        normalized = normalize_01(beta_test_output[1])
+        beta_errors.append(normalized)  # Obtener el último error de la lista
 
     plt.bar(index, beta_errors, bar_width, label='Perceptrón non Logistic')
 
@@ -409,6 +411,7 @@ if __name__ == '__main__':
         config = json.load(f)
     '''
     for i in range(3):
+    
         # 3, 4, 6, 7, 8
         train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=2, k=6, learning_rate=0.01, epoch_limit=600,
                                                                   eps=0.1)
