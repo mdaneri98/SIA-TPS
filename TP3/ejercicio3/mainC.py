@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-from ejercicio3.Activation import Sigmoid
-from ejercicio3.neural_network import NeuralNetwork
+from Activation import Sigmoid
+from neural_network import NeuralNetwork
 
 
 def split_data(data, labels, train_ratio):

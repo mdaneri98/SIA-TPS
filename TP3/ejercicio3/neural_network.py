@@ -1,6 +1,6 @@
 import numpy as np
 
-from ejercicio3.Layer import Layer
+from Layer import Layer
 
 
 class NeuralNetwork:
