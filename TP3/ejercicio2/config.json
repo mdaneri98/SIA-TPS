@@ -4,5 +4,5 @@
     "train_percentage": 0.8,
     "max_epochs": 5000,
     "beta": 1,
-    "epsilon": 0.01
+    "epsilon": 0.1
 }

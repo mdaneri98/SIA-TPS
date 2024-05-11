@@ -78,50 +78,38 @@ expected_output = [[1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
 # Instancia de la red neuronal, corrección en las dimensiones
 dim = len(matrices[0])  # Tamaño de entrada correcto
 layer1_neurons = 10  # Tamaño de la capa oculta arbitrario
-layer2_neurons = 5
+layer2_neurons = 8
 output_size = 10
 learning_rate = 0.01  # Tasa de aprendizaje
 
-# Corrección: Asegurar que las dimensiones de las capas estén correctamente definidas
+
 model = NeuralNetwork([dim, layer1_neurons, layer2_neurons, output_size], learning_rate, Sigmoid(), verbose=False)
 
-epochs = 3000  # Número de épocas de entrenamiento
-errors = model.train(matrices, expected_output, epochs)  # Asumiendo que devuelve errores
 
-matrices = add_noise(matrices, 0.1)
+epochs = 5000
+errors = model.train(matrices, expected_output, epochs)
 
-# Predicciones y accuracy
-num_repetitions = 100
-
-
-# Realizar predicciones repetidas y almacenar resultados
-all_real_labels = []  # Lista para almacenar todas las etiquetas verdaderas
-all_predicted_labels = []  # Lista para almacenar todas las etiquetas predichas
-matriz_de_confusion = np.zeros((10, output_size))
+# Predicción
+num_repetitions = 500
+matriz_de_confusion = np.zeros((output_size, output_size))
 for _ in range(num_repetitions):
+    matrices = add_noise(matrices, 0.01)
     predictions = model.predict(matrices)
     predicted_labels = [np.argmax(prediction) for prediction in predictions]
-    real_labels = [np.argmax(label) for label in
-                   expected_output]  # Asumiendo que expected_output está en formato one-hot
+    real_labels = [np.argmax(label) for label in expected_output]  # One-hot to label
 
     for real, predicted in zip(real_labels, predicted_labels):
         matriz_de_confusion[real][predicted] += 1
 
-    all_real_labels.extend(real_labels)
-    all_predicted_labels.extend(predicted_labels)
-
-
-
+for row in matriz_de_confusion:
+    print(" ".join("{:4d}".format(int(x)) for x in row))
 
 # Normalizar la matriz de confusión dividiendo por el número de repeticiones
 matriz_de_confusion /= num_repetitions
 
-# Crear la matriz de confusión usando sklearn (no es necesario recalcularla)
-cm = confusion_matrix(all_real_labels, all_predicted_labels, labels=range(output_size))
-
 # Graficar la matriz de confusión
 plt.figure(figsize=(10, 8))
-ax = sns.heatmap(matriz_de_confusion, annot=True, fmt=".2f", cmap="Blues", xticklabels=range(10), ytickglabels=range(10))
+ax = sns.heatmap(matriz_de_confusion, annot=True, fmt=".2f", cmap="Blues", xticklabels=range(10), yticklabels=range(10))
 plt.xlabel('Predicted Label')
 plt.ylabel('True Label')
 plt.title('Normalized Confusion Matrix')

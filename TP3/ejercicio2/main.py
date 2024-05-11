@@ -189,73 +189,60 @@ def graph_mse_test_per_train_percentage(config):
 def graph_mse_per_train_percentage(config):
     learning_rate, _, epoch_limit, beta, eps = get_config_params(config)
     train_percentages = [0.2, 0.4, 0.6, 0.8]
-    bar_width = 0.35  # Ancho de las barras
+    bar_width = 0.25  # Ancho de las barras, reducido para ajustar 3 barras
     index = np.arange(len(train_percentages))  # Índices para las barras
 
-    # Crear figura para el gráfico de perceptrones lineales
-    plt.figure(figsize=(10, 5))
-    plt.title('Error de entrenamiento agrupado por training percentage - Perceptrón Lineal')
-    plt.xlabel('Porcentaje de entrenamiento')
-    plt.ylabel('Error cuadrático medio - SME')
-    # Inicializar listas para almacenar los errores de entrenamiento
+    # Listas para almacenar los errores de entrenamiento
     linear_errors = []
-    # Iterar sobre cada porcentaje de entrenamiento para perceptrón lineal
-    for i, train_percentage in enumerate(train_percentages):
-        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
-        dim = len(train_set[0])
-
-        linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
-        linear_train_output = linear_perceptron.train(train_set, train_expected_set,  False)
-        linear_errors.append(linear_train_output[3][-1] / dim)  # Obtener el último error de la lista
-    # Crear gráfico de barras para perceptrones lineales
-    plt.bar(index, linear_errors, bar_width, label='Perceptrón Lineal')
-    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-
-    # Crear figura para el gráfico de perceptrones no lineales
-    plt.figure(figsize=(10, 5))
-    plt.title('Error de entrenamiento agrupado por training percentage - Perceptrón Hiperbolic')
-    plt.xlabel('Porcentaje de entrenamiento')
-    plt.ylabel('Error cuadrático medio - SME')
-    # Inicializar listas para almacenar los errores de entrenamiento
     non_linear_errors = []
-    # Iterar sobre cada porcentaje de entrenamiento para perceptrón no lineal
+    log_errors = []
+
+    # Iterar sobre cada porcentaje de entrenamiento para cada tipo de perceptrón
     for i, train_percentage in enumerate(train_percentages):
         train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
         dim = len(train_set[0])
-        non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+
+        # Perceptrón Lineal
+        linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, 0.001)
+        linear_train_output = linear_perceptron.train(train_set, train_expected_set, False)
+        linear_errors.append(linear_train_output[3][-1] / dim)  # Error normalizado por dimensión
+
+        # Perceptrón Hiperbólico
+        non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, 0.00001)
         non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
-        non_linear_errors.append(non_linear_train_output[3][-1]  / dim)  # Obtener el último error de la lista
+        non_linear_errors.append(non_linear_train_output[3][-1] / dim)  # Error normalizado por dimensión
 
-    # Crear gráfico de barras para perceptrones no lineales
-    plt.bar(index, non_linear_errors, bar_width, label='Perceptrón Hiperbolic')
-    plt.xticks(index, [f'{percent*100}%' for percent in train_percentages])
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+        # Perceptrón Logístico
+        log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, 0.00001)
+        log_train_output = log_perceptron.train(train_set, train_expected_set, True)
+        log_errors.append(log_train_output[3][-1] / dim)  # Error normalizado por dimensión
 
-    # Crear figura para el gráfico de perceptrones no lineales
+    print(f"Lineal | Max epocas: {linear_train_output[0]}")
+    print(f"Hyperbólica | Max epocas: {non_linear_train_output[0]}")
+    print(f"Logística | Max epocas: {non_linear_train_output[0]}")
+
+    all_errors = linear_errors + non_linear_errors + log_errors
+    normalized_all_errors = normalize_01(all_errors)
+    normalized_linear_errors = normalized_all_errors[:len(linear_errors)]
+    normalized_non_linear_errors = normalized_all_errors[len(linear_errors):len(linear_errors) + len(non_linear_errors)]
+    normalized_beta_errors = normalized_all_errors[-len(log_errors):]
+
+    # Crear figura para el gráfico
     plt.figure(figsize=(10, 5))
-    plt.title('Error de entrenamiento agrupado por training percentage - Perceptrón Logistic')
+    plt.title('Error de entrenamiento agrupado por training percentage')
     plt.xlabel('Porcentaje de entrenamiento')
     plt.ylabel('Error cuadrático medio - SME')
-    log_errors =[]
-    for i, train_percentage in enumerate(train_percentages):
-        train_set, train_expected_set, test_set, test_expected_set = initialize_data(train_percentage)
-        dim = len(train_set[0])
 
-        log_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
-        log_train_output = log_perceptron.train(train_set, train_expected_set, True)
-        log_errors.append(log_train_output[3][-1] / dim)  # Obtener el último error de la lista
+    # Dibujar las barras
+    plt.bar(index - bar_width, normalized_linear_errors, bar_width, label='Perceptrón Lineal', align='center')
+    plt.bar(index, normalized_non_linear_errors, bar_width, label='Perceptrón Hiperbólico', align='center')
+    plt.bar(index + bar_width, normalized_beta_errors, bar_width, label='Perceptrón Logístico', align='center')
 
-    # Crear gráfico de barras para perceptrones no lineales
-    plt.bar(index + bar_width, log_errors, bar_width, label='Perceptrón Log')
-    plt.xticks(index + bar_width, [f'{percent*100}%' for percent in train_percentages])
+    # Configurar las etiquetas del eje x
+    plt.xticks(index, [f'{percent * 100}%' for percent in train_percentages])
     plt.legend()
     plt.grid(True)
+    plt.yscale('log')  # Usando escala logarítmica en el eje y
     plt.show()
 
 
@@ -274,7 +261,7 @@ def graph_mse_per_beta(config):
     plt.ylabel('Error cuadrático medio - SME')
 
     # Iterar sobre cada tasa de aprendizaje para perceptrón no lineal
-    for beta in [0.25, 0.50, 0.75,1]:
+    for beta in [0.25, 0.50, 0.75, 1]:
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
         non_linear_train_output = non_linear_perceptron.train(train_set, train_expected_set, True)
         plt.plot(range(1, non_linear_train_output[0] + 1), non_linear_train_output[3], label=f'beta={beta}')
