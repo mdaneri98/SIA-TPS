@@ -3,6 +3,7 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 from Activation import Sigmoid
+from ejercicio3.Optimazer import AdamOptimizer, GradientDescentOptimizer
 from neural_network import NeuralNetwork
 
 
@@ -14,7 +15,7 @@ def split_data(data, labels, train_ratio):
     train_indices = indices[:train_size]
     test_indices = indices[train_size:]
     return np.array(data)[train_indices], np.array(data)[test_indices], np.array(labels)[train_indices], \
-    np.array(labels)[test_indices]
+        np.array(labels)[test_indices]
 
 
 def min_max_normalize(lista):
@@ -85,7 +86,9 @@ layer2_neurons = 8
 output_size = 10
 learning_rate = 0.01  # Tasa de aprendizaje
 
-model = NeuralNetwork([dim, layer1_neurons, layer2_neurons, output_size], learning_rate, Sigmoid(), verbose=False)
+optimizer = AdamOptimizer(learning_rate, beta1=0.9, beta2=0.999, epsilon=0.01)
+# optimizer = GradientDescentOptimizer(learning_rate)
+model = NeuralNetwork([dim, layer1_neurons, layer2_neurons, output_size], Sigmoid(), optimizer, verbose=False)
 
 epochs = 5000
 errors = model.train(matrices, expected_output, epochs)

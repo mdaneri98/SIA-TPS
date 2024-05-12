@@ -11,6 +11,12 @@ class Neuron:
         self.activation = activation
         self.learn_rate = learn_rate
 
+    def calculate_gradient(self, inputs: np.ndarray, error: np.ndarray):
+        inputs = np.append(inputs, 1)  # Agregar bias
+        self.delta = self.output_dx * error
+        gradient = self.delta * inputs  # Element-wise multiplication
+        return gradient
+
     def calculate_output(self, inputs: np.ndarray):
         # Suma bias
         inputs = np.append(inputs, 1)

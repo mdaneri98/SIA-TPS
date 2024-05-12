@@ -37,7 +37,7 @@ def accuracy_for_with_std(model_params, data, labels, training_percentage, num_t
     X_train, X_test, y_train, y_test = split_data(data, labels, training_percentage)
     for _ in range(num_trials):
         dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer = model_params
-        model = NeuralNetwork([dim, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
+        model = NeuralNetwork([dim, hidden_size, output_size], Sigmoid(), optimizer, verbose=False)
         model.train(X_train, y_train, epochs)
         acc = accuracy_for_model(model, data, labels, eps)
         accuracies.append(acc)
@@ -47,18 +47,18 @@ def accuracy_for_with_std(model_params, data, labels, training_percentage, num_t
 
 # Datos y configuración
 matrices = [np.array(matrix).flatten() for matrix in read_data("TP3-ej3-digitos.txt")]
-expected_output = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+expected_output = np.array([[1], [0], [1], [0], [1], [0], [1], [0], [1], [0]])
 
 dim = len(matrices[0])
 hidden_size = 40
-output_size = 2
+output_size = 1
 learning_rate = 0.01
 eps = 0.1
 epochs = 1000
 training_percentages = [0.2, 0.4, 0.6, 0.8]
 
 # Optimizador ADAM
-optimizer = AdamOptimizer(learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=0.01)
+optimizer = GradientDescentOptimizer(learning_rate=0.01)
 accuracies_with_std = []
 for pct in training_percentages:
     model_params = (dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer)

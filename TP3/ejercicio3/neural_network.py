@@ -6,13 +6,13 @@ from Layer import Layer
 class NeuralNetwork:
     ERROR_MIN = 0.0001
 
-    def __init__(self, neurons_per_layer: list, learning_rate, activation, verbose=False):
+    def __init__(self, neurons_per_layer: list, activation, optimizer, verbose=False):
         self.verbose = verbose
+        self.optimizer = optimizer
         self.error_min = np.inf
         self.layers = np.array(
-            list(
-                Layer(neurons_per_layer[i], neurons_per_layer[i - 1], activation, learning_rate)
-                for i in range(1, len(neurons_per_layer))))
+            [Layer(neurons_per_layer[i], neurons_per_layer[i - 1], activation, optimizer.learning_rate)
+             for i in range(1, len(neurons_per_layer))])
 
     def get_inputs(self, current_layer, inputs):
         """
@@ -46,16 +46,17 @@ class NeuralNetwork:
             layer.propagation(self.get_inputs(index, inputs))
 
     def back_propagation(self, data, expected_value):
-        # Recorremos desde la capa de salida hasta la de inicio.
         for layer_index in range(len(self.layers) - 1, -1, -1):
-            # Inputs de la actual Layer.
+            # Inputs de la actual layer.
             inputs = self.get_inputs(layer_index, data)
             for index, neuron in enumerate(self.layers[layer_index].neurons):
-                
                 neuron_error = self.get_neuron_error(layer_index, index, expected_value)
                 if self.verbose:
                     print(f"Layer index: {layer_index} | Neuron Index: {index} | Neuron.output: {neuron.output} | Expected value: {expected_value} | Neuron error: {neuron_error}")
-                neuron.update_w(inputs, neuron_error)
+
+                gradient = neuron.calculate_gradient(inputs, neuron_error)
+                updated_weights = self.optimizer.update(neuron.weights, gradient)  # Actualizar pesos usando el optimizador
+                neuron.weights = updated_weights
 
     def calculate_error(self, expected_output):
         m = len(self.layers)

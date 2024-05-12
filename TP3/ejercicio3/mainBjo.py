@@ -27,13 +27,12 @@ def read_data(archivo):
 archive = "TP3-ej3-digitos.txt"
 
 matrices = [np.array(matrix).flatten() for matrix in read_data(archive)]
-
-expected_output = np.array([[1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1]])
+expected_output = np.array([[1], [0], [1], [0], [1], [0], [1], [0], [1], [0]])
 #output is 1 if it s a mutiply of 2 and -1 whereas ; the values are in [-1;1]
 
 input_size = len(matrices[0])
 hidden_size = 15
-output_size = 2
+output_size = 1
 epochs = 5000
 
 def errors_training_learning_rate1():
@@ -47,7 +46,8 @@ def errors_training_learning_rate1():
         for run in range(1, run_number + 1):
 
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
-            model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
+            optimizer = GradientDescentOptimizer(learning_rate)
+            model = NeuralNetwork([input_size, hidden_size, output_size], Sigmoid(), optimizer, verbose=False)
             errors = model.train(X_train, y_train, epochs)
             all_errors.append(errors)
         mean_errors = np.mean(all_errors, axis=0)
