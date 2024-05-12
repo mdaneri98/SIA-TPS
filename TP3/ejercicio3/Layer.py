@@ -1,6 +1,7 @@
 import numpy as np
 from Neuron import Neuron
 
+
 class Layer:
 
     def __init__(self, num_neurons, prev_num_neurons, activation, learn_rate):

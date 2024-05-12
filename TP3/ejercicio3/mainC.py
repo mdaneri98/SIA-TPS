@@ -2,10 +2,9 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-import math
+from Activation import Sigmoid
+from neural_network import NeuralNetwork
 
-from ejercicio3.Optimazer import GradientDescentOptimizer
-from perceptron_multicapa import NeuralNetwork
 
 def split_data(data, labels, train_ratio):
     indices = np.arange(len(data))
@@ -58,47 +57,62 @@ def graph_confusion_matrix(predictions, y_test, labels=None):
     plt.title('Matriz de Confusión')
     plt.show()
 
-data = read_data("TP3-ej3-digitos.txt")
-
-# Cargar los datos de los dígitos
-matrices = [np.array(matrix).flatten() for matrix in data]
-expected_output = np.array([i for i in range(len(matrices))])
-
-data = add_noise(matrices, 0.1)
-
-# Dividir los datos en conjunto de entrenamiento y conjunto de prueba (80% entrenamiento, 20% prueba)
-x_data, _, y_data, _ = split_data(matrices, expected_output, 1)
 
 
 
-num_repetitions = 100
-all_predicted_labels = []
-all_real_labels = []
+# Convertir matrices 5x7 a vectores de 35 elementos
+archivo = "TP3-ej3-digitos.txt"
+matrices = read_data(archivo)
 
+
+matrices = [np.array(matrix).flatten() for matrix in matrices]
+expected_output = [[1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                     [0., 1., 0., 0., 0., 0., 0., 0., 0., 0.],
+                     [0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
+                     [0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 1., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 1., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]
+
+# Instancia de la red neuronal, corrección en las dimensiones
+dim = len(matrices[0])  # Tamaño de entrada correcto
+layer1_neurons = 10  # Tamaño de la capa oculta arbitrario
+layer2_neurons = 8
+output_size = 10
+learning_rate = 0.01  # Tasa de aprendizaje
+
+
+model = NeuralNetwork([dim, layer1_neurons, layer2_neurons, output_size], learning_rate, Sigmoid(), verbose=False)
+
+
+epochs = 5000
+errors = model.train(matrices, expected_output, epochs)
+
+# Predicción
+num_repetitions = 500
+matriz_de_confusion = np.zeros((output_size, output_size))
 for _ in range(num_repetitions):
-    # Crear instancia de la red neuronal para clasificación de dígitos (10 neuronas de salida)
-    model = NeuralNetwork(dim=len(x_data[0]), hidden_size=10, output_size=10, learning_rate=0.01, eps=0.1,
-                          optimizer=GradientDescentOptimizer(0.01))
-
-    # Entrenar la red neuronal con los datos de entrenamiento
-    epochs = 300
-    model.train(x_data, y_data, epochs)
-
-    predictions = model.predict(x_data)
+    matrices = add_noise(matrices, 0.01)
+    predictions = model.predict(matrices)
     predicted_labels = [np.argmax(prediction) for prediction in predictions]
-    all_predicted_labels.extend(predicted_labels)
-    all_real_labels.extend(y_data)
+    real_labels = [np.argmax(label) for label in expected_output]  # One-hot to label
 
-# Crear la matriz de confusión con todas las predicciones
-cm = confusion_matrix(all_real_labels, all_predicted_labels, labels=range(10))
+    for real, predicted in zip(real_labels, predicted_labels):
+        matriz_de_confusion[real][predicted] += 1
 
-# Calcular el promedio de cada casillero
-average_cm = cm / num_repetitions
+for row in matriz_de_confusion:
+    print(" ".join("{:4d}".format(int(x)) for x in row))
 
-# Graficar la matriz de confusión con los promedios
-plt.figure(figsize=(8, 6))
-sns.heatmap(average_cm, annot=True, fmt=".2f", cmap="Blues", xticklabels=range(10), yticklabels=range(10))
-plt.xlabel('Predicción')
-plt.ylabel('Real')
-plt.title('Matriz de Confusión Promedio')
+# Normalizar la matriz de confusión dividiendo por el número de repeticiones
+matriz_de_confusion /= num_repetitions
+
+# Graficar la matriz de confusión
+plt.figure(figsize=(10, 8))
+ax = sns.heatmap(matriz_de_confusion, annot=True, fmt=".2f", cmap="Blues", xticklabels=range(10), yticklabels=range(10))
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Normalized Confusion Matrix')
 plt.show()

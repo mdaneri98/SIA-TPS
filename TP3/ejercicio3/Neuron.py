@@ -12,8 +12,12 @@ class Neuron:
         self.learn_rate = learn_rate
 
     def calculate_output(self, inputs: np.ndarray):
+        # Suma bias
         inputs = np.append(inputs, 1)
+
+        # Similar a .dot pero mejor para manejar matrices multidimensionales.
         e = np.inner(inputs, self.weights)
+
         self.output = self.activation.apply(e)
         self.output_dx = self.activation.apply_dx(e)
 

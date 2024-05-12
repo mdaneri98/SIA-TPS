@@ -15,20 +15,16 @@ class Activation(ABC):
 
 class Sigmoid(Activation):
 
-    def apply(x):
-        if -700 < x < 700:
-            return np.exp(x) / (1 + np.exp(x))
-        return 0 if x < 0 else 1
+    def apply(self, x):
+        return np.exp(x) / (1 + np.exp(x))
 
-    def apply_dx(x):
-        if -355 < x < 355:
-            return np.exp(x) / np.power(np.exp(x) + 1, 2)
-        return 0
+    def apply_dx(self, x):
+        return np.exp(x) / np.power(np.exp(x) + 1, 2)
 
 
 class Tanh(Activation):
-    def apply(excitation):
+    def apply(self,excitation):
         return np.tanh(excitation)
 
-    def apply_dx(excitation):
+    def apply_dx(self,excitation):
         return 1 - np.tanh(excitation) ** 2
