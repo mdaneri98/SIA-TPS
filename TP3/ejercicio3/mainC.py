@@ -13,12 +13,15 @@ def split_data(data, labels, train_ratio):
     train_size = int(len(data) * train_ratio)
     train_indices = indices[:train_size]
     test_indices = indices[train_size:]
-    return np.array(data)[train_indices], np.array(data)[test_indices], np.array(labels)[train_indices], np.array(labels)[test_indices]
+    return np.array(data)[train_indices], np.array(data)[test_indices], np.array(labels)[train_indices], \
+    np.array(labels)[test_indices]
+
 
 def min_max_normalize(lista):
     min_val = np.min(lista)
     max_val = np.max(lista)
     return (lista - min_val) / (max_val - min_val)
+
 
 def read_data(archivo):
     with open(archivo) as file:
@@ -36,11 +39,12 @@ def add_noise(data, noise_level):
     noisy_data = []
     for image in data:
         noisy_image = image.copy()
-        noise = np.random.choice([0, 1], size=image.shape, p=[1-noise_level, noise_level])
+        noise = np.random.choice([0, 1], size=image.shape, p=[1 - noise_level, noise_level])
         noisy_image += noise
         noisy_image = np.clip(noisy_image, 0, 1)  # Clip para asegurar que los valores estén entre 0 y 1
         noisy_data.append(noisy_image)
     return np.array(noisy_data)
+
 
 def graph_confusion_matrix(predictions, y_test, labels=None):
     # Convertir las predicciones a etiquetas discretas
@@ -58,24 +62,21 @@ def graph_confusion_matrix(predictions, y_test, labels=None):
     plt.show()
 
 
-
-
 # Convertir matrices 5x7 a vectores de 35 elementos
 archivo = "TP3-ej3-digitos.txt"
 matrices = read_data(archivo)
 
-
 matrices = [np.array(matrix).flatten() for matrix in matrices]
 expected_output = [[1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                     [0., 1., 0., 0., 0., 0., 0., 0., 0., 0.],
-                     [0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
-                     [0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
-                     [0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
-                     [0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
-                     [0., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
-                     [0., 0., 0., 0., 0., 0., 0., 1., 0., 0.],
-                     [0., 0., 0., 0., 0., 0., 0., 0., 1., 0.],
-                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]
+                   [0., 1., 0., 0., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 1., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 0., 1., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]
 
 # Instancia de la red neuronal, corrección en las dimensiones
 dim = len(matrices[0])  # Tamaño de entrada correcto
@@ -84,9 +85,7 @@ layer2_neurons = 8
 output_size = 10
 learning_rate = 0.01  # Tasa de aprendizaje
 
-
 model = NeuralNetwork([dim, layer1_neurons, layer2_neurons, output_size], learning_rate, Sigmoid(), verbose=False)
-
 
 epochs = 5000
 errors = model.train(matrices, expected_output, epochs)

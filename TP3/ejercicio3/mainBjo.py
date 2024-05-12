@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from neural_network import NeuralNetwork
 from Activation import Sigmoid
@@ -30,27 +28,27 @@ archive = "TP3-ej3-digitos.txt"
 
 matrices = [np.array(matrix).flatten() for matrix in read_data(archive)]
 
-expected_output = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+expected_output = np.array([[1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1], [1, 0], [0, 1]])
 #output is 1 if it s a mutiply of 2 and -1 whereas ; the values are in [-1;1]
 
 input_size = len(matrices[0])
 hidden_size = 15
-output_size = 1
+output_size = 2
 epochs = 5000
 
-def errors_training_learning_rate():
+def errors_training_learning_rate1():
     training_percentage = 1.0
     run_number = 5
-    
+
     learning_rates = [0.1, 0.01, 0.001]
     plt.figure()  # Créer une nouvelle figure pour le graphique global
     for learning_rate in learning_rates:
         all_errors = []
         for run in range(1, run_number + 1):
-            
+
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
             model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
-            errors = model.train(X_train, y_train, epochs, verbose=False)
+            errors = model.train(X_train, y_train, epochs)
             all_errors.append(errors)
         mean_errors = np.mean(all_errors, axis=0)
         plt.plot(np.arange(1, len(mean_errors) + 1), mean_errors, label='Learning Rate: {}'.format(learning_rate))
@@ -66,66 +64,62 @@ def errors_training_learning_rate():
 def errors_test_training_rate():
     learning_rate = 0.1
     run_number = 5
-    training_percentages = [ 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80]
-    
+    training_percentages = [0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80]
+
     mean_errors = []  # Pour stocker les erreurs moyennes pour chaque pourcentage d'entraînement
-    
+
     for training_percentage in training_percentages:
         all_errors = []
         for run in range(1, run_number + 1):
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
             model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
-            _ = model.train(X_train, y_train, epochs, verbose=False)
+            _ = model.train(X_train, y_train, epochs)
             result = model.predict(X_test)
-            errors = [(result[i] - y_test[i])**2 for i in range(len(result))] 
+            errors = [(result[i] - y_test[i])**2 for i in range(len(result))]
             error = np.mean(errors)  # Calcul de l'erreur moyenne
             all_errors.append(error*training_percentage)
         mean_error = np.mean(all_errors)  # Calcul de l'erreur moyenne sur les 5 exécutions
         mean_errors.append(mean_error)
-    
+
     # Tracer les barres
     plt.bar(np.arange(len(training_percentages)), mean_errors)
-    plt.xlabel('Training Percentage')
-    plt.ylabel('Mean Error')
-    plt.title('Mean Error for Different Training Percentages (Learning Rate: {})'.format(learning_rate))
+    plt.xlabel('Porcentaje de entrenamiento')
+    plt.ylabel('Error medio')
+    'Error medio '
+    plt.title('Error medio según porcentaje de entrenamiento (Learning Rate: {})'.format(learning_rate))
     plt.xticks(np.arange(len(training_percentages)), [str(int(p * 100)) + '%' for p in training_percentages])
     plt.grid(True)
     plt.show()
 
-            
-def errors_training_training_rate():
+
+def errors_training_training_rate2():
     learning_rate = 0.1
     run_number = 5
-    training_percentages = [ 0.20, 0.50,  0.80]
+    training_percentages = [0.20, 0.50,  0.80]
     run_number = 1
-    
+
     plt.figure()  # Créer une nouvelle figure pour le graphique global
     for training_percentage in training_percentages:
         all_errors = []
         for run in range(1, run_number + 1):
-            
+
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
             model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
-            errors = model.train(X_train, y_train, epochs, verbose=False)
+            errors = model.train(X_train, y_train, epochs)
             all_errors.append(errors)
         mean_errors = np.mean(all_errors, axis=0)
         plt.plot(np.arange(1, len(mean_errors) + 1), mean_errors, label='Trainingpercentage : {}'.format(training_percentage))
 
     plt.yscale('log')
-    plt.xlabel('Iterations')
+    plt.xlabel('Época')
     plt.ylabel('Errors')
-    plt.title('Evolution of Errors medium during depending several learning rate on 5 runs')
+    plt.title('Evolución del error medio según learning rate')
     plt.legend()
     plt.grid(True)
     plt.show()
 
 
-
-
-
-
-
-errors_training_learning_rate()
-errors_training_training_rate()
+errors_training_learning_rate1()
+errors_training_training_rate2()
 errors_test_training_rate()
 

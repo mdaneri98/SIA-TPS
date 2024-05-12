@@ -35,7 +35,7 @@ class NeuralNetwork:
             # Si es la última layer => Es la capa de salida => Error calculado como la diferencia entre lo esperado y obtenido.
             neuron = self.layers[current_layer].neurons[current_neuron]
             
-            return expected_value - neuron.output
+            return expected_value[current_neuron] - neuron.output
 
     def plot(self):
         for layer in self.layers:
@@ -76,7 +76,7 @@ class NeuralNetwork:
                 self.forward_propagation(x_values[i])
                 self.back_propagation(x_values[i], expected_output[i])
 
-                error = self.calculate_error(expected_output)
+                error = self.calculate_error(expected_output[i])
                 if self.verbose:
                     print(f"{epoch}/{epoch_limit} | Error: {error}")
 
