@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from Activation import Sigmoid
 from Optimazer import *
 from ejercicio3.neural_network import NeuralNetwork
 
@@ -36,7 +37,7 @@ def accuracy_for_with_std(model_params, data, labels, training_percentage, num_t
     X_train, X_test, y_train, y_test = split_data(data, labels, training_percentage)
     for _ in range(num_trials):
         dim, hidden_size, output_size, learning_rate, epochs, eps, optimizer = model_params
-        model = NeuralNetwork(dim, hidden_size, output_size, learning_rate, epochs, optimizer)
+        model = NeuralNetwork([dim, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
         model.train(X_train, y_train, epochs)
         acc = accuracy_for_model(model, data, labels, eps)
         accuracies.append(acc)

@@ -23,8 +23,8 @@ class Sigmoid(Activation):
 
 
 class Tanh(Activation):
-    def apply(excitation):
+    def apply(self,excitation):
         return np.tanh(excitation)
 
-    def apply_dx(excitation):
+    def apply_dx(self,excitation):
         return 1 - np.tanh(excitation) ** 2

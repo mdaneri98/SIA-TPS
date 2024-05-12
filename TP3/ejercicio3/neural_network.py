@@ -1,10 +1,10 @@
 import numpy as np
 
-from ejercicio3.Layer import Layer
+from Layer import Layer
 
 
 class NeuralNetwork:
-    ERROR_MIN = 0.01
+    ERROR_MIN = 0.0001
 
     def __init__(self, neurons_per_layer: list, learning_rate, activation, verbose=False):
         self.verbose = verbose
@@ -34,7 +34,8 @@ class NeuralNetwork:
         else:
             # Si es la última layer => Es la capa de salida => Error calculado como la diferencia entre lo esperado y obtenido.
             neuron = self.layers[current_layer].neurons[current_neuron]
-            return expected_value[current_neuron] - neuron.output
+            
+            return expected_value - neuron.output
 
     def plot(self):
         for layer in self.layers:
@@ -50,6 +51,7 @@ class NeuralNetwork:
             # Inputs de la actual Layer.
             inputs = self.get_inputs(layer_index, data)
             for index, neuron in enumerate(self.layers[layer_index].neurons):
+                
                 neuron_error = self.get_neuron_error(layer_index, index, expected_value)
                 if self.verbose:
                     print(f"Layer index: {layer_index} | Neuron Index: {index} | Neuron.output: {neuron.output} | Expected value: {expected_value} | Neuron error: {neuron_error}")
@@ -74,7 +76,7 @@ class NeuralNetwork:
                 self.forward_propagation(x_values[i])
                 self.back_propagation(x_values[i], expected_output[i])
 
-                error = self.calculate_error(expected_output[i])
+                error = self.calculate_error(expected_output)
                 if self.verbose:
                     print(f"{epoch}/{epoch_limit} | Error: {error}")
 

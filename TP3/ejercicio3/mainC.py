@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-from ejercicio3.Activation import Sigmoid
-from ejercicio3.neural_network import NeuralNetwork
+from Activation import Sigmoid
+from neural_network import NeuralNetwork
 
 
 def split_data(data, labels, train_ratio):
@@ -57,12 +57,14 @@ def graph_confusion_matrix(predictions, y_test, labels=None):
     plt.title('Matriz de Confusión')
     plt.show()
 
-data = read_data("TP3-ej3-digitos.txt")
+
 
 
 # Convertir matrices 5x7 a vectores de 35 elementos
 archivo = "TP3-ej3-digitos.txt"
 matrices = read_data(archivo)
+
+
 matrices = [np.array(matrix).flatten() for matrix in matrices]
 expected_output = [[1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                      [0., 1., 0., 0., 0., 0., 0., 0., 0., 0.],
