@@ -146,16 +146,19 @@ def graph_mse_test_per_train_percentage(config):
 
         # Perceptrón Lineal
         linear_perceptron = LinearPerceptron(dim, learning_rate, epoch_limit, eps)
+        linear_perceptron.train(train_set, train_expected_set, False)
         linear_test_output = linear_perceptron.predict(test_set, test_expected_set, False)
         linear_errors.append(linear_test_output[1])
 
         # Perceptrón Hiperbólico
         non_linear_perceptron = HypPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        non_linear_perceptron.train(train_set, train_expected_set, True)
         non_linear_test_output = non_linear_perceptron.predict(test_set, test_expected_set, True)
         non_linear_errors.append(non_linear_test_output[1])
 
         # Perceptrón Logístico
         beta_perceptron = LogPerceptron(dim, beta, learning_rate, epoch_limit, eps)
+        beta_perceptron.train(train_set, train_expected_set, True)
         beta_test_output = beta_perceptron.predict(test_set, test_expected_set, True)
         beta_errors.append(beta_test_output[1])
 
@@ -379,18 +382,18 @@ def plot_accuracies(perceptron_type: int, train_accuracies, test_accuracies):
 if __name__ == '__main__':
     with open('./config.json', 'r') as f:
         config = json.load(f)
-    '''
+
     for i in range(3):
     
         # 3, 4, 6, 7, 8
         train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=2, k=6, learning_rate=0.01, epoch_limit=600,
                                                                   eps=0.1)
         plot_accuracies(i, train_accuracies, test_accuracies)
-    '''
-    #graph_mse_per_learning_rate(config)
+
+    graph_mse_per_learning_rate(config)
 
     graph_mse_per_train_percentage(config)
-    #graph_mse_per_beta(config)
+    graph_mse_per_beta(config)
     graph_mse_test_per_train_percentage(config)
 
 

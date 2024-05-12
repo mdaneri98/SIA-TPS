@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from perceptron_multicapa import NeuralNetwork
 from Optimazer import *
+from ejercicio3.neural_network import NeuralNetwork
+
 
 def split_data(data, labels, train_ratio):
     indices = np.arange(len(data))

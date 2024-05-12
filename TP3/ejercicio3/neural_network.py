@@ -63,7 +63,7 @@ class NeuralNetwork:
             aux_sum += (expected_output[i] - neurons[i].output) ** 2
         return aux_sum
 
-    def train(self, x_values, expected_output, epoch_limit, verbose=False):
+    def train(self, x_values, expected_output, epoch_limit):
         epoch = 0
         errors = []
         positions = np.arange(0, len(x_values))

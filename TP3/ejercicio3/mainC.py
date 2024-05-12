@@ -93,7 +93,7 @@ errors = model.train(matrices, expected_output, epochs)
 num_repetitions = 500
 matriz_de_confusion = np.zeros((output_size, output_size))
 for _ in range(num_repetitions):
-    matrices = add_noise(matrices, 0.01)
+    matrices = add_noise(matrices, 0.001)
     predictions = model.predict(matrices)
     predicted_labels = [np.argmax(prediction) for prediction in predictions]
     real_labels = [np.argmax(label) for label in expected_output]  # One-hot to label
