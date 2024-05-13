@@ -141,17 +141,17 @@ def errors_training_optimizer(training_ratio,archi):
 
 
 
-#errors_training_learning_rate("Gradient")
-#errors_training_learning_rate("Adam")
-
-# errors_training_optimizer(0.20,[input_size, hidden_size, output_size])
-# errors_training_optimizer(0.20,[input_size, hidden_size,15, output_size])
-# errors_training_optimizer(0.50,[input_size, hidden_size, output_size])
-# errors_training_optimizer(0.50,[input_size, hidden_size,15, output_size])
-# errors_training_optimizer(0.80,[input_size, hidden_size, output_size])
-# errors_training_optimizer(0.80,[input_size, hidden_size,15, output_size])
+errors_training_learning_rate("Gradient")
+errors_training_learning_rate("Adam")
+ 
+errors_training_optimizer(0.20,[input_size, hidden_size, output_size])
+errors_training_optimizer(0.20,[input_size, hidden_size,15, output_size])
+errors_training_optimizer(0.50,[input_size, hidden_size, output_size])
+errors_training_optimizer(0.50,[input_size, hidden_size,15, output_size])
+errors_training_optimizer(0.80,[input_size, hidden_size, output_size])
+errors_training_optimizer(0.80,[input_size, hidden_size,15, output_size])
 
 errors_test_training_rate("Gradient",[input_size, hidden_size, output_size])
-#errors_test_training_rate("Gradient",[input_size, hidden_size,15, output_size])
-#errors_test_training_rate("Adam",[input_size, hidden_size, output_size])
+errors_test_training_rate("Gradient",[input_size, hidden_size,15, output_size])
+errors_test_training_rate("Adam",[input_size, hidden_size, output_size])
 errors_test_training_rate("Adam",[input_size, hidden_size,15, output_size])
