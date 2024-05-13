@@ -35,18 +35,20 @@ hidden_size = 15
 output_size = 1
 epochs = 5000
 
-def errors_training_learning_rate1():
+def errors_training_learning_rate(opti):
+    
     training_percentage = 1.0
     run_number = 5
-
     learning_rates = [0.1, 0.01, 0.001]
     plt.figure()  # Créer une nouvelle figure pour le graphique global
     for learning_rate in learning_rates:
         all_errors = []
         for run in range(1, run_number + 1):
-
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
-            optimizer = GradientDescentOptimizer(learning_rate)
+            if (opti == "Adam"):
+                optimizer = AdamOptimizer(learning_rate, beta1=0.9, beta2=0.999, epsilon=0.01)
+            else : 
+                optimizer = GradientDescentOptimizer(learning_rate)
             model = NeuralNetwork([input_size, hidden_size, output_size], Sigmoid(), optimizer, verbose=False)
             errors = model.train(X_train, y_train, epochs)
             all_errors.append(errors)
@@ -61,7 +63,7 @@ def errors_training_learning_rate1():
     plt.grid(True)
     plt.show()
 
-def errors_test_training_rate():
+def errors_test_training_rate(opti,archi):
     learning_rate = 0.1
     run_number = 5
     training_percentages = [0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80]
@@ -72,12 +74,17 @@ def errors_test_training_rate():
         all_errors = []
         for run in range(1, run_number + 1):
             X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
-            model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
+            if (opti == "Adam"):
+                print ("caca")
+                optimizer = AdamOptimizer(learning_rate, beta1=0.9, beta2=0.999, epsilon=0.01)
+            else : 
+                optimizer = GradientDescentOptimizer(learning_rate)
+            model = NeuralNetwork(archi,  Sigmoid(),optimizer, verbose=False)
             _ = model.train(X_train, y_train, epochs)
             result = model.predict(X_test)
             errors = [(result[i] - y_test[i])**2 for i in range(len(result))]
             error = np.mean(errors)  # Calcul de l'erreur moyenne
-            all_errors.append(error*training_percentage)
+            all_errors.append(error/(training_percentage*10))
         mean_error = np.mean(all_errors)  # Calcul de l'erreur moyenne sur les 5 exécutions
         mean_errors.append(mean_error)
 
@@ -92,34 +99,59 @@ def errors_test_training_rate():
     plt.show()
 
 
-def errors_training_training_rate2():
+def errors_training_optimizer(training_ratio,archi):
     learning_rate = 0.1
     run_number = 5
-    training_percentages = [0.20, 0.50,  0.80]
-    run_number = 1
+    training_percentage = training_ratio
 
     plt.figure()  # Créer une nouvelle figure pour le graphique global
-    for training_percentage in training_percentages:
-        all_errors = []
-        for run in range(1, run_number + 1):
+    
+    all_errors = []
+    for run in range(1, run_number + 1):
 
-            X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
-            model = NeuralNetwork([input_size, hidden_size, output_size], learning_rate, Sigmoid(), verbose=False)
-            errors = model.train(X_train, y_train, epochs)
-            all_errors.append(errors)
-        mean_errors = np.mean(all_errors, axis=0)
-        plt.plot(np.arange(1, len(mean_errors) + 1), mean_errors, label='Trainingpercentage : {}'.format(training_percentage))
+        X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
+        optimizer = AdamOptimizer(learning_rate, beta1=0.9, beta2=0.999, epsilon=0.01)
+        model = NeuralNetwork(archi, Sigmoid(),optimizer, verbose=False)
+        errors = model.train(X_train, y_train, epochs)
+        all_errors.append(errors)
+    mean_errors = np.mean(all_errors, axis=0)
+    plt.plot(np.arange(1, len(mean_errors) + 1), mean_errors, label='Adam')
+
+
+    all_errors = []
+    for run in range(1, run_number + 1):
+
+        X_train, X_test, y_train, y_test = split_data(matrices, expected_output, training_percentage)
+        optimizer = GradientDescentOptimizer(learning_rate)
+        model = NeuralNetwork(archi, Sigmoid(),optimizer, verbose=False)
+        errors = model.train(X_train, y_train, epochs)
+        all_errors.append(errors)
+    mean_errors = np.mean(all_errors, axis=0)
+    plt.plot(np.arange(1, len(mean_errors) + 1), mean_errors, label='GradientDescent')
 
     plt.yscale('log')
     plt.xlabel('Época')
     plt.ylabel('Errors')
-    plt.title('Evolución del error medio según learning rate')
+    plt.title('Evolución del error medio con {} del data set para entrenar'.format(training_percentage))
     plt.legend()
     plt.grid(True)
     plt.show()
 
 
-errors_training_learning_rate1()
-errors_training_training_rate2()
-errors_test_training_rate()
 
+
+
+#errors_training_learning_rate("Gradient")
+#errors_training_learning_rate("Adam")
+
+# errors_training_optimizer(0.20,[input_size, hidden_size, output_size])
+# errors_training_optimizer(0.20,[input_size, hidden_size,15, output_size])
+# errors_training_optimizer(0.50,[input_size, hidden_size, output_size])
+# errors_training_optimizer(0.50,[input_size, hidden_size,15, output_size])
+# errors_training_optimizer(0.80,[input_size, hidden_size, output_size])
+# errors_training_optimizer(0.80,[input_size, hidden_size,15, output_size])
+
+errors_test_training_rate("Gradient",[input_size, hidden_size, output_size])
+#errors_test_training_rate("Gradient",[input_size, hidden_size,15, output_size])
+#errors_test_training_rate("Adam",[input_size, hidden_size, output_size])
+errors_test_training_rate("Adam",[input_size, hidden_size,15, output_size])
