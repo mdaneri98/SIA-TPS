@@ -366,18 +366,18 @@ def plot_accuracies(perceptron_type: int, train_accuracies, test_accuracies):
     width = 0.35
 
     fig, ax = plt.subplots()
-    ax.bar(x - width / 2, train_accuracies, width, label='Precisión de train')
-    ax.bar(x + width / 2, test_accuracies, width, label='Precisión de test')
+    ax.bar(x - width / 2, train_accuracies, width, label='Accuracy de train')
+    ax.bar(x + width / 2, test_accuracies, width, label='Accuracy de test')
 
     ax.set_xlabel('Número de partición elegida para training set')
-    ax.set_ylabel('Precisión')
+    ax.set_ylabel('Accuracy')
 
     if perceptron_type == 0:
-        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nLineal')
+        ax.set_title('Accuracy para cada iteración sobre el conjunto partido de datos\nLineal')
     elif perceptron_type == 1:
-        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nHyperbólica')
+        ax.set_title('Accuracy para cada iteración sobre el conjunto partido de datos\nHyperbólica')
     else:
-        ax.set_title('Precisión para cada iteración sobre el conjunto partido de datos\nLogística')
+        ax.set_title('Accuracy para cada iteración sobre el conjunto partido de datos\nLogística')
 
     ax.set_xticks(x)
     ax.legend()
