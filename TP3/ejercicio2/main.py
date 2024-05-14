@@ -318,19 +318,31 @@ def cross_validate_perceptron(perceptron_type: int = 0, k=5, learning_rate=0.01,
 
         scale = not (perceptron_type == 0)
 
+        """
+            Se elige el epsilon, para cada modelo según un error relativo esperado de 0.1
+            Según la salida de la función de activación de cada perceptrón, se ajusta el epsilon.
+            Por ej. La salida del hyperbólico está entre -1 y 1 => Se multiplica el relativo por 2
+            Por ej. La salida del Lineal está entre -10 y 10 => Se multiplica el relativo por 20  
+        """
+        acceptable_error_percentage = 0.1  # Error relativo
+        epsilon_lineal = acceptable_error_percentage * 20  # Suponiendo salida de activación es entre [-10, 10]
+        epsilon_hyperbolic = acceptable_error_percentage * 2  # [-1, 1]
+        epsilon_logistic = acceptable_error_percentage * 1  # [0, 1]
+
         # Inicializar y entrenar el perceptrón no lineal
         if perceptron_type == 0:
             perceptron = LinearPerceptron(dim=len(x_train[0]), learning_rate=learning_rate,
-                                          limit=epoch_limit, eps=eps)
+                                          limit=epoch_limit, eps=epsilon_lineal)
             _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
         elif perceptron_type == 1:
             perceptron = HypPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
-                                       limit=epoch_limit, eps=eps)
+                                       limit=epoch_limit, eps=epsilon_hyperbolic)
             _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
         else:
             perceptron = LogPerceptron(dim=len(x_train[0]), beta=1.0, learning_rate=learning_rate,
-                                       limit=epoch_limit, eps=eps)
+                                       limit=epoch_limit, eps=epsilon_logistic)
             _, _, _, errors = perceptron.train(x_train, y_train, scale=scale)
+
 
         # Calcular la precisión en el conjunto de entrenamiento
         if scale:
@@ -386,8 +398,8 @@ if __name__ == '__main__':
     for i in range(3):
     
         # 3, 4, 6, 7, 8
-        train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=2, k=6, learning_rate=0.01, epoch_limit=600,
-                                                                  eps=0.1)
+        train_accuracies, test_accuracies = cross_validate_perceptron(perceptron_type=i, k=6, learning_rate=0.01,
+                                                                      epoch_limit=600)
         plot_accuracies(i, train_accuracies, test_accuracies)
 
     graph_mse_per_learning_rate(config)
