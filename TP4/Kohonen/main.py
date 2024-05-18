@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from KohonenNetwork import *
+import seaborn as sns
+
 
 
 def get_data():
@@ -14,7 +16,7 @@ def get_data():
 
 
 def standarize_data(input_data):
-    data_standardized = np.copy(input_data)  # Copia los datos para no modificar el original
+    data_standardized = np.copy(input_data)
     means = np.mean(data_standardized, axis=0)
     stdevs = np.std(data_standardized, axis=0)
     data_standardized = (data_standardized - means) / stdevs
@@ -94,6 +96,40 @@ def plot_neighbor_distances(network, radius):
     plt.title('Distribution of Distances to Neighboring Neurons')
     plt.show()
 
+
+def analyze_association(network, data):
+    association_count = np.zeros(network.grid_shape)
+    for sample in data:
+        bmu_position, _ = network.predict(sample)
+        association_count[bmu_position] += 1
+    return association_count
+
+
+def plot_confusion_matrix(association_count):
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(association_count, annot=True, fmt=".0f", cmap="Blues")
+    plt.xlabel("Columna de Neurona")
+    plt.ylabel("Fila de Neurona")
+    plt.title("Matriz de Confusión")
+    plt.show()
+
+# Función para entrenar la red de Kohonen y analizar la asociación para una variable específica
+def analyze_variable(network, input_data, variable_index, variables):
+    network.train(num_epochs=100)
+    association_count = analyze_association(network, input_data[:, [variable_index]])
+
+    plt.figure(figsize=(8, 6))
+    for i in range(association_count.shape[0]):
+        for j in range(association_count.shape[1]):
+            plt.text(j, i, f"{association_count[i, j]:.2f}", ha='center', va='center', color='black')
+    plt.imshow(association_count, cmap='Blues')
+    plt.colorbar()
+    plt.title(f'Asociación de elementos a cada neurona para la variable "{variables[variable_index]}"')
+    plt.xlabel("Columna de Neurona")
+    plt.ylabel("Fila de Neurona")
+    plt.show()
+
+
 def main():
     countries, labels, data = get_data()
 
@@ -114,6 +150,16 @@ def main():
 
     plot_average_neighbor_distances(network.calculate_unified_distances(initial_radius), k)
 
+    association_count = analyze_association(network, standarized_data)
+    print("Cantidad de elementos asociados a cada neurona:")
+    print(association_count)
+    plot_confusion_matrix(association_count)
+
+    variables = ['Area', 'GDP', 'Inflation', 'Life.expect', 'Military', 'Pop.growth', 'Unemployment']
+
+    # Graficar los resultados para cada variable
+    for i, variable in enumerate(variables):
+        analyze_variable(network, standarized_data, i, variables)
 
 if __name__ == "__main__":
     main()
