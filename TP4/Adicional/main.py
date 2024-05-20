@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
@@ -55,6 +56,17 @@ def plot_pca_index_by_country(countries, principal_df):
     plt.show()
 
 
+def plot_pca_variance(explained_variance):
+    cumulative_variance = np.cumsum(explained_variance)
+    plt.figure(figsize=(14, 8))
+    plt.plot(cumulative_variance, marker='o', linestyle='-', color='b')
+    plt.xlabel(f"Componente principal")
+    plt.ylabel('Varianza acumulada')
+    plt.title('Varianza acumulada de toda componente principal')
+    plt.xticks(rotation=90)
+    plt.show()
+
+
 # Cargar el conjunto de datos
 df = pd.read_csv('europe.csv')
 
@@ -73,6 +85,7 @@ pca_result = pca.fit_transform(df_scaled[variables])
 
 # Varianza explicada por cada componente
 explained_variance = pca.explained_variance_ratio_
+plot_pca_variance(explained_variance)
 
 countries = df["Country"]
 
@@ -90,11 +103,6 @@ principal_df = pd.DataFrame(data=principal_components, columns=["PC1", "PC2"])
 print(principal_df)
 
 plot_pca_index_by_country(countries, principal_df)
-
-
-# Interpretación de la primera componente
-for i in range(0, len(explained_variance)):
-    print(f"Varianza explicada por componente {i}: {explained_variance[i]:.2f}")
 
 # Componentes de la primera PC
 first_pc = pca.components_[0]
