@@ -25,30 +25,38 @@ def standarize_data(input_data):
 def plot_heatmap(network, input_data, countries):
     k = network.k
 
-    activation_matrix = np.zeros((k, k), dtype=int)
-    country_count = {country: 0 for country in countries}
+    # Dictionnaire pour stocker les pays mappés à chaque neurone
+    neuron_countries = { (i, j): [] for i in range(k) for j in range(k) }
 
     for i, input_vector in enumerate(input_data):
         bmu_position, similarity = network.predict(input_vector)
         x, y = bmu_position
-        activation_matrix[x][y] += 1
-        country_count[countries[i]] += 1
+        neuron_countries[(x, y)].append(countries[i])
+
+    # Création de la matrice d'activation pour l'affichage
+    activation_matrix = np.zeros((k, k), dtype=int)
+    for position, country_list in neuron_countries.items():
+        x, y = position
+        activation_matrix[x, y] = len(country_list)
 
     fig, ax = plt.subplots()
     cax = ax.matshow(activation_matrix, cmap='viridis', origin='lower', extent=[0, k, 0, k])
     ax.set_title('Heatmap of Countries')
     ax.set_xticks(np.arange(k))
     ax.set_yticks(np.arange(k))
-    ax.set_xticklabels(np.arange(1, k + 1))  # Ajusta las etiquetas del eje x
-    ax.set_yticklabels(np.arange(1, k + 1))  # Ajusta las etiquetas del eje y
+    ax.set_xticklabels(np.arange(1, k + 1))  # Ajuste les étiquettes de l'axe x
+    ax.set_yticklabels(np.arange(1, k + 1))  # Ajuste les étiquettes de l'axe y
 
     for i in range(k):
         for j in range(k):
-            text = activation_matrix[i, j]
-            ax.text(j + 0.5, i + 0.5, text, ha='center', va='center', color='black')
+            country_list = neuron_countries[(i, j)]
+            if country_list:
+                # Ajuster la taille de la police en fonction du nombre de pays
+                font_size = max(10 - len(country_list), 5)
+                text = "\n".join(country_list)
+                ax.text(j + 0.5, i + 0.5, text, ha='center', va='center', color='black', fontsize=font_size)
 
     cbar = fig.colorbar(cax)
-
     plt.show()
 
 
