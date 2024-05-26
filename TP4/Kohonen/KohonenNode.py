@@ -16,6 +16,6 @@ class KohonenNode:
         # Calcula la distancia euclidiana entre el vector de entrada y los pesos del nodo
         return np.linalg.norm(input_vector - self.weights)
 
-    def update_weights(self, input_vector, influence):
+    def update_weights(self, input_vector):
         # Actualiza los pesos del nodo en función del vector de entrada, la influencia y la tasa de aprendizaje
-        self.weights += self.learning_rate * influence * (input_vector - self.weights)
+        self.weights += self.learning_rate * (input_vector - self.weights)
