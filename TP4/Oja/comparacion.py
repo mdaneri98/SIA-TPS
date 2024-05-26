@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 labels = ['Area', 'GDP', 'Inflation', 'Exp. de vida', 'Militares', 'Inc. de población', 'Desempleo']
 
 # Componentes principales de Oja
-oja_principal_components = np.array([-0.1320901, 0.49983558, -0.41358595, 0.48437194, -0.18215693, 0.47415024, -0.26813229])
+oja_principal_components_1000 = np.array([-0.20275538, 0.48993905, -0.47946847, 0.50095825, -0.13074739, 0.45684623, -0.232006])
 
 # Componentes principales de otro método (supongo que de scikit-learn)
-sci_principal_components = np.array([-0.20275538, 0.48993905, -0.47946847, 0.50095825, -0.13074739, 0.45684623, -0.232006])
+sci_principal_components = np.array([0.12, -0.50, -0.4065, -0.4829, 0.1881, -0.4757, 0.2717])
 
 # Convertir todas las componentes a valores absolutos (positivos)
-oja_principal_components_positive = np.abs(oja_principal_components)
+oja_principal_components_positive = np.abs(oja_principal_components_1000)
 sci_principal_components_positive = np.abs(sci_principal_components)
 
 # Calcular la diferencia entre las componentes principales positivas
@@ -46,6 +46,7 @@ for i in range(len(x)):
 plt.show()
 
 # Crear un gráfico de barras separado para las diferencias
+differences = np.abs(differences)
 fig, ax = plt.subplots(figsize=(14, 8))
 rects3 = ax.bar(x, differences, width, label='Diferencia (Oja - Librería)')
 

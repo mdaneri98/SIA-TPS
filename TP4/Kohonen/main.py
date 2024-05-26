@@ -176,11 +176,11 @@ def main():
     # Tracer les similarités moyennes
     plt.figure(figsize=(10, 5))
     epochs = range(1, num_epochs + 1)
-    plt.plot(epochs, mean_similarities_random, label='Random Initialization - Euclidean')
-    plt.plot(epochs, mean_similarities_data_samples, label='Data Samples Initialization - Euclidean')
-    plt.xlabel('Epochs')
-    plt.ylabel('Average Similarity')
-    plt.title('Evolution of Similarities During Training (Averaged Over 10 Runs)')
+    plt.plot(epochs, mean_similarities_random, label='Inicialización random - Euclideana')
+    plt.plot(epochs, mean_similarities_data_samples, label='Inicialización respecto de los datos - Euclideana')
+    plt.xlabel('Épocas')
+    plt.ylabel('Similitud media')
+    plt.title('Evolución de similitudes durante el entrenamiento (10 ejecuciones)')
     plt.legend()
     plt.show()
 
