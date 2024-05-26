@@ -31,13 +31,19 @@ class KohonenNetwork:
     def get_random_sample(self):
         return np.random.rand(self.input_size).tolist()
 
-    def train(self, num_epochs,similitud = 'euclidean'):
+    def train(self, num_epochs, similitud='euclidean'):
+        similarities = []
         for epoch in range(num_epochs):
+            total_similarity = 0
             for input_vector in self.input_data:
-                bmu_position, bmu_similarity = self.best_matching_neuron(input_vector,similitud)
-                if (self.radius>1) : 
+                bmu_position, bmu_similarity = self.best_matching_neuron(input_vector, similitud)
+                total_similarity += bmu_similarity
+                if self.radius > 1:
                     self.radius = max(1, self.initial_radius / (epoch + 1))
                 self.update_neighborhood(bmu_position, input_vector, bmu_similarity, epoch, num_epochs)
+            average_similarity = total_similarity / len(self.input_data)
+            similarities.append(average_similarity)
+        return similarities
 
     def update_neighborhood(self, bmu_position, input_vector, bmu_similarity, epoch, num_epochs):
         for i in range(self.k):
