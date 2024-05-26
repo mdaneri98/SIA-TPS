@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from KohonenNetwork import *
+import seaborn as sns
 
 
 def get_data():
@@ -14,105 +15,177 @@ def get_data():
 
 
 def standarize_data(input_data):
-    data_standardized = np.copy(input_data)  # Copia los datos para no modificar el original
+    data_standardized = np.copy(input_data)
     means = np.mean(data_standardized, axis=0)
     stdevs = np.std(data_standardized, axis=0)
     data_standardized = (data_standardized - means) / stdevs
     return data_standardized
 
 
-def plot_heatmap(network, input_data, countries):
+def plot_heatmap(network, input_data, countries,similitud = 'euclidean'):
     k = network.k
 
-    activation_matrix = np.zeros((k, k), dtype=int)
-    country_count = {country: 0 for country in countries}
+    # Dictionnaire pour stocker les pays mappés à chaque neurone
+    neuron_countries = { (i, j): [] for i in range(k) for j in range(k) }
 
     for i, input_vector in enumerate(input_data):
-        bmu_position, similarity = network.predict(input_vector)
+        bmu_position, similarity = network.predict(input_vector,similitud)
         x, y = bmu_position
-        activation_matrix[x][y] += 1
-        country_count[countries[i]] += 1
+        neuron_countries[(x, y)].append(countries[i])
+
+    # Création de la matrice d'activation pour l'affichage
+    activation_matrix = np.zeros((k, k), dtype=int)
+    for position, country_list in neuron_countries.items():
+        x, y = position
+        activation_matrix[x, y] = len(country_list)
 
     fig, ax = plt.subplots()
-    cax = ax.matshow(activation_matrix, cmap='viridis')
+    cax = ax.matshow(activation_matrix, cmap='viridis', origin='lower', extent=[0, k, 0, k])
     ax.set_title('Heatmap of Countries')
-    ax.set_xticks(np.arange(k + 1))
-    ax.set_yticks(np.arange(k + 1))
-    ax.set_xticklabels(list(range(k + 1)))
-    ax.set_yticklabels(list(range(k + 1)))
+    ax.set_xticks(np.arange(k))
+    ax.set_yticks(np.arange(k))
+    ax.set_xticklabels(np.arange(1, k + 1))  # Ajuste les étiquettes de l'axe x
+    ax.set_yticklabels(np.arange(1, k + 1))  # Ajuste les étiquettes de l'axe y
 
     for i in range(k):
         for j in range(k):
-            country_name = ''
-            for country, position in zip(countries, input_data):
-                bmu_position, similarity = network.predict(position)
-                max_index = similarity.argmax()
-                x = max_index // network.k  # División entera para obtener la fila
-                y = max_index % network.k
-                if x == i and y == j:
-                    country_name += f'{country}\n'
-            ax.text(j, i, activation_matrix[i, j], ha='center', va='center', color='black')
+            country_list = neuron_countries[(i, j)]
+            if country_list:
+                # Ajuster la taille de la police en fonction du nombre de pays
+                font_size = max(10 - len(country_list), 5)
+                text = "\n".join(country_list)
+                ax.text(j + 0.5, i + 0.5, text, ha='center', va='center', color='black', fontsize=font_size)
 
     cbar = fig.colorbar(cax)
-    cbar.set_label('Frequency')
-
     plt.show()
 
 
 def plot_average_neighbor_distances(ud_matrix, k):
     cmap = plt.get_cmap('gray')
-    plt.imshow(ud_matrix, cmap=cmap)
+    plt.imshow(ud_matrix, cmap=cmap, extent=[0, k, 0, k], origin='lower')
 
-    min_val = min(min(row) for row in ud_matrix)
-    max_val = max(max(row) for row in ud_matrix)
+    min_val = np.min(ud_matrix)
+    max_val = np.max(ud_matrix)
     color_thr = min_val + 0.8 * (max_val - min_val)
 
     for i in range(k):
         for j in range(k):
             color = 'w' if ud_matrix[i][j] < color_thr else 'k'
-            plt.text(j, i, str(f"{ud_matrix[i][j]:.2f}"), ha='center', va='center', color=color)
+            plt.text(j + 0.5, i + 0.5, f"{ud_matrix[i][j]:.2f}", ha='center', va='center', color=color)
 
     cbar = plt.colorbar()
-    cbar.set_label('Valor')
-
     plt.show()
 
 
+def analyze_association(network, data):
+    association_count = np.zeros(network.grid_shape)
+    for sample in data:
+        bmu_position, _ = network.predict(sample)
+        association_count[bmu_position] += 1
+    return association_count
 
-def plot_neighbor_distances(network, radius):
-    all_distances = []
 
-    for i in range(network.k):
-        for j in range(network.k):
-            position = (i, j)
-            neighbors = network.get_neighbors(position, radius)
-            all_distances.extend(dist for _, dist in neighbors)
-
-    plt.hist(all_distances, bins=20)
-    plt.xlabel('Distance')
-    plt.ylabel('Frequency')
-    plt.title('Distribution of Distances to Neighboring Neurons')
+def plot_confusion_matrix(association_count):
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(association_count, annot=True, fmt=".0f", cmap="Blues")
+    plt.xlabel("Columna de Neurona")
+    plt.ylabel("Fila de Neurona")
+    plt.title("Matriz de Confusión")
     plt.show()
+
+
+def analyze_variable(network, input_data, variable_index, variables):
+    k = network.k
+    association_count = analyze_association(network, input_data[:, [variable_index]])
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(association_count, cmap='Blues', origin='lower', extent=[0, k, 0, k], vmin=association_count.min())
+    plt.colorbar()
+    plt.title(f'Heatmap for "{variables[variable_index]}"')
+
+    plt.show()
+
 
 def main():
     countries, labels, data = get_data()
+    standard_data = standarize_data(data)
+    variables = ['Area', 'GDP', 'Inflation', 'Life.expect', 'Military', 'Pop.growth', 'Unemployment']
 
-    standarized_data = standarize_data(data)
-
-    k = 8
+    k = 3
     learning_rate = 0.01
     initial_radius = 3
-    max_epochs = 1000
+    max_epochs = 3500
 
-    network = KohonenNetwork(standarized_data, len(standarized_data[0]), k, learning_rate, initial_radius)
+    # Network 3x3
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs)
 
-    network.train(max_epochs)
+    plot_heatmap(network, standard_data, countries)
 
-    plot_heatmap(network, standarized_data, countries)
+    
+    
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs,'exp')
+    plot_heatmap(network, standard_data, countries,'exp')
 
-    plot_neighbor_distances(network, initial_radius)
-
+    k = 4
+    initial_radius = 4
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs)
+    plot_heatmap(network, standard_data, countries)
     plot_average_neighbor_distances(network.calculate_unified_distances(initial_radius), k)
+    for i, variable in enumerate(variables):
+        analyze_variable(network, standard_data, i, variables)
+
+
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs,'exp')
+    plot_heatmap(network, standard_data, countries,'exp')
+
+
+    k = 5
+    initial_radius = 5
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs)
+    plot_heatmap(network, standard_data, countries)
+    plot_average_neighbor_distances(network.calculate_unified_distances(initial_radius), k)
+    network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
+    _=network.train(max_epochs,'exp')
+    plot_heatmap(network, standard_data, countries,'exp')
+
+    num_epochs = 1000
+    num_repeats = 10
+    all_similarities_random = []
+    all_similarities_data_samples = []
+
+    for _ in range(num_repeats):
+        # Réseau avec initialisation aléatoire
+        network_random = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius, init_type='random')
+        similarities_random = network_random.train(num_epochs, similitud='euclidean')
+        all_similarities_random.append(similarities_random)
+
+        # Réseau avec initialisation par échantillons de données
+        network_data_samples = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius, init_type='data_samples')
+        similarities_data_samples = network_data_samples.train(num_epochs, similitud='euclidean')
+        all_similarities_data_samples.append(similarities_data_samples)
+
+    # Calculer les similarités moyennes pour chaque méthode d'initialisation
+    mean_similarities_random = np.mean(all_similarities_random, axis=0)
+    mean_similarities_data_samples = np.mean(all_similarities_data_samples, axis=0)
+
+    # Tracer les similarités moyennes
+    plt.figure(figsize=(10, 5))
+    epochs = range(1, num_epochs + 1)
+    plt.plot(epochs, mean_similarities_random, label='Random Initialization - Euclidean')
+    plt.plot(epochs, mean_similarities_data_samples, label='Data Samples Initialization - Euclidean')
+    plt.xlabel('Epochs')
+    plt.ylabel('Average Similarity')
+    plt.title('Evolution of Similarities During Training (Averaged Over 10 Runs)')
+    plt.legend()
+    plt.show()
+
+    
+    
 
 
 if __name__ == "__main__":

@@ -51,8 +51,14 @@ def main():
     hopfield_net = HopfieldNetwork(25)
     hopfield_net.train(patterns)
 
-    # Crear un patrón ruidoso de una letra
-    original_pattern = letras['A'].flatten()  # Usar letra A como ejemplo
+    # Solicitar al usuario que elija una letra
+    letra = input("Ingrese la letra que desea utilizar (A, B, C, D): ").upper()
+    if letra not in letras:
+        print("Letra no válida. Por favor, elija una letra válida.")
+        return
+
+    # Crear un patrón ruidoso de la letra elegida
+    original_pattern = letras[letra].flatten()
     noisy_pattern = agregar_ruido(original_pattern, noise_level=5)
 
     # Imprimir patrón ruidoso
