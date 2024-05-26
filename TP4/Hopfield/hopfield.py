@@ -21,16 +21,18 @@ class HopfieldNetwork:
         self.weights /= len(patterns)
         np.fill_diagonal(self.weights, 0)  # No tener conexiones propias
 
-    def recall(self, pattern, steps=5):
+    def recall(self, pattern, steps=5, verbose=False):
         pattern = pattern.copy()
-        neurons_per_step = self.size // steps
+        neurons_per_step = self.size // steps   # Seria Si(t)
 
         for step in range(steps):
             indices = np.random.choice(self.size, neurons_per_step, replace=False)
             for i in indices:
                 pattern[i] = np.sign(np.dot(self.weights[i], pattern))
-            print(f"Paso {step + 1}:")
-            imprimir_letra(pattern.reshape(5, 5))
+
+            if verbose:
+                print(f"Paso {step + 1}:")
+                imprimir_letra(pattern.reshape(5, 5))
 
         return pattern
 
@@ -67,7 +69,7 @@ def main():
     imprimir_letra(noisy_pattern.reshape(5, 5))
 
     # Recuperar el patrón ruidoso
-    output_pattern = hopfield_net.recall(noisy_pattern, steps=5)
+    output_pattern = hopfield_net.recall(noisy_pattern, steps=5, verbose=True)
 
     # Verificar si el patrón recuperado es un estado espurio
     es_estado_espurio = True
