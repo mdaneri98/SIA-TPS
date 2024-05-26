@@ -18,6 +18,7 @@ class HopfieldNetwork:
     def train(self, patterns):
         for p in patterns:
             self.weights += np.outer(p, p)
+        self.weights /= len(patterns)
         np.fill_diagonal(self.weights, 0)  # No tener conexiones propias
 
     def recall(self, pattern, steps=5):
