@@ -8,7 +8,7 @@ labels = ['Area', 'GDP', 'Inflation', 'Exp. de vida', 'Militares', 'Inc. de pobl
 oja_principal_components = np.array([-0.1320901, 0.49983558, -0.41358595, 0.48437194, -0.18215693, 0.47415024, -0.26813229])
 
 # Componentes principales de otro método (supongo que de scikit-learn)
-sci_principal_components = np.array([0.1249, -0.5005, 0.4065, -0.4829, 0.1881, -0.4757, 0.2717])
+sci_principal_components = np.array([-0.20275538, 0.48993905, -0.47946847, 0.50095825, -0.13074739, 0.45684623, -0.232006])
 
 # Convertir todas las componentes a valores absolutos (positivos)
 oja_principal_components_positive = np.abs(oja_principal_components)
