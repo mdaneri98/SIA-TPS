@@ -10,7 +10,7 @@ class KohonenNode:
 
     def calculate_similarity(self, input_vector):
         # Calcula la similitud entre el vector de entrada y los pesos del nodo
-        return np.exp(-np.linalg.norm(input_vector - self.weights) ** 2)
+        return np.linalg.norm(input_vector - self.weights)
 
     def calculate_euclidean_distance(self, input_vector):
         # Calcula la distancia euclidiana entre el vector de entrada y los pesos del nodo
