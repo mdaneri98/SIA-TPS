@@ -94,15 +94,44 @@ def plot_confusion_matrix(association_count):
     plt.show()
 
 
-def analyze_variable(network, input_data, variable_index, variables):
+def analyze_variable(network, input_data, labels, variable):
     k = network.k
-    association_count = analyze_association(network, input_data[:, [variable_index]])
 
-    plt.figure(figsize=(8, 6))
-    plt.imshow(association_count, cmap='Blues', origin='lower', extent=[0, k, 0, k], vmin=association_count.min())
+    activation_matrix = np.zeros((k, k))
+
+    for i in range(len(input_data)):
+        # Predict returns a tuple with the position of the BMU
+        bmu_position, _ = network.predict(input_data[i])
+        x, y = bmu_position
+        activation_matrix[x][y] += input_data[i][variable]
+
+    min_val = np.min(activation_matrix)
+    if min_val < 0:
+        activation_matrix -= min_val
+
+
+    cmap = plt.get_cmap('Blues')
+
+    plt.xticks(range(k), range(k))
+    plt.yticks(range(k), range(k))
+
+    # Create a norm with integer boundaries
+    min_val = np.min(activation_matrix)
+    max_val = np.max(activation_matrix)
+    norm = BoundaryNorm(np.arange(min_val, max_val + 1), cmap.N)
+
+    plt.imshow(activation_matrix, cmap=cmap)
+
+    for i in range(k):
+        for j in range(k):
+            cell_color = cmap(norm(activation_matrix[i][j]))
+            brightness = np.linalg.norm(cell_color[:3])  # Calculate luminance (brightness)
+            text_color = 'k' if brightness >= 0.5 else 'w'  # Determine text color
+            annotation = f"{activation_matrix[i, j]:.2f}"
+            plt.text(j, i, annotation, ha='center', va='center', color=text_color)
+
+    plt.title(f"Heatmap \"{labels[variable]}\"")
     plt.colorbar()
-    plt.title(f'Heatmap for "{variables[variable_index]}"')
-
     plt.show()
 
 
@@ -135,7 +164,7 @@ def main():
     plot_heatmap(network, standard_data, countries)
     plot_average_neighbor_distances(network.calculate_unified_distances(initial_radius), k)
     for i, variable in enumerate(variables):
-        analyze_variable(network, standard_data, i, variables)
+        analyze_variable(network, standard_data, labels, i)
 
 
     network = KohonenNetwork(standard_data, len(standard_data[0]), k, learning_rate, initial_radius)
