@@ -1,30 +1,43 @@
 import numpy as np
-from Neuron import Neuron
+from Optimazer import AdamOptimizer
+from Optimazer import GradientDescentOptimizer
 
 
 class Layer:
+    def __init__(self):
+        self.input = None
+        self.output = None
 
-    def __init__(self, num_neurons, prev_num_neurons, activation, learn_rate):
-        self.neurons = np.array([Neuron(prev_num_neurons, activation, learn_rate) for _ in range(num_neurons)])
+    def forward(self, input):
+        pass
 
-    def get_all_outputs(self):
-        outputs = []
-        for current_neuron in self.neurons:
-            outputs.append(current_neuron.output)
-        return outputs
+    def backward(self, output_derivative):
+        pass
 
-    def get_neuron_delta(self, num_neuron):
-        delta = 0
-        for current_neuron in self.neurons:
-            delta += (current_neuron.weights[num_neuron] * current_neuron.delta)
-        return delta
 
-    def propagation(self, inputs):
-        for neuron in self.neurons:
-            neuron.calculate_output(inputs)
+class Dense(Layer):
+    def __init__(self, input_size, output_size, learning_rate = 0.001, optimizer_type = None):
+        self.weights = np.random.randn(output_size, input_size)
+        self.bias =  np.random.randn(output_size, 1)
+        self.learning_rate = learning_rate
+        self.time_step = 0
+        if optimizer_type =="ADAM":
+            self.optimizer = AdamOptimizer(self.learning_rate)
+        else:
+            self.optimizer = GradientDescentOptimizer(self.learning_rate)
 
-    def plot(self):
-        print("Layer " + " : ")
-        for neuron in self.neurons:
-            neuron.plot()
-        print("------------------------")
+    def forward(self, input):
+        self.input = input
+        return np.dot(self.weights, self.input) + self.bias
+
+    def backward(self, output_derivative):
+        self.time_step += 1
+
+        weights_gradient = np.dot(output_derivative, self.input.T)
+        input_gradient = np.dot(self.weights.T, output_derivative)
+
+        self.weights += self.optimizer.update(weights_gradient,self.time_step)
+
+        # self.weights -= learning_rate * weights_gradient
+        self.bias -= self.learning_rate * output_derivative
+        return input_gradient

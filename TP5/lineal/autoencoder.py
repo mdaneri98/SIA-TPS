@@ -72,7 +72,7 @@ def read_font3_from_header(file_path):
 
 
 if __name__ == "__main__":
-    file_path = '../fonts.h'
+    file_path = 'fonts.h'
     Font3 = read_font3_from_header(file_path)
 
     print(Font3)
