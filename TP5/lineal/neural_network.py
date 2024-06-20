@@ -2,7 +2,7 @@ import numpy as np
 from Layer import Layer
 
 
-def predict(self, network, input):
+def predict(network, input):
     output = input
     for layer in network:
         output = layer.forward(output)
