@@ -30,14 +30,15 @@ class Dense(Layer):
         self.input = input
         return np.dot(self.weights, self.input) + self.bias
 
-    def backward(self, output_gradient):
+    def backward(self, output_derivative):
         self.time_step += 1
 
-        weights_gradient = np.dot(output_gradient, self.input.T)
-        bias_gradient = np.sum(output_gradient, axis=1, keepdims=True)
-        input_gradient = np.dot(self.weights.T, output_gradient)
+        weights_gradient = np.dot(output_derivative, self.input.T)
+        input_gradient = np.dot(self.weights.T, output_derivative)
 
-        self.weights -= self.optimizer.update(weights_gradient, self.time_step)
-        self.bias -= self.optimizer.update(bias_gradient, self.time_step)
+        self.weights += self.optimizer.update(weights_gradient,self.time_step)
+
+        # self.weights -= learning_rate * weights_gradient
+        self.bias -= self.learning_rate * output_derivative
 
         return input_gradient
