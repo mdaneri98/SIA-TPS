@@ -19,9 +19,11 @@ def fonts_to_bitmap(fonts: dict):
         bitmaps[character] = bitmap
     return bitmaps
 
+
 # Función para representar un bitmap como matriz 7x5
 def bitmap_as_matrix(bitmap: list):
     return [[bitmap[i * 5 + j] for j in range(5)] for i in range(7)]
+
 
 # Función para graficar matrices de bitmaps
 def plot_bitmap_matrix_2(matrix_list, character_list, title):
@@ -46,6 +48,7 @@ def plot_bitmap_matrix_2(matrix_list, character_list, title):
     plt.tight_layout()
     plt.show()
 
+
 def plot_latent_space(raw_latent_spaces, labels):
     latent_spaces = np.array([latent_space.flatten() for latent_space in raw_latent_spaces])
 
@@ -61,6 +64,21 @@ def plot_latent_space(raw_latent_spaces, labels):
         plt.annotate(letra, (x, y), textcoords="offset points", xytext=(5, 5), ha='center')
 
     plt.grid(True)
+    plt.show()
+
+
+def generate_new_letter(autoencoder, latent_point=None):
+    if latent_point is None:
+        latent_point = np.random.uniform(low=0.0, high=1.0, size=(2, 1))
+
+    new_letter_bitmap = decode(autoencoder, latent_point, 6)
+    new_letter_matrix = bitmap_as_matrix(new_letter_bitmap.flatten().tolist())
+
+    # Mostramos la nueva letra
+    plt.imshow(new_letter_matrix, cmap='binary', interpolation='none', vmin=0, vmax=1)
+    plt.title("Nueva Letra Generada")
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
 
 
@@ -80,6 +98,8 @@ def generate_autoencoder(optimizer=None, learning_rate=0.001):
         Dense(20, 35, optimizer_type=optimizer, learning_rate=learning_rate),
         Sigmoid(),
     ]
+
+
 # Función para comparar bitmaps
 def compare_bitmaps(input_bitmap, output_bitmap, character, max_wrongs=1):
     wrongs = 0
@@ -90,6 +110,7 @@ def compare_bitmaps(input_bitmap, output_bitmap, character, max_wrongs=1):
             if wrongs > max_wrongs:
                 return False
     return True
+
 
 def start():
     bitmapDict = fonts_to_bitmap(fontDict)
@@ -114,6 +135,7 @@ def start():
     input_matrix_list = []
     output_matrix_list = []
     correct = 0
+
     for c in range(len(characters)):
         input_bitmap = []
         output_bitmap = []
@@ -139,5 +161,15 @@ def start():
     plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
     plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
     plot_latent_space(raw_latent_spaces, characters)
+
+
+    # La idea es generar una nueva letra que esté entre medio de la 'z'(26) y la 's'(19)
+    z_point = encode(autoencoder, X[26], 6)
+    s_point = encode(autoencoder, X[19], 6)
+
+    for i in np.arange(0, 1.1, 0.1):
+        mid = (i*(z_point[0]+s_point[0]), i*(z_point[1]+s_point[1]))
+        generate_new_letter(autoencoder, mid)
+
 
 start()

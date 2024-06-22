@@ -18,6 +18,18 @@ def predict_with_layer_value(network, input, layer_index):
     return output, values_at_layer[layer_index]
 
 
+def encode(network, input, latent_layer_index):
+    return predict_with_layer_value(network, input, latent_layer_index)[1]
+
+
+def decode(network, input, decoder_start_index):
+    output = input
+    for index, layer in enumerate(network):
+        if index >= decoder_start_index:
+            output = layer.forward(output)
+    return output
+
+
 def train(network, error_function, error_derivative, x_train, y_train, epochs, verbose=True):
     mse = []
     max_index = len(x_train) - 1
