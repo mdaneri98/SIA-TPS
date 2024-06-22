@@ -1,6 +1,6 @@
-from lineal.Activation import Sigmoid
-from lineal.neural_network import *
-from lineal.Optimazer import *
+from Activation import Sigmoid
+from neural_network import *
+from Optimazer import *
 import numpy as np
 import re
 
