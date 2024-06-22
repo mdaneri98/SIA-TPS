@@ -46,6 +46,24 @@ def plot_bitmap_matrix_2(matrix_list, character_list, title):
     plt.tight_layout()
     plt.show()
 
+def plot_latent_space(raw_latent_spaces, labels):
+    latent_spaces = np.array([latent_space.flatten() for latent_space in raw_latent_spaces])
+
+    plt.figure(figsize=(10, 8))
+    plt.scatter(latent_spaces[:, 0], latent_spaces[:, 1], c='blue', alpha=0.5)
+    plt.xlabel('Latente 1')
+    plt.ylabel('Latente 2')
+    plt.title('Datos de Entrada en el Espacio Latente')
+
+    # Agregar etiquetas a cada punto
+    for i, (x, y) in enumerate(latent_spaces):
+        letra = labels[i]
+        plt.annotate(letra, (x, y), textcoords="offset points", xytext=(5, 5), ha='center')
+
+    plt.grid(True)
+    plt.show()
+
+
 # Definición del autoencoder
 def generate_autoencoder(optimizer=None, learning_rate=0.001):
     return [
@@ -120,6 +138,6 @@ def start():
 
     plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
     plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
-
+    plot_latent_space(raw_latent_spaces, characters)
 
 start()
