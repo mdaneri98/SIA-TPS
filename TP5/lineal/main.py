@@ -150,6 +150,16 @@ def compare_bitmaps(input_bitmap, output_bitmap, character, max_wrongs=1):
                 return False
     return True
 
+def plot_error_per_epoch(error):
+    plt.figure(figsize=(10, 6))
+    plt.plot(error, label='Training Error')
+    plt.xlabel('Epochs')
+    plt.ylabel('Error')
+    plt.title('Error vs Epochs')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
 
 def start():
     bitmapDict = fonts_to_bitmap(fontDict)
@@ -169,6 +179,9 @@ def start():
     autoencoder = generate_autoencoder_arch1('ADAM', 0.001)
     error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
     print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
+
+    # Graficar el error por época
+    plot_error_per_epoch(error)
 
     latent_spaces = []
     raw_latent_spaces = []
@@ -201,6 +214,14 @@ def start():
     plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
     plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
     plot_latent_space(raw_latent_spaces, characters)
+
+    # La idea es generar una nueva letra que esté entre medio de la 'z'(26) y la 's'(19)
+    z_point = encode(autoencoder, X[26], 6)
+    s_point = encode(autoencoder, X[19], 6)
+
+    for i in np.arange(0, 1.1, 0.1):
+        mid = (i*(z_point[0]+s_point[0]), i*(z_point[1]+s_point[1]))
+        generate_new_letter(autoencoder, mid)
 
     #archi 2
 
@@ -238,56 +259,52 @@ def start():
 
     plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
     plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
+    print(raw_latent_spaces)
     plot_latent_space(raw_latent_spaces, characters)
 
     #archi 3
-    # autoencoder = generate_autoencoder_arch3('ADAM', 0.001)
-    # error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
-    # print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
+    autoencoder = generate_autoencoder_arch3('ADAM', 0.001)
+    error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
+    print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
 
-    # latent_spaces = []
-    # raw_latent_spaces = []
-    # input_matrix_list = []
-    # output_matrix_list = []
-    # correct = 0
+    latent_spaces = []
+    raw_latent_spaces = []
+    input_matrix_list = []
+    output_matrix_list = []
+    correct = 0
 
-    # for c in range(len(characters)):
-    #     input_bitmap = []
-    #     output_bitmap = []
+    for c in range(len(characters)):
+        input_bitmap = []
+        output_bitmap = []
 
-    #     for i in range(len(X[c])):
-    #         input_bitmap.append(X[c][i][0])
-    #     input_matrix_list.append(bitmap_as_matrix(input_bitmap))
+        for i in range(len(X[c])):
+            input_bitmap.append(X[c][i][0])
+        input_matrix_list.append(bitmap_as_matrix(input_bitmap))
 
-    #     bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], 6)
-    #     raw_latent_spaces.append(raw_latent_space)
-    #     latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
+        bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], 8)
+        raw_latent_spaces.append(raw_latent_space)
+        latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
 
-    #     for bit in bits:
-    #         output_bitmap.append(bit[0])
+        for bit in bits:
+            output_bitmap.append(bit[0])
 
-    #     if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
-    #         print(f"Error en la reconstrucción del carácter '{characters[c]}'")
-    #     else:
-    #         correct += 1
+        if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
+            print(f"Error en la reconstrucción del carácter '{characters[c]}'")
+        else:
+            correct += 1
 
-    #     output_matrix_list.append(bitmap_as_matrix(output_bitmap))
+        output_matrix_list.append(bitmap_as_matrix(output_bitmap))
 
-    # plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
-    # plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
-    # plot_latent_space(raw_latent_spaces, characters)
+    plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
+    plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
+    print(raw_latent_spaces)
+    plot_latent_space(raw_latent_spaces, characters)
 
 
     
 
 
-    # La idea es generar una nueva letra que esté entre medio de la 'z'(26) y la 's'(19)
-    z_point = encode(autoencoder, X[26], 6)
-    s_point = encode(autoencoder, X[19], 6)
-
-    for i in np.arange(0, 1.1, 0.1):
-        mid = (i*(z_point[0]+s_point[0]), i*(z_point[1]+s_point[1]))
-        generate_new_letter(autoencoder, mid)
+    
 
 
 start()
