@@ -67,11 +67,11 @@ def plot_latent_space(raw_latent_spaces, labels):
     plt.show()
 
 
-def generate_new_letter(autoencoder, latent_point=None):
+def generate_new_letter(autoencoder, decoder_start_index, latent_point=None):
     if latent_point is None:
         latent_point = np.random.uniform(low=0.0, high=1.0, size=(2, 1))
 
-    new_letter_bitmap = decode(autoencoder, latent_point, 6)
+    new_letter_bitmap = decode(autoencoder, latent_point, decoder_start_index)
     new_letter_matrix = bitmap_as_matrix(new_letter_bitmap.flatten().tolist())
 
     # Mostramos la nueva letra
@@ -99,6 +99,7 @@ def generate_autoencoder_arch1(optimizer=None, learning_rate=0.001):
         Sigmoid(),
     ]
 
+
 # Definición del autoencoder para arquitectura 2
 def generate_autoencoder_arch2(optimizer=None, learning_rate=0.001):
     return [
@@ -115,6 +116,7 @@ def generate_autoencoder_arch2(optimizer=None, learning_rate=0.001):
         Dense(25, 35, optimizer_type=optimizer, learning_rate=learning_rate),
         Sigmoid(),
     ]
+
 
 # Definición del autoencoder para arquitectura 3
 def generate_autoencoder_arch3(optimizer=None, learning_rate=0.001):
@@ -138,7 +140,6 @@ def generate_autoencoder_arch3(optimizer=None, learning_rate=0.001):
     ]
 
 
-
 # Función para comparar bitmaps
 def compare_bitmaps(input_bitmap, output_bitmap, character, max_wrongs=1):
     wrongs = 0
@@ -150,12 +151,27 @@ def compare_bitmaps(input_bitmap, output_bitmap, character, max_wrongs=1):
                 return False
     return True
 
+
 def plot_error_per_epoch(error):
     plt.figure(figsize=(10, 6))
     plt.plot(error, label='Training Error')
     plt.xlabel('Epochs')
     plt.ylabel('Error')
     plt.title('Error vs Epochs')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+def plot_correct_predictions(autoencoders, correct_characters_predicted, num_runs):
+    # Graficar la media de caracteres correctos predichos para cada arquitectura
+    runs = list(range(1, num_runs + 1))
+    for index in range(len(autoencoders)):
+        correct_predictions = [correct_characters_predicted[run][index] for run in range(num_runs)]
+        plt.plot(runs, correct_predictions, label=f'Arquitectura {index + 1}')
+
+    plt.xlabel('Corrida')
+    plt.ylabel('Número de Caracteres Correctos Predichos')
+    plt.title('Número de Caracteres Correctos Predichos por Corrida para Cada Arquitectura')
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -174,137 +190,66 @@ def start():
     # Correspondencia de cada carácter con su bitmap X[i]
     characters = list(bitmapDict.keys())
     print(characters)
-    
-    #archi 1 
-    autoencoder = generate_autoencoder_arch1('ADAM', 0.001)
-    error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
-    print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
 
-    # Graficar el error por época
-    plot_error_per_epoch(error)
+    autoencoders = [generate_autoencoder_arch1('ADAM', 0.001), generate_autoencoder_arch2('ADAM', 0.001),
+                    generate_autoencoder_arch3('ADAM', 0.001)]
+    latent_space = [6, 6, 8]
 
-    latent_spaces = []
-    raw_latent_spaces = []
-    input_matrix_list = []
-    output_matrix_list = []
-    correct = 0
+    num_runs = 1
+    correct_characters_predicted = [[0 for _ in range(len(autoencoders))] for _ in range(num_runs)]
+    for run in range(num_runs):
+        for index, autoencoder in enumerate(autoencoders):
+            error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=False)
+            print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
 
-    for c in range(len(characters)):
-        input_bitmap = []
-        output_bitmap = []
+            # Graficar el error por época
+            plot_error_per_epoch(error)
 
-        for i in range(len(X[c])):
-            input_bitmap.append(X[c][i][0])
-        input_matrix_list.append(bitmap_as_matrix(input_bitmap))
+            latent_spaces = []
+            raw_latent_spaces = []
+            input_matrix_list = []
+            output_matrix_list = []
+            correct = 0
 
-        bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], 6)
-        raw_latent_spaces.append(raw_latent_space)
-        latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
+            for c in range(len(characters)):
+                input_bitmap = []
+                output_bitmap = []
 
-        for bit in bits:
-            output_bitmap.append(bit[0])
+                for i in range(len(X[c])):
+                    input_bitmap.append(X[c][i][0])
+                input_matrix_list.append(bitmap_as_matrix(input_bitmap))
 
-        if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
-            print(f"Error en la reconstrucción del carácter '{characters[c]}'")
-        else:
-            correct += 1
+                bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], latent_space[index])
+                raw_latent_spaces.append(raw_latent_space)
+                latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
 
-        output_matrix_list.append(bitmap_as_matrix(output_bitmap))
+                for bit in bits:
+                    output_bitmap.append(bit[0])
 
-    plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
-    plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
-    plot_latent_space(raw_latent_spaces, characters)
+                if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
+                    print(f"Error en la reconstrucción del carácter '{characters[c]}'")
+                else:
+                    correct_characters_predicted[run][index] += 1
 
+                output_matrix_list.append(bitmap_as_matrix(output_bitmap))
+
+            plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
+            plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
+            plot_latent_space(raw_latent_spaces, characters)
+
+        autoencoders = [generate_autoencoder_arch1('ADAM', 0.001), generate_autoencoder_arch2('ADAM', 0.001),
+                        generate_autoencoder_arch3('ADAM', 0.001)]
+
+    #plot_correct_predictions(autoencoders, correct_characters_predicted, num_runs)
+    train(autoencoders[2], mse, mse_derivative, X, X, epochs=10000, verbose=False)
+    autoencoder = autoencoders[2]
     # La idea es generar una nueva letra que esté entre medio de la 'z'(26) y la 's'(19)
-    z_point = encode(autoencoder, X[26], 6)
-    s_point = encode(autoencoder, X[19], 6)
+    z_point = encode(autoencoder, X[26], latent_space[2])
+    s_point = encode(autoencoder, X[19], latent_space[2])
 
     for i in np.arange(0, 1.1, 0.1):
-        mid = (i*(z_point[0]+s_point[0]), i*(z_point[1]+s_point[1]))
-        generate_new_letter(autoencoder, mid)
-
-    #archi 2
-
-    autoencoder = generate_autoencoder_arch2('ADAM', 0.001)
-    error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
-    print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
-
-    latent_spaces = []
-    raw_latent_spaces = []
-    input_matrix_list = []
-    output_matrix_list = []
-    correct = 0
-
-    for c in range(len(characters)):
-        input_bitmap = []
-        output_bitmap = []
-
-        for i in range(len(X[c])):
-            input_bitmap.append(X[c][i][0])
-        input_matrix_list.append(bitmap_as_matrix(input_bitmap))
-
-        bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], 6)
-        raw_latent_spaces.append(raw_latent_space)
-        latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
-
-        for bit in bits:
-            output_bitmap.append(bit[0])
-
-        if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
-            print(f"Error en la reconstrucción del carácter '{characters[c]}'")
-        else:
-            correct += 1
-
-        output_matrix_list.append(bitmap_as_matrix(output_bitmap))
-
-    plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
-    plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
-    print(raw_latent_spaces)
-    plot_latent_space(raw_latent_spaces, characters)
-
-    #archi 3
-    autoencoder = generate_autoencoder_arch3('ADAM', 0.001)
-    error = train(autoencoder, mse, mse_derivative, X, X, epochs=10000, verbose=True)
-    print(f"Se entrenaron {10000} epochs con un error de {error[-1]}")
-
-    latent_spaces = []
-    raw_latent_spaces = []
-    input_matrix_list = []
-    output_matrix_list = []
-    correct = 0
-
-    for c in range(len(characters)):
-        input_bitmap = []
-        output_bitmap = []
-
-        for i in range(len(X[c])):
-            input_bitmap.append(X[c][i][0])
-        input_matrix_list.append(bitmap_as_matrix(input_bitmap))
-
-        bits, raw_latent_space = predict_with_layer_value(autoencoder, X[c], 8)
-        raw_latent_spaces.append(raw_latent_space)
-        latent_spaces.append((raw_latent_space[0][0], raw_latent_space[1][0]))
-
-        for bit in bits:
-            output_bitmap.append(bit[0])
-
-        if not compare_bitmaps(input_bitmap, output_bitmap, characters[c]):
-            print(f"Error en la reconstrucción del carácter '{characters[c]}'")
-        else:
-            correct += 1
-
-        output_matrix_list.append(bitmap_as_matrix(output_bitmap))
-
-    plot_bitmap_matrix_2(input_matrix_list, characters, "Caracteres Originales")
-    plot_bitmap_matrix_2(output_matrix_list, characters, "Caracteres Predichos")
-    print(raw_latent_spaces)
-    plot_latent_space(raw_latent_spaces, characters)
-
-
-    
-
-
-    
+        mid = (1 - i) * z_point + i * s_point
+        generate_new_letter(autoencoder, latent_space[2], mid)
 
 
 start()
