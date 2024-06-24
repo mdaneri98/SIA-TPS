@@ -8,16 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-
-INPUT_ROWS = 20
-INPUT_COLS = 20
-INPUT_SIZE = INPUT_COLS * INPUT_ROWS
-LATENT_SIZE = 2
-HIDDEN_SIZE = 100
-HIDDEN_SIZE2 = 200
-HIDDEN_SIZE3 = 300
 EMOJIS_CHOSEN = len(emojis_images)
 NOISE = None
+INPUT_ROWS = 20
+INPUT_COLS = 20
 
 emojis_indexes = np.array([0, 1, 2, 3, 4, 5, 6, 7])
 data = np.array(emojis_images)
@@ -27,18 +21,9 @@ dataset_input_list = list(dataset_input)
 optimizer = Adam(0.001)
 
 def load_image(path):
-    # Abre la imagen y conviértela a escala de grises
     image = Image.open(path).convert('L')
-    # Convierte la imagen a una matriz NumPy
     matrix = np.array(image)
     return matrix
-
-
-def save_image(matrix, path):
-    # Crea una imagen a partir de la matriz
-    image = Image.fromarray(matrix.astype(np.uint8), mode='L')
-    # Guarda la imagen en la ruta especificada como formato PNG
-    image.save(path, format='PNG')
 
 
 def get_all_images(path):
@@ -104,28 +89,25 @@ def generate_new_emoji(vae):
 
 def start():
     encoder = MLP()
-    encoder.addLayer(Dense(inputDim=INPUT_SIZE, outputDim=HIDDEN_SIZE3, activation=ReLU(), optimizer=optimizer))
-    encoder.addLayer(Dense(inputDim=HIDDEN_SIZE3, outputDim=HIDDEN_SIZE2, activation=ReLU(), optimizer=optimizer))
-    encoder.addLayer(Dense(inputDim=HIDDEN_SIZE2, outputDim=HIDDEN_SIZE, activation=ReLU(), optimizer=optimizer))
-
-    sampler = Sampler(HIDDEN_SIZE, LATENT_SIZE, optimizer=optimizer)
-
     decoder = MLP()
-    decoder.addLayer(Dense(inputDim=LATENT_SIZE, outputDim=HIDDEN_SIZE, activation=ReLU(), optimizer=optimizer))
-    decoder.addLayer(Dense(inputDim=HIDDEN_SIZE, outputDim=HIDDEN_SIZE2, activation=ReLU(), optimizer=optimizer))
-    decoder.addLayer(Dense(inputDim=HIDDEN_SIZE2, outputDim=HIDDEN_SIZE3, activation=ReLU(), optimizer=optimizer))
-    decoder.addLayer(Dense(inputDim=HIDDEN_SIZE3, outputDim=INPUT_SIZE, activation=Sigmoid(), optimizer=optimizer))
+
+    encoder.addLayer(Dense(inputDim=INPUT_COLS*INPUT_ROWS, outputDim=300, activation=ReLU(), optimizer=optimizer))
+    encoder.addLayer(Dense(inputDim=300, outputDim=200, activation=ReLU(), optimizer=optimizer))
+    encoder.addLayer(Dense(inputDim=200, outputDim=100, activation=ReLU(), optimizer=optimizer))
+    sampler = Sampler(100, 2, optimizer=optimizer)
+    decoder.addLayer(Dense(inputDim=2, outputDim=100, activation=ReLU(), optimizer=optimizer))
+    decoder.addLayer(Dense(inputDim=100, outputDim=200, activation=ReLU(), optimizer=optimizer))
+    decoder.addLayer(Dense(inputDim=200, outputDim=300, activation=ReLU(), optimizer=optimizer))
+    decoder.addLayer(Dense(inputDim=300, outputDim=INPUT_COLS*INPUT_ROWS, activation=Sigmoid(), optimizer=optimizer))
 
     vae = VAE(encoder, sampler, decoder)
 
-    vae.train(dataset_input=dataset_input_list, loss=MSE(), epochs=500, callbacks={})
+    vae.train(dataset_input=dataset_input_list, loss=MSE(), epochs=1000, callbacks={})
 
 
     for i in range(len(dataset_input_list)):
         input_reshaped = np.reshape(dataset_input_list[i], (len(dataset_input_list[i]), 1))
         output = vae.feedforward(input_reshaped)
         plot_data(list(dataset_input)[i], output, INPUT_ROWS, INPUT_COLS)
-
-    generate_new_emoji(vae)
 
 start()
