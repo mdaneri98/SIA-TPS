@@ -8,7 +8,7 @@
 
 ## Introducción
 
-Se implementó un programa en Python con el objetivo de generar un motor de algoritmos genéticos para obtener las mejores configuraciones de personajes de un juego de rol.
+Se implementaron programas en Python para cada uno de los ejercicios pedidos en `/docs`.
 
 ### Requisitos
 
