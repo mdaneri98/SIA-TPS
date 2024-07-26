@@ -1,5 +1,6 @@
 ### Sistemas de Inteligencia Artificial
 Repositorio utilizado para los proyectos de la materia "72.27 - Sistemas de Inteligencia Artificial" de la facultad Instituto Tecnológico de Buenos Aires (ITBA)
+Los enunciados de todos los ejercicios se pueden encontrar dentro de las carpetas TPX/docs/Enunciado.pdf
 
 ## TP0 - Introducción al Análisis de Datos
 Trabajo práctico orientativo con el objetivo de evaluar la función de captura de un Pokemon y sacar conclusiones sobre la misma mediante el análisis de datos y la generación de gráficos para ello.
@@ -25,3 +26,4 @@ Implementación de diferentes programas en Python en donde podemos ver en funcio
 Lineal Autoencoder
 Denoising Autoencoder
 Variational Autoencoder
+

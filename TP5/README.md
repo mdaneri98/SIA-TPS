@@ -18,7 +18,7 @@ Se implementó un Autoencoder básico para las imágenes binarias proporcionadas
 
 ### Instalación
 
-En la carpeta del tp2 ejecutar.
+En la carpeta del tp5 ejecutar.
 ```sh
 pipenv install
 ```

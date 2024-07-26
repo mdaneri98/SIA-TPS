@@ -16,7 +16,7 @@ objetivo de evaluar la función de captura de un Pokemon.
 
 ### Instalación
 
-Parado en la carpeta del tp0 ejecutar
+Desde la carpeta del tp0 ejecutar
 
 ```sh
 pipenv install

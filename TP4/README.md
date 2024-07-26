@@ -18,24 +18,16 @@ Se implementaron programas en Python para cada uno de los ejercicios pedidos en 
 
 ### Instalación
 
-En la carpeta del tp3 ejecutar.
+En la carpeta del tp4 ejecutar.
 ```sh
 pipenv install
 ```
 para instalar las dependencias necesarias en el ambiente virtual.
 
-## Ejecución de los ejercicios 1 y 2.
+## Ejecución de los ejercicios.
 
 Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto
 ```python
 pipenv shell
-python ejercicioX/main.py
-```
-
-## Ejecución del ejercicio 3 parte A, B y C.
-
-Para ejecutar el programa se deberá posicionar en la carpeta raíz del proyecto
-```python
-pipenv shell
-python ejercicio3/mainX.py
+python [ejercicio]/main.py
 ```

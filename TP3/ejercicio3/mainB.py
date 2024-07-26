@@ -82,9 +82,9 @@ def errors_test_training_rate(opti,archi):
             _ = model.train(X_train, y_train, epochs)
             result = model.predict(X_test)
             errors = [(result[i] - y_test[i])**2 for i in range(len(result))]
-            error = np.mean(errors)  # Calcul de l'erreur moyenne
+            error = np.mean(errors)  
             all_errors.append(error/((1-training_percentage)*10))
-        mean_error = np.mean(all_errors)  # Calcul de l'erreur moyenne sur les 5 exécutions
+        mean_error = np.mean(all_errors)  
         mean_errors.append(mean_error)
 
     # Tracer les barres
@@ -103,7 +103,7 @@ def errors_training_optimizer(training_ratio,archi):
     run_number = 5
     training_percentage = training_ratio
 
-    plt.figure()  # Créer une nouvelle figure pour le graphique global
+    plt.figure() 
     
     all_errors = []
     for run in range(1, run_number + 1):
